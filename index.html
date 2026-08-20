@@ -1375,17 +1375,16 @@ async function executeSave(isNewBill) {
         reader.readAsText(file);
     }
 
-    function loadCustomerDropdown() {
-        let select = document.getElementById('customerSelect');
-        select.innerHTML = '<option value="">-- เลือกลูกค้า/บริษัท --</option>';
-        let customers = JSON.parse(localStorage.getItem('saved_quot_customers') || '[]');
-        customers.forEach((c, index) => {
-            let opt = document.createElement('option');
-            opt.value = index;
-            opt.innerText = c.name;
-            select.appendChild(opt);
-        });
+// แนวทางการปรับปรุงฟังก์ชันดึงข้อมูล
+async function loadCustomerDropdown() {
+    const db = firebase.firestore();
+    const doc = await db.collection("settings").doc("master_data").get();
+    if (doc.exists) {
+        const data = doc.data();
+        let customers = data.customers || []; // ดึงจาก Cloud
+        // ... โค้ดแสดงผล Dropdown ...
     }
+}
 
     function selectCustomer(select) {
         let index = select.value;
