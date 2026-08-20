@@ -427,6 +427,7 @@
     .btn-clear-ui { background: linear-gradient(135deg, #e11d48, #fb7185); }
     .btn-export-ui { background: linear-gradient(135deg, #0891b2, #06b6d4); }
     .btn-import-ui { background: linear-gradient(135deg, #7c3aed, #a855f7); }
+    .btn-line-ui { background: linear-gradient(135deg, #06c755, #00b900); }
 
     .icon-btn[data-tip]::after {
         content: attr(data-tip);
@@ -659,7 +660,6 @@
         body { padding: 4px; }
         .bill-container { width: 100% !important; padding: 10px !important; }
         
-        /* ปรับแผงควบคุมให้ปุ่มทั้งหมดเรียงเป็นแถวแนวนอนแถวเดียว เลื่อนซ้ายขวาได้ */
         .control-panel { 
             width: 100% !important; 
             flex-direction: row; 
@@ -683,7 +683,7 @@
             gap: 6px;
         }
         .panel-group-label {
-            display: none; /* ซ่อนชื่อหมวดหมู่บนมือถือเพื่อประหยัดพื้นที่ให้ปุ่มเรียงแถวเดียว */
+            display: none; 
         }
         .panel-buttons { 
             display: flex;
@@ -691,19 +691,16 @@
             gap: 6px; 
         }
         .credit {
-            display: none; /* ซ่อนชื่อผู้จัดทำบนมือถือเพื่อความกระชับ */
+            display: none; 
         }
         
-        /* ส่วนหัวบริษัทและชื่อเอกสาร */
         .header-section { flex-direction: column; gap: 10px; }
         .title-box { width: 100%; box-sizing: border-box; }
         
-        /* ข้อมูลลูกค้าและวันที่ให้แสดงผลแบบเต็มหน้าจอแนวตั้ง */
         .top-info, .top-info tr, .top-info td { display: block; width: 100% !important; box-sizing: border-box; }
         .customer-info { margin-bottom: 10px; width: 100% !important; }
         .customer-info input, .customer-info textarea, .no-date-box input { max-width: 100% !important; width: 100% !important; }
         
-        /* ตารางสินค้าให้เลื่อนเลื่อนซ้าย-ขวาได้ป้องกันตารางพัง */
         .table-responsive-wrapper {
             width: 100%;
             overflow-x: auto;
@@ -714,7 +711,6 @@
             min-width: 650px; 
         }
 
-        /* ตารางสรุปผลยอดเงินด้านล่าง */
         .footer-table, .footer-table tr, .footer-table td {
             display: block;
             width: 100% !important;
@@ -734,7 +730,6 @@
             padding-left: 0 !important;
         }
 
-        /* ส่วนลงลายมือชื่อ */
         .signature-section {
             flex-direction: column;
             gap: 20px;
@@ -775,11 +770,15 @@
 
     <div class="panel-divider"></div>
 	<div class="panel-group">
-    <div class="panel-group-label">📧 ส่งเมลผ่าน Gmail</div>
+    <div class="panel-group-label">📤 ส่งออก (เมล/ไลน์)</div>
     <div class="panel-buttons">
-        <!-- ปุ่มนี้จะเปิดแท็บใหม่ไปที่หน้าเขียนเมลของ Gmail โดยตรง -->
+        <!-- ปุ่มส่งเมลผ่าน Gmail -->
         <button class="icon-btn btn-export-ui" data-tip="เขียนใบเสนอราคาใน Gmail" onclick="window.open('https://mail.google.com/mail/u/0/?tab=rm&ogbl#inbox?compose=new', '_blank')">
             <i class="fa-solid fa-envelope"></i>
+        </button>
+        <!-- ปุ่มส่งไลน์ส่วนตัวผ่านมือถือ -->
+        <button class="icon-btn btn-line-ui" data-tip="ส่งใบเสนอราคาผ่าน LINE" onclick="sendToLine()">
+            <i class="fa-brands fa-line"></i>
         </button>
     </div>
 </div>
@@ -1169,6 +1168,21 @@
         return grandTotal;
     }
 
+    // ฟังก์ชันส่งไลน์ผ่านลิงก์ URL Scheme บนมือถือ
+    function sendToLine() {
+        let customerName = document.getElementById('custName').value.trim() || 'ลูกค้าทั่วไป';
+        let billNo = document.getElementById('billNo').value.trim() || '-';
+        let grandTotal = document.getElementById('grandTotal').innerText;
+
+        let text = `สวัสดีครับ/ค่ะ ส่งใบเสนอราคาครับ/ค่ะ\n` +
+                   `เลขที่บิล: ${billNo}\n` +
+                   `ลูกค้า: ${customerName}\n` +
+                   `ยอดรวมทั้งสิ้น: ${grandTotal} บาท`;
+
+        let lineUrl = `https://line.me/R/msg/text/?` + encodeURIComponent(text);
+        window.open(lineUrl, '_blank');
+    }
+
     function saveCurrentData() {
         executeSave(false);
     }
@@ -1548,7 +1562,6 @@ async function renderHistoryTable(filterText = '') {
     let container = document.getElementById('historyTableContainer');
     let titleElement = document.getElementById('historyModalTitle');
     
-    // แสดงสถานะกำลังโหลดข้อมูล
     container.innerHTML = '<p style="text-align:center; color:#64748b; padding: 20px;">กำลังโหลดข้อมูลประวัติจาก Cloud...</p>';
     
     let purchases = [];
@@ -1565,7 +1578,6 @@ async function renderHistoryTable(filterText = '') {
     }
 
     let totalRecords = purchases.length;
-    // อัปเดตข้อความหัวข้อให้แสดงจำนวนรายการทั้งหมด[cite: 13]
     titleElement.innerHTML = `📋 ประวัติการขายและใบเสนอราคาทั้งหมด (History Log) - พบ ${totalRecords} รายการ`;
 
     if (totalRecords === 0) {
@@ -1667,7 +1679,6 @@ async function deleteHistoryBill(billNo) {
                 const db = firebase.firestore();
                 await db.collection("quotations").doc(billNo).delete();
 
-                // ลบออกจาก localStorage ด้วย
                 let purchases = JSON.parse(localStorage.getItem('saved_quot_purchases') || '[]');
                 purchases = purchases.filter(p => p.billNo !== billNo);
                 localStorage.setItem('saved_quot_purchases', JSON.stringify(purchases));
