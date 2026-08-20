@@ -1375,14 +1375,35 @@ async function executeSave(isNewBill) {
         reader.readAsText(file);
     }
 
-// แนวทางการปรับปรุงฟังก์ชันดึงข้อมูล
 async function loadCustomerDropdown() {
+    // 1. ตรวจสอบและ Initialize Firebase ป้องกัน Error เรื่อง No App Created
+    if (typeof firebase !== 'undefined' && !firebase.apps.length) {
+        firebase.initializeApp(firebaseConfig);
+    }
+
     const db = firebase.firestore();
-    const doc = await db.collection("settings").doc("master_data").get();
-    if (doc.exists) {
-        const data = doc.data();
-        let customers = data.customers || []; // ดึงจาก Cloud
-        // ... โค้ดแสดงผล Dropdown ...
+    try {
+        const doc = await db.collection("settings").doc("master_data").get();
+        let customers = [];
+        
+        if (doc.exists) {
+            const data = doc.data();
+            customers = data.customers || [];
+        }
+
+        // 2. โค้ดแสดงผล Dropdown ตามเดิมของคุณ
+        let select = document.getElementById('customerSelect');
+        select.innerHTML = '<option value="">-- เลือกลูกค้า/บริษัท --</option>';
+        
+        customers.forEach((c, index) => {
+            let opt = document.createElement('option');
+            opt.value = index;
+            opt.innerText = c.name;
+            select.appendChild(opt);
+        });
+
+    } catch (error) {
+        console.error("❌ ไม่สามารถโหลดข้อมูลลูกค้าจาก Cloud ได้:", error);
     }
 }
 
