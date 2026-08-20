@@ -1376,35 +1376,39 @@ async function executeSave(isNewBill) {
     }
 
 async function loadCustomerDropdown() {
-    // 1. ตรวจสอบและ Initialize Firebase ป้องกัน Error เรื่อง No App Created
-    if (typeof firebase !== 'undefined' && !firebase.apps.length) {
-        firebase.initializeApp(firebaseConfig);
-    }
-
-    const db = firebase.firestore();
+    let customers = [];
+    
+    // 1. ลองดึงข้อมูลจาก Cloud Firestore ก่อน
     try {
-        const doc = await db.collection("settings").doc("master_data").get();
-        let customers = [];
-        
-        if (doc.exists) {
-            const data = doc.data();
-            customers = data.customers || [];
+        if (typeof firebase !== 'undefined') {
+            if (!firebase.apps.length) {
+                firebase.initializeApp(firebaseConfig);
+            }
+            const db = firebase.firestore();
+            const doc = await db.collection("settings").doc("master_data").get();
+            if (doc.exists && doc.data().customers) {
+                customers = doc.data().customers;
+            }
         }
-
-        // 2. โค้ดแสดงผล Dropdown ตามเดิมของคุณ
-        let select = document.getElementById('customerSelect');
-        select.innerHTML = '<option value="">-- เลือกลูกค้า/บริษัท --</option>';
-        
-        customers.forEach((c, index) => {
-            let opt = document.createElement('option');
-            opt.value = index;
-            opt.innerText = c.name;
-            select.appendChild(opt);
-        });
-
     } catch (error) {
-        console.error("❌ ไม่สามารถโหลดข้อมูลลูกค้าจาก Cloud ได้:", error);
+        console.warn("⚠️ ไม่สามารถโหลดลูกค้าจาก Cloud ได้ กำลังใช้ข้อมูลสำรองในเครื่อง:", error);
     }
+
+    // 2. ถ้าบน Cloud ไม่มี ให้ดึงจาก Local Storage มาแสดงแทน
+    if (customers.length === 0) {
+        customers = JSON.parse(localStorage.getItem('saved_quot_customers') || '[]');
+    }
+
+    // 3. นำข้อมูลมาสร้างตัวเลือกใน Dropdown
+    let select = document.getElementById('customerSelect');
+    select.innerHTML = '<option value="">-- เลือกลูกค้า/บริษัท --</option>';
+    
+    customers.forEach((c, index) => {
+        let opt = document.createElement('option');
+        opt.value = index;
+        opt.innerText = c.name;
+        select.appendChild(opt);
+    });
 }
 
     function selectCustomer(select) {
