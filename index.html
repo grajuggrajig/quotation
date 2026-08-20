@@ -1665,7 +1665,6 @@ async function renderHistoryTable(filterText = '') {
     
     container.innerHTML = '<p style="text-align:center; color:#64748b; padding: 20px;">กำลังโหลดข้อมูลประวัติจาก Cloud...</p>';
     
-    // 📍 นำโค้ดของคุณมาวางที่นี่แทนที่โค้ดดึงข้อมูลเดิม
     let purchases = [];
     try {
         if (!firebase.apps.length) {
@@ -1677,19 +1676,20 @@ async function renderHistoryTable(filterText = '') {
         console.log("🔥 จำนวน Document ที่ดึงมาจาก Firestore:", querySnapshot.size);
 
         querySnapshot.forEach((doc) => {
-            console.log("📄 ดึงข้อมูล Doc ID:", doc.id, doc.data());
             purchases.push(doc.data());
         });
 
+        // 🛠️ แก้ไขจุดนี้: แปลงค่า timestamp ให้เป็น String ก่อนใช้งาน .localeCompare ป้องกัน Error
         purchases.sort((a, b) => {
-            return (b.timestamp || '').localeCompare(a.timestamp || '');
+            let timeA = String(a.timestamp || '');
+            let timeB = String(b.timestamp || '');
+            return timeB.localeCompare(timeA);
         });
 
     } catch (error) {
         console.error("❌ เกิดข้อผิดพลาดในการโหลดจาก Cloud:", error);
         purchases = JSON.parse(localStorage.getItem('saved_quot_purchases') || '[]');
     }
-    // สิ้นสุดจุดที่นำมาวาง ----------------------------------
 
     let totalRecords = purchases.length;
     titleElement.innerHTML = `📋 ประวัติการขายและใบเสนอราคาทั้งหมด (History Log) - พบ ${totalRecords} รายการ`;
