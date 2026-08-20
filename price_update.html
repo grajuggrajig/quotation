@@ -2,6 +2,7 @@
 <html lang="th">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ใบแจ้งปรับราคาสินค้า - Modern Edition</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -15,14 +16,14 @@
             color: #2c3e50; 
             background: #f4f7f6; 
             margin: 0; 
-            padding: 20px; 
+            padding: 10px; 
         }
 
         .container { 
             width: 100%; 
             max-width: 820px; 
             margin: auto; 
-            padding: 40px; 
+            padding: 20px; 
             background: #ffffff; 
             border-radius: 16px; 
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08); 
@@ -56,12 +57,12 @@
             border-bottom: 2px solid #eef2f7;
             padding-bottom: 20px;
             margin-bottom: 25px;
+            gap: 15px;
         }
 
         .logo-box {
-            width: 100px;
-            height: 100px;
-            /* เอาขอบ, พื้นหลัง และมุมมนออก เพื่อให้รูปโลโก้แสดงผลแบบอิสระ */
+            width: 80px;
+            height: 80px;
             border: none;
             border-radius: 0;
             background: transparent;
@@ -69,7 +70,6 @@
             align-items: center;
             justify-content: center;
             overflow: hidden;
-            margin-right: 20px;
             flex-shrink: 0;
             position: relative;
         }
@@ -86,23 +86,23 @@
         }
 
         .company-name { 
-            font-size: 20px; 
+            font-size: 18px; 
             font-weight: 700; 
             color: #1e3a8a; 
             margin-bottom: 4px; 
         }
         
         .company-address {
-            font-size: 14px;
+            font-size: 13px;
             color: #64748b;
         }
 
         .doc-title { 
-            font-size: 24px; 
+            font-size: 22px; 
             font-weight: 700; 
             color: #0f172a;
             text-align: center; 
-            margin: 20px 0 30px 0; 
+            margin: 20px 0 25px 0; 
             letter-spacing: 0.5px;
         }
 
@@ -112,20 +112,23 @@
         }
 
         .letter-body {
-            font-size: 15px;
+            font-size: 14px;
             color: #334155;
             margin-bottom: 20px;
         }
 
+        /* ทำให้ตารางเลื่อนซ้าย-ขวาได้บนมือถือ */
         .table-wrapper {
-            margin: 25px 0;
+            margin: 20px 0;
             border-radius: 10px;
-            overflow: hidden;
             border: 1px solid #e2e8f0;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
         }
 
         table { 
             width: 100%; 
+            min-width: 550px; /* บังคับความกว้างขั้นต่ำไม่ให้ตารางยัดเยียดเกินไปบนจอเล็ก */
             border-collapse: collapse; 
             background: #ffffff; 
         }
@@ -134,33 +137,29 @@
             background: linear-gradient(135deg, #1e3a8a, #3b82f6); 
             color: white; 
             font-weight: 600; 
-            padding: 12px 10px; 
+            padding: 10px 8px; 
             text-align: center; 
-            font-size: 14px;
+            font-size: 13px;
         }
 
         td { 
-            padding: 10px; 
+            padding: 8px; 
             text-align: center; 
             border-bottom: 1px solid #f1f5f9; 
-            font-size: 14px;
+            font-size: 13px;
         }
 
         tr:last-child td {
             border-bottom: none;
         }
-
-        tr:hover {
-            background-color: #f8fafc;
-        }
         
         input.table-input { 
-            width: 95%; 
+            width: 100%; 
             border: 1px solid transparent; 
             background: transparent; 
             text-align: center; 
             font-family: inherit; 
-            font-size: 14px; 
+            font-size: 13px; 
             padding: 6px; 
             border-radius: 6px;
             transition: all 0.2s;
@@ -177,62 +176,54 @@
             background: #fee2e2; 
             color: #ef4444; 
             border: none; 
-            width: 30px; 
-            height: 30px; 
+            width: 28px; 
+            height: 28px; 
             cursor: pointer; 
             border-radius: 50%; 
             font-weight: bold;
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            transition: all 0.2s;
         }
         
-        .btn-delete:hover { 
-            background: #ef4444; 
-            color: white; 
-        }
-
         .action-container {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-top: 20px;
+            margin-top: 15px;
+            flex-wrap: wrap;
+            gap: 10px;
         }
 
         .btn-add { 
             background: #0ea5e9; 
             color: white; 
-            padding: 10px 20px; 
+            padding: 10px 18px; 
             border: none; 
             cursor: pointer; 
             font-size: 14px; 
             font-weight: 500;
             border-radius: 8px; 
             box-shadow: 0 4px 12px rgba(14, 165, 233, 0.2);
-            transition: all 0.2s;
+            width: 100%;
         }
-        
-        .btn-add:hover { background: #0284c7; }
 
         .btn-print { 
             background: #10b981; 
             color: white; 
-            padding: 12px 30px; 
+            padding: 12px 20px; 
             border: none; 
             cursor: pointer; 
-            font-size: 16px; 
+            font-size: 15px; 
             font-weight: 600;
             border-radius: 8px; 
             box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
-            transition: all 0.2s;
+            width: 100%;
         }
-        
-        .btn-print:hover { background: #059669; }
 
         .footer-note-section {
-            margin-top: 25px;
-            font-size: 14px;
+            margin-top: 20px;
+            font-size: 13px;
         }
 
         .editable-note {
@@ -245,16 +236,14 @@
             background: #fafafa;
             margin-top: 5px;
         }
-        .editable-note:focus {
-            outline: none;
-            border-color: #3b82f6;
-            background: #fff;
-        }
 
         .footer-sign { 
-            margin-top: 40px; 
+            margin-top: 30px; 
             text-align: right; 
-            margin-right: 40px; 
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
         }
         
         .footer-sign input {
@@ -262,13 +251,22 @@
             border-bottom: 1px dotted #94a3b8;
             text-align: right;
             font-family: inherit;
-            font-size: 15px;
+            font-size: 14px;
             padding: 4px;
             background: transparent;
         }
-        .footer-sign input:focus {
-            outline: none;
-            border-color: #3b82f6;
+
+        /* Media Query สำหรับหน้าจอคอมพิวเตอร์ (Desktop) ให้ปุ่มและฟอนต์ขยายสวยงามตามเดิม */
+        @media (min-width: 768px) {
+            body { padding: 20px; }
+            .container { padding: 40px; }
+            .logo-box { width: 100px; height: 100px; }
+            .company-name { font-size: 20px; }
+            .company-address, .letter-body, .footer-note-section { font-size: 14px; }
+            th, td, input.table-input { font-size: 14px; }
+            .btn-add { width: auto; }
+            .btn-print { width: auto; }
+            .footer-sign { align-items: center; text-align: center; margin-right: 40px; }
         }
 
         @media print { 
@@ -327,9 +325,9 @@
                 <tr>
                     <th style="width: 8%;">ลำดับ</th>
                     <th>รายการสินค้า</th>
-                    <th style="width: 20%;">ราคาเดิม</th>
-                    <th style="width: 20%;">ราคาใหม่</th>
-                    <th style="width: 8%;" class="col-action">ลบ</th>
+                    <th style="width: 22%;">ราคาเดิม</th>
+                    <th style="width: 22%;">ราคาใหม่</th>
+                    <th style="width: 10%;" class="col-action">ลบ</th>
                 </tr>
             </thead>
             <tbody id="price-table-body">
@@ -353,19 +351,19 @@
         
         <input type="text" id="noteInput" class="editable-note" value="หมายเหตุ* ราคาสินค้านี้ ยังไม่รวมภาษีมูลค่าเพิ่ม">
 
-        <p style="text-indent: 80px; margin-top: 25px;">จึงเรียนมาเพื่อทราบ</p>
+        <p style="text-indent: 40px; margin-top: 25px;">จึงเรียนมาเพื่อทราบ</p>
     </div>
 
-    <div style="display: flex; justify-content: flex-end; width: 100%;">
-        <div class="footer-sign" style="text-align: center;">
+    <div class="footer-sign">
+        <div style="text-align: center;">
             <p style="margin-bottom: 35px;">ขอแสดงความนับถือ</p>
-            <input type="text" value="" style="font-weight: bold; width: 260px; text-align: center;" placeholder="(ชื่อ-นามสกุล ผู้ลงนาม)"><br>
-            <input type="text" value="กรรมการผู้จัดการ" style="width: 260px; color: #64748b; font-size: 14px; text-align: center;">
+            <input type="text" value="" style="font-weight: bold; width: 240px; text-align: center;" placeholder="(ระบุชื่อ-นามสกุลผู้ลงนาม)"><br>
+            <input type="text" value="กรรมการผู้จัดการ" style="width: 240px; color: #64748b; font-size: 13px; text-align: center;">
         </div>
     </div>
 
-    <div class="action-container" style="margin-top: 60px; border-top: 2px solid #eef2f7; padding-top: 20px;">
-        <span style="font-size: 13px; color: #94a3b8;">ระบบออกเอกสารอัตโนมัติ - KL Stationery</span>
+    <div class="action-container" style="margin-top: 40px; border-top: 2px solid #eef2f7; padding-top: 20px;">
+        <span style="font-size: 12px; color: #94a3b8;">ระบบออกเอกสารอัตโนมัติ - KL Stationery</span>
         <button class="btn-print" onclick="window.print()">🖨️ พิมพ์ / บันทึกเป็น PDF</button>
     </div>
 </div>
