@@ -1456,22 +1456,10 @@ async function loadCustomerDropdown() {
         }
     }
 
-async function openHistoryModal() {
-    try {
-        // เปิด Modal ประวัติ (ปรับชื่อ ID ของ Modal ตามที่คุณใช้งานจริง เช่น 'historyModal')
-        const modal = document.getElementById('historyModal');
-        if (modal) {
-            modal.style.display = 'block'; // หรือใช้ class สำหรับเปิด Modal เช่น modal.classList.add('show');
-            
-            // โหลดรายการประวัติบิลมาแสดงที่นี่ (ถ้ามีฟังก์ชันดึงข้อมูล)
-            if (typeof loadHistoryList === 'function') {
-                loadHistoryList();
-            }
-        }
-    } catch (error) {
-        console.error("❌ ไม่สามารถเปิดหน้าต่างประวัติได้:", error);
+    function openHistoryModal() {
+        renderHistoryTable();
+        document.getElementById('historyModal').style.display = 'flex';
     }
-}
 
 async function renderHistoryTable(filterText = '') {
     let container = document.getElementById('historyTableContainer');
