@@ -1391,86 +1391,136 @@ async function executeSave(isNewBill) {
 }
 
     async function exportAllData() {
+    try {
+        // 1. ดึงข้อมูลล่าสุดจาก LocalStorage มาเป็นค่าเริ่มต้น
+        let customers = JSON.parse(localStorage.getItem('saved_quot_customers') || '[]');
+        let products = JSON.parse(localStorage.getItem('saved_quot_products') || '[]');
+        let purchases = JSON.parse(localStorage.getItem('saved_quot_purchases') || '[]');
+
+        // 2. ดึงข้อมูลล่าสุดจาก Firebase Cloud มารวมด้วย เพื่อให้ไฟล์สำรองสมบูรณ์ที่สุด
         try {
-            const allData = {
-                customers: JSON.parse(localStorage.getItem('saved_quot_customers') || '[]'),
-                products: JSON.parse(localStorage.getItem('saved_quot_products') || '[]'),
-                purchases: JSON.parse(localStorage.getItem('saved_quot_purchases') || '[]')
-            };
-
-            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(allData, null, 2));
-            
-            if ('showSaveFilePicker' in window) {
-                const options = {
-                    suggestedName: `system_backup_${new Date().toISOString().slice(0, 10)}.json`,
-                    types: [{
-                        description: 'JSON Files',
-                        accept: { 'application/json': ['.json'] }
-                    }]
-                };
-                const handle = await window.showSaveFilePicker(options);
-                const writable = await handle.createWritable();
-                await writable.write(JSON.stringify(allData, null, 2));
-                await writable.close();
+            if (typeof firebase !== 'undefined') {
+                if (!firebase.apps.length) {
+                    firebase.initializeApp(firebaseConfig);
+                }
+                const db = firebase.firestore();
                 
-                Swal.fire('สำเร็จ', 'สำรองข้อมูลทั้งหมดเรียบร้อยแล้ว', 'success');
-                return;
-            }
-
-            const downloadAnchor = document.createElement('a');
-            downloadAnchor.setAttribute("href", dataStr);
-            downloadAnchor.setAttribute("download", `system_backup_${new Date().toISOString().slice(0, 10)}.json`);
-            document.body.appendChild(downloadAnchor);
-            downloadAnchor.click();
-            downloadAnchor.remove();
-
-            Swal.fire('สำเร็จ', 'สำรองข้อมูลทั้งหมดเรียบร้อยแล้ว', 'success');
-        } catch (err) {
-            if (err.name !== 'AbortError') {
-                Swal.fire('เกิดข้อผิดพลาด', 'ไม่สามารถสำรองข้อมูลได้: ' + err.message, 'error');
-            }
-        }
-    }
-
-    function importAllData(event) {
-        const file = event.target.files[0];
-        if (!file) return;
-
-        const reader = new FileReader();
-        reader.onload = function(e) {
-            try {
-                const jsonContent = JSON.parse(e.target.result);
-
-                if (!jsonContent.customers && !jsonContent.products && !jsonContent.purchases) {
-                    throw new Error('โครงสร้างไฟล์ JSON ไม่ถูกต้อง');
+                // ดึงรายชื่อลูกค้าจาก Cloud
+                const custDoc = await db.collection("settings").doc("master_data").get();
+                if (custDoc.exists && custDoc.data().customers) {
+                    customers = custDoc.data().customers;
                 }
 
-                Swal.fire({
-                    title: 'ยืนยันการนำเข้าข้อมูล?',
-                    text: 'ข้อมูลปัจจุบันทั้งหมดจะถูกแทนที่ด้วยข้อมูลจากไฟล์สำรอง',
-                    icon: 'warning',
-                    showCancelButton: true,
-                    confirmButtonText: 'ยืนยัน',
-                    cancelButtonText: 'ยกเลิก'
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        if (jsonContent.customers) localStorage.setItem('saved_quot_customers', JSON.stringify(jsonContent.customers));
-                        if (jsonContent.products) localStorage.setItem('saved_quot_products', JSON.stringify(jsonContent.products));
-                        if (jsonContent.purchases) localStorage.setItem('saved_quot_purchases', JSON.stringify(jsonContent.purchases));
-
-                        Swal.fire('สำเร็จ!', 'นำเข้าข้อมูลทั้งหมดเรียบร้อยแล้ว', 'success').then(() => {
-                            location.reload();
-                        });
-                    }
+                // ดึงประวัติบิลทั้งหมดจาก Cloud
+                const querySnapshot = await db.collection("quotations").get();
+                let cloudPurchases = [];
+                querySnapshot.forEach((doc) => {
+                    cloudPurchases.push(doc.data());
                 });
-            } catch (err) {
-                Swal.fire('เกิดข้อผิดพลาด', 'ไฟล์ไม่ถูกต้องหรือเสียหาย: ' + err.message, 'error');
-            } finally {
-                event.target.value = '';
+                if (cloudPurchases.length > 0) {
+                    purchases = cloudPurchases;
+                }
             }
+        } catch (cloudErr) {
+            console.warn("⚠️ ไม่สามารถดึงข้อมูลจาก Cloud มาสำรองได้ ใช้ข้อมูลในเครื่องแทน:", cloudErr);
+        }
+
+        const allData = {
+            customers: customers,
+            products: products,
+            purchases: purchases
         };
-        reader.readAsText(file);
+
+        const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(allData, null, 2));
+        
+        if ('showSaveFilePicker' in window) {
+            const options = {
+                suggestedName: `system_backup_${new Date().toISOString().slice(0, 10)}.json`,
+                types: [{
+                    description: 'JSON Files',
+                    accept: { 'application/json': ['.json'] }
+                }]
+            };
+            const handle = await window.showSaveFilePicker(options);
+            const writable = await handle.createWritable();
+            await writable.write(JSON.stringify(allData, null, 2));
+            await writable.close();
+            
+            Swal.fire('สำเร็จ', 'สำรองข้อมูลทั้งหมดเรียบร้อยแล้ว', 'success');
+            return;
+        }
+
+        const downloadAnchor = document.createElement('a');
+        downloadAnchor.setAttribute("href", dataStr);
+        downloadAnchor.setAttribute("download", `system_backup_${new Date().toISOString().slice(0, 10)}.json`);
+        document.body.appendChild(downloadAnchor);
+        downloadAnchor.click();
+        downloadAnchor.remove();
+
+        Swal.fire('สำเร็จ', 'สำรองข้อมูลทั้งหมดเรียบร้อยแล้ว', 'success');
+    } catch (err) {
+        if (err.name !== 'AbortError') {
+            Swal.fire('เกิดข้อผิดพลาด', 'ไม่สามารถสำรองข้อมูลได้: ' + err.message, 'error');
+        }
     }
+}
+
+    function importAllData(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = async function(e) {
+        try {
+            const jsonContent = JSON.parse(e.target.result);
+
+            if (!jsonContent.customers && !jsonContent.products && !jsonContent.purchases) {
+                throw new Error('โครงสร้างไฟล์ JSON ไม่ถูกต้อง');
+            }
+
+            Swal.fire({
+                title: 'ยืนยันการนำเข้าข้อมูล?',
+                text: 'ข้อมูลปัจจุบันทั้งหมดจะถูกแทนที่ด้วยข้อมูลจากไฟล์สำรอง',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'ยืนยัน',
+                cancelButtonText: 'ยกเลิก'
+            }).then(async (result) => {
+                if (result.isConfirmed) {
+                    // 1. บันทึกลง localStorage ของเครื่อง
+                    if (jsonContent.customers) localStorage.setItem('saved_quot_customers', JSON.stringify(jsonContent.customers));
+                    if (jsonContent.products) localStorage.setItem('saved_quot_products', JSON.stringify(jsonContent.products));
+                    if (jsonContent.purchases) localStorage.setItem('saved_quot_purchases', JSON.stringify(jsonContent.purchases));
+
+                    // 2. สำคัญ: อัปเดตรายชื่อลูกค้าชุดใหม่ขึ้น Firebase Cloud ทันที (เพื่อให้เครื่องอื่นซิงค์ได้ด้วย)
+                    try {
+                        if (typeof firebase !== 'undefined' && jsonContent.customers) {
+                            if (!firebase.apps.length) {
+                                firebase.initializeApp(firebaseConfig);
+                            }
+                            const db = firebase.firestore();
+                            await db.collection("settings").doc("master_data").set({
+                                customers: jsonContent.customers
+                            }, { merge: true });
+                        }
+                    } catch (cloudErr) {
+                        console.warn("⚠️ ไม่สามารถอัปเดตข้อมูลลูกค้าขึ้น Cloud หลัง Import ได้:", cloudErr);
+                    }
+
+                    // 3. แจ้งเตือนและรีโหลดหน้าจอเพื่อแสดงผลข้อมูลใหม่
+                    Swal.fire('สำเร็จ!', 'นำเข้าข้อมูลทั้งหมดเรียบร้อยแล้ว', 'success').then(() => {
+                        location.reload();
+                    });
+                }
+            });
+        } catch (err) {
+            Swal.fire('เกิดข้อผิดพลาด', 'ไฟล์ไม่ถูกต้องหรือเสียหาย: ' + err.message, 'error');
+        } finally {
+            event.target.value = '';
+        }
+    };
+    reader.readAsText(file);
+}
 
 async function loadCustomerDropdown() {
     let customers = [];
