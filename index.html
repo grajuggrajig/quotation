@@ -1529,22 +1529,7 @@ async function renderHistoryTable(filterText = '') {
         renderHistoryTable(query);
     }
 
-    function selectHistoryBill(billNo) {
-        let purchases = JSON.parse(localStorage.getItem('saved_quot_purchases') || '[]');
-        let found = purchases.find(p => p.billNo === billNo);
-        if (found) {
-            fillPurchaseDataToDOM(found);
-            closeModal('historyModal');
-            const Toast = Swal.mixin({
-                toast: true,
-                position: 'top-end',
-                showConfirmButton: false,
-                timer: 1500,
-                timerProgressBar: true
-            });
-            Toast.fire({ icon: 'success', title: `ดึงข้อมูลบิล ${billNo} สำเร็จ` });
-        }
-    }
+    async function selectHistoryBill(billNo)
 
     function fillPurchaseDataToDOM(data) {
         if(data.billNo) document.getElementById('billNo').value = data.billNo;
