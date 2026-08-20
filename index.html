@@ -1547,21 +1547,29 @@ async function loadCustomerDropdown() {
 async function renderHistoryTable(filterText = '') {
     let container = document.getElementById('historyTableContainer');
     let titleElement = document.getElementById('historyModalTitle');
-	let totalRecords = purchases.length;
-	// อัปเดตข้อความหัวข้อให้แสดงจำนวนรายการทั้งหมด
-	titleElement.innerHTML = `📋 ประวัติการขายและใบเสนอราคาทั้งหมด (History Log) - พบ ${totalRecords} รายการ`;
     
-    const db = firebase.firestore();
-    const querySnapshot = await db.collection("quotations").orderBy("timestamp", "desc").get();
+    // แสดงสถานะกำลังโหลดข้อมูล
+    container.innerHTML = '<p style="text-align:center; color:#64748b; padding: 20px;">กำลังโหลดข้อมูลประวัติจาก Cloud...</p>';
     
     let purchases = [];
-    querySnapshot.forEach((doc) => {
-        purchases.push(doc.data());
-    });
+    try {
+        const db = firebase.firestore();
+        const querySnapshot = await db.collection("quotations").orderBy("timestamp", "desc").get();
+        
+        querySnapshot.forEach((doc) => {
+            purchases.push(doc.data());
+        });
+    } catch (error) {
+        console.warn("⚠️ ไม่สามารถโหลดประวัติจาก Cloud ได้ กำลังโหลดจาก LocalStorage แทน:", error);
+        purchases = JSON.parse(localStorage.getItem('saved_quot_purchases') || '[]');
+    }
 
     let totalRecords = purchases.length;
+    // อัปเดตข้อความหัวข้อให้แสดงจำนวนรายการทั้งหมด[cite: 13]
+    titleElement.innerHTML = `📋 ประวัติการขายและใบเสนอราคาทั้งหมด (History Log) - พบ ${totalRecords} รายการ`;
+
     if (totalRecords === 0) {
-        container.innerHTML = '<p style="text-align:center; color:#64748b; padding: 20px;">ยังไม่มีประวัติการบันทึกบิลบน Cloud</p>';
+        container.innerHTML = '<p style="text-align:center; color:#64748b; padding: 20px;">ยังไม่มีประวัติการบันทึกบิล</p>';
         return;
     }
 
@@ -1573,43 +1581,43 @@ async function renderHistoryTable(filterText = '') {
         );
     }
 
-        let html = `
-            <div style="overflow-x: auto;">
-                <table class="history-table" style="min-width: 500px;">
-                    <thead>
-                        <tr>
-                            <th style="width: 13%;">วันที่</th>
-                            <th style="width: 14%;">เลขที่บิล</th>
-                            <th style="width: 33%;">ชื่อลูกค้า / บริษัท</th>
-                            <th style="width: 18%;">ผู้เสนอราคา</th>
-                            <th style="width: 13%; text-align: right;">ยอดรวมทั้งสิ้น</th>
-                            <th style="width: 9%; text-align: center;">เลือก</th>
-                        </tr>
-                    </thead>
-                    <tbody>
+    let html = `
+        <div style="overflow-x: auto;">
+            <table class="history-table" style="min-width: 500px;">
+                <thead>
+                    <tr>
+                        <th style="width: 13%;">วันที่</th>
+                        <th style="width: 14%;">เลขที่บิล</th>
+                        <th style="width: 33%;">ชื่อลูกค้า / บริษัท</th>
+                        <th style="width: 18%;">ผู้เสนอราคา</th>
+                        <th style="width: 13%; text-align: right;">ยอดรวมทั้งสิ้น</th>
+                        <th style="width: 9%; text-align: center;">เลือก</th>
+                    </tr>
+                </thead>
+                <tbody>
+    `;
+
+    purchases.forEach(p => {
+        let formattedTotal = (p.grandTotal !== undefined ? p.grandTotal : 0).toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        html += `
+            <tr>
+                <td>${p.billDate || '-'}</td>
+                <td><strong>${p.billNo || '-'}</strong></td>
+                <td>${p.customerName || '-'}</td>
+                <td>${p.salesSignName || '-'}</td>
+                <td style="text-align: right; color: #0369a1; font-weight: 600;">${formattedTotal}</td>
+                <td style="text-align: center; white-space: nowrap;">
+                    <button class="btn-select-history" onclick="selectHistoryBill('${p.billNo}')">เลือก</button>
+                    <button class="btn-select-history" style="background: #f59e0b; margin-left: 2px;" onclick="selectHistoryBill('${p.billNo}'); closeModal('historyModal');">แก้ไข</button>
+                    <button class="btn-del" style="padding: 4px 8px; margin-left: 2px;" onclick="deleteHistoryBill('${p.billNo}')">ลบ</button>
+                </td>
+            </tr>
         `;
+    });
 
-        purchases.forEach(p => {
-          let formattedTotal = (p.grandTotal !== undefined ? p.grandTotal : 0).toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-          html += `
-              <tr>
-                  <td>${p.billDate || '-'}</td>
-                  <td><strong>${p.billNo || '-'}</strong></td>
-                  <td>${p.customerName || '-'}</td>
-                  <td>${p.salesSignName || '-'}</td>
-                  <td style="text-align: right; color: #0369a1; font-weight: 600;">${formattedTotal}</td>
-                  <td style="text-align: center; white-space: nowrap;">
-                      <button class="btn-select-history" onclick="selectHistoryBill('${p.billNo}')">เลือก</button>
-                      <button class="btn-select-history" style="background: #f59e0b; margin-left: 2px;" onclick="selectHistoryBill('${p.billNo}'); closeModal('historyModal');">แก้ไข</button>
-                      <button class="btn-del" style="padding: 4px 8px; margin-left: 2px;" onclick="deleteHistoryBill('${p.billNo}')">ลบ</button>
-                  </td>
-              </tr>
-          `;
-      });
-
-        html += `</tbody></table></div>`;
-        container.innerHTML = html;
-    }
+    html += `</tbody></table></div>`;
+    container.innerHTML = html;
+}
 
     function filterHistoryTable() {
         let query = document.getElementById('historySearchInput').value;
