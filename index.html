@@ -2,6 +2,7 @@
 <html lang="th">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ใบเสนอราคา (Quotation)</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -48,6 +49,7 @@
         border-radius: 16px;
         box-shadow: 0 10px 20px -5px rgba(0, 0, 0, 0.05);
         border: 1px solid #e2e8f0;
+        box-sizing: border-box;
     }
     
     .header-section { 
@@ -361,6 +363,7 @@
         position: sticky;
         top: 10px;
         z-index: 2500;
+        box-sizing: border-box;
     }
 
     .panel-group {
@@ -485,26 +488,30 @@
         background-color: rgba(0,0,0,0.5);
         justify-content: center;
         align-items: center;
+        padding: 10px;
+        box-sizing: border-box;
     }
     .modal-content {
         background: #fff;
         padding: 20px;
         border-radius: 14px;
         width: 450px;
-        max-width: 90%;
+        max-width: 100%;
         box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1);
         max-height: 80vh;
         overflow-y: auto;
+        box-sizing: border-box;
     }
     .modal-content-wide {
         background: #fff;
         padding: 20px;
         border-radius: 14px;
         width: 750px;
-        max-width: 95%;
+        max-width: 100%;
         box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1);
         max-height: 85vh;
         overflow-y: auto;
+        box-sizing: border-box;
     }
     .modal-header {
         font-size: 15px;
@@ -646,16 +653,72 @@
         .sig-line { border-bottom: 1px dashed #94a3b8 !important; }
     }
 
-    /* --- Media Screen Styles --- */
+    /* --- Media Screen Styles (มือถือ & แท็บเล็ต) --- */
     @media screen and (max-width: 768px) {
-        body { padding: 5px; }
-        .bill-container { width: 100% !important; padding: 15px !important; box-sizing: border-box; }
-        .control-panel { width: 100% !important; flex-direction: column; gap: 15px; box-sizing: border-box; align-items: stretch; }
+        body { padding: 4px; }
+        .bill-container { width: 100% !important; padding: 10px !important; }
+        
+        /* แผงควบคุมด้านบนจัดเรียงใหม่ให้อยู่ในกรอบกระชับและเลื่อนซ้ายขวาได้ */
+        .control-panel { 
+            width: 100% !important; 
+            flex-direction: column; 
+            gap: 10px; 
+            align-items: stretch; 
+            padding: 10px;
+            top: 5px;
+        }
         .panel-divider { display: none; }
+        .panel-buttons { justify-content: flex-start; overflow-x: auto; padding-bottom: 4px; }
+        
+        /* ส่วนหัวบริษัทและชื่อเอกสาร */
         .header-section { flex-direction: column; gap: 10px; }
-        .top-info, .top-info tr, .top-info td { display: block; width: 100% !important; }
-        .customer-info { margin-bottom: 10px; }
-        .data-table { display: block; overflow-x: auto; white-space: nowrap; }
+        .title-box { width: 100%; box-sizing: border-box; }
+        
+        /* ข้อมูลลูกค้าและวันที่ให้แสดงผลแบบเต็มหน้าจอแนวตั้ง */
+        .top-info, .top-info tr, .top-info td { display: block; width: 100% !important; box-sizing: border-box; }
+        .customer-info { margin-bottom: 10px; width: 100% !important; }
+        .customer-info input, .customer-info textarea, .no-date-box input { max-width: 100% !important; width: 100% !important; }
+        
+        /* ตารางสินค้าให้เลื่อนเลื่อนซ้าย-ขวาได้ป้องกันตารางพัง */
+        .table-responsive-wrapper {
+            width: 100%;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            margin-bottom: 10px;
+        }
+        .data-table { 
+            min-width: 650px; 
+        }
+
+        /* ตารางสรุปผลยอดเงินด้านล่าง */
+        .footer-table, .footer-table tr, .footer-table td {
+            display: block;
+            width: 100% !important;
+            box-sizing: border-box;
+        }
+        .footer-table td {
+            text-align: left !important;
+            padding: 8px 10px !important;
+        }
+        .footer-total-label {
+            text-align: left !important;
+            width: 100% !important;
+            background-color: #f1f5f9 !important;
+        }
+        #grandTotal, #subTotal, #vatAmount, #netTotal {
+            text-align: left !important;
+            padding-left: 0 !important;
+        }
+
+        /* ส่วนลงลายมือชื่อ */
+        .signature-section {
+            flex-direction: column;
+            gap: 20px;
+            align-items: center;
+        }
+        .sig-box {
+            width: 100% !important;
+        }
     }
 </style>
 </head>
@@ -748,42 +811,44 @@
         </tr>
     </table>
 
-    <table class="data-table" id="billTable">
-        <thead>
-            <tr>
-                <th style="width: 5%;">ลำดับ<br><span style="font-size: 9px; font-weight: 300;">Item</span></th>
-				<th style="width: 38%;">รายการสินค้า / รายละเอียด<br><span style="font-size: 9px; font-weight: 300;">Description</span></th>
-                <th style="width: 9%;">แบบรุ่น<br><span style="font-size: 9px; font-weight: 300;">Model</span></th>
-                <th style="width: 8%;">จำนวน<br><span style="font-size: 9px; font-weight: 300;">Qty</span></th>
-                <th style="width: 8%;">หน่วย<br><span style="font-size: 9px; font-weight: 300;">Unit</span></th>
-                <th style="width: 11%;">ราคาต่อหน่วย<br><span style="font-size: 9px; font-weight: 300;">Unit Price</span></th>
-                <th style="width: 13%;">จำนวนเงิน<br><span style="font-size: 9px; font-weight: 300;">Amount</span></th>
-                <th class="no-print" style="width: 6%;">ลบ</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr class="item-row">
-                <td class="row-num" style="text-align: center;">1</td>
-                <td class="desc-cell"><textarea class="item-desc" placeholder="ระบุรายละเอียดสินค้า" oninput="autoGrow(this)" onblur="fetchProductByDesc(this)"></textarea></td>
-                <td style="text-align: center;">
-                    <input type="text" class="sku-input" placeholder="รุ่น" 
-                           onkeydown="if(event.key === 'Enter'){ fetchProductBySKU(this); this.blur(); }">
-                </td>
-                <td style="text-align: center;"><input type="text" class="qty" value="0" inputmode="decimal" onfocus="if(this.value==='0')this.value='';" onblur="if(this.value==='')this.value='0';" oninput="formatNumberInput(this); calculate();"></td>
-                <td style="text-align: center;"><input type="text" class="unit-input" placeholder="ชิ้น/อัน"></td>
-                <td style="text-align: center;"><input type="text" class="price" value="0" inputmode="decimal" onfocus="if(this.value==='0')this.value='';" onblur="if(this.value==='')this.value='0';" oninput="formatNumberInput(this); calculate();"></td>
-                <td class="amount" style="text-align: right; padding-right: 12px;">0.00</td>
-                <td class="no-print" style="text-align: center;"><button class="btn-del" onclick="removeRow(this)">ลบ</button></td>
-            </tr>
-        </tbody>
-        <tfoot class="no-print">
-            <tr>
-                <td colspan="8" style="text-align: center; padding: 12px; border: 1px solid #cbd5e1; background: #ffffff;">
-                    <button class="btn-add" style="background: linear-gradient(135deg, #059669, #10b981); color: white; border: none; border-radius: 8px; padding: 8px 16px; font-weight: 600; cursor: pointer; box-shadow: none;" onclick="addRow()">+ เพิ่มรายการสินค้า</button>
-                </td>
-            </tr>
-        </tfoot>
-    </table>
+    <div class="table-responsive-wrapper">
+        <table class="data-table" id="billTable">
+            <thead>
+                <tr>
+                    <th style="width: 5%;">ลำดับ<br><span style="font-size: 9px; font-weight: 300;">Item</span></th>
+                    <th style="width: 38%;">รายการสินค้า / รายละเอียด<br><span style="font-size: 9px; font-weight: 300;">Description</span></th>
+                    <th style="width: 9%;">แบบรุ่น<br><span style="font-size: 9px; font-weight: 300;">Model</span></th>
+                    <th style="width: 8%;">จำนวน<br><span style="font-size: 9px; font-weight: 300;">Qty</span></th>
+                    <th style="width: 8%;">หน่วย<br><span style="font-size: 9px; font-weight: 300;">Unit</span></th>
+                    <th style="width: 11%;">ราคาต่อหน่วย<br><span style="font-size: 9px; font-weight: 300;">Unit Price</span></th>
+                    <th style="width: 13%;">จำนวนเงิน<br><span style="font-size: 9px; font-weight: 300;">Amount</span></th>
+                    <th class="no-print" style="width: 6%;">ลบ</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr class="item-row">
+                    <td class="row-num" style="text-align: center;">1</td>
+                    <td class="desc-cell"><textarea class="item-desc" placeholder="ระบุรายละเอียดสินค้า" oninput="autoGrow(this)" onblur="fetchProductByDesc(this)"></textarea></td>
+                    <td style="text-align: center;">
+                        <input type="text" class="sku-input" placeholder="รุ่น" 
+                               onkeydown="if(event.key === 'Enter'){ fetchProductBySKU(this); this.blur(); }">
+                    </td>
+                    <td style="text-align: center;"><input type="text" class="qty" value="0" inputmode="decimal" onfocus="if(this.value==='0')this.value='';" onblur="if(this.value==='')this.value='0';" oninput="formatNumberInput(this); calculate();"></td>
+                    <td style="text-align: center;"><input type="text" class="unit-input" placeholder="ชิ้น/อัน"></td>
+                    <td style="text-align: center;"><input type="text" class="price" value="0" inputmode="decimal" onfocus="if(this.value==='0')this.value='';" onblur="if(this.value==='')this.value='0';" oninput="formatNumberInput(this); calculate();"></td>
+                    <td class="amount" style="text-align: right; padding-right: 12px;">0.00</td>
+                    <td class="no-print" style="text-align: center;"><button class="btn-del" onclick="removeRow(this)">ลบ</button></td>
+                </tr>
+            </tbody>
+            <tfoot class="no-print">
+                <tr>
+                    <td colspan="8" style="text-align: center; padding: 12px; border: 1px solid #cbd5e1; background: #ffffff;">
+                        <button class="btn-add" style="background: linear-gradient(135deg, #059669, #10b981); color: white; border: none; border-radius: 8px; padding: 8px 16px; font-weight: 600; cursor: pointer; box-shadow: none;" onclick="addRow()">+ เพิ่มรายการสินค้า</button>
+                    </td>
+                </tr>
+            </tfoot>
+        </table>
+    </div>
     
     <table class="footer-table" style="width: 100%; border-collapse: collapse;">
     <tr>
@@ -1096,7 +1161,6 @@
     }
 
 async function executeSave(isNewBill) {
-    // ตรวจสอบว่ามีตัวแปร firebase โหลดเข้ามาหรือยัง
     if (typeof firebase === 'undefined') {
         Swal.fire({
             icon: 'error',
@@ -1107,7 +1171,6 @@ async function executeSave(isNewBill) {
         return;
     }
 
-    // ตรวจสอบว่ามีการ initialize ไปแล้วหรือยัง ป้องกัน Error ตอนรีเฟรชหน้า
     if (!firebase.apps.length) {
         firebase.initializeApp(firebaseConfig);
     }
@@ -1118,7 +1181,6 @@ async function executeSave(isNewBill) {
     let bNoInput = document.getElementById('billNo');
     let bNo = bNoInput.value.trim();
 
-    // 1. การตรวจสอบข้อมูลเบื้องต้น (Validation)
     if (!cName) {
         Swal.fire({
             icon: 'warning',
@@ -1132,7 +1194,6 @@ async function executeSave(isNewBill) {
 
     let rows = document.querySelectorAll('.item-row');
     let currentItems = [];
-    // [ส่วนนี้ยังจำเป็นสำหรับการจัดการ Product DB]
     let products = JSON.parse(localStorage.getItem('saved_quot_products') || '[]'); 
     let savedProdCount = 0;
 
@@ -1154,7 +1215,6 @@ async function executeSave(isNewBill) {
                 price: validated.price 
             });
             
-            // อัปเดตฐานข้อมูลสินค้าใน Local Storage (ยังคงเก็บไว้ใช้สะดวก)
             if (sku && desc) {
                 let pIndex = products.findIndex(p => p.sku === sku);
                 let prodData = { sku: sku, desc: desc, unit: unit, price: validated.price };
@@ -1179,16 +1239,13 @@ async function executeSave(isNewBill) {
         return;
     }
 
-    // บันทึก Product DB ลงเครื่อง
     if (savedProdCount > 0) {
         localStorage.setItem('saved_quot_products', JSON.stringify(products));
     }
 
-    // 2. การเตรียมข้อมูลสำหรับบันทึก
     let dateField = document.getElementById('billDate');
     let sigSalesDate = document.getElementById('sigSalesDate');
     
-    // อัปเดตวันที่เป็นปัจจุบัน หากเป็นการสร้างบิลใหม่
     if (isNewBill) {
         let d = new Date();
         let day = String(d.getDate()).padStart(2, '0');
@@ -1199,7 +1256,6 @@ async function executeSave(isNewBill) {
         if (sigSalesDate) sigSalesDate.value = currentDateStr;
     }
 
-    // อัปเดตฐานข้อมูลลูกค้าใน Local Storage
     let customers = JSON.parse(localStorage.getItem('saved_quot_customers') || '[]');
     let existingIndex = customers.findIndex(c => c.name === cName);
     if (existingIndex >= 0) {
@@ -1209,30 +1265,26 @@ async function executeSave(isNewBill) {
     }
     localStorage.setItem('saved_quot_customers', JSON.stringify(customers));
 
-    // 2.1 บันทึกรายชื่อลูกค้าทั้งหมดขึ้น Cloud Firestore (master_data) เพื่อให้ทุกเครื่องมองเห็นตรงกัน
     try {
         await db.collection("settings").doc("master_data").set({
             customers: customers
         }, { merge: true });
-        console.log("✅ อัปเดตรายชื่อลูกค้าขึ้น Cloud สำเร็จ!");
     } catch (err) {
         console.warn("⚠️ ไม่สามารถอัปเดตรายชื่อลูกค้าขึ้น Cloud ได้:", err);
     }
 
-    loadCustomerDropdown(); // รีเฟรช Dropdown
+    loadCustomerDropdown();
 
     let grandTotalVal = calculate();
     
     let finalBillNo;
     if (isNewBill || !bNo) {
-        // สร้างเลขที่บิลอัตโนมัติ (Timestamp) หากไม่มี
         finalBillNo = 'QT' + new Date().getTime();
         bNoInput.value = finalBillNo;
     } else {
         finalBillNo = bNo;
     }
 
-    // ข้อมูลใบเสนอราคาหลักที่จะถูกบันทึกลง Firestore
     let billDataToSave = {
         billNo: finalBillNo,
         bookNo: document.getElementById('bookNo').value.trim(),
@@ -1253,7 +1305,6 @@ async function executeSave(isNewBill) {
         timestamp: new Date().getTime()
     };
 
-    // 3. บันทึกลง Cloud Firestore อย่างแท้จริง (รอจนกว่าจะสำเร็จ)
     Swal.fire({
         title: 'กำลังบันทึกข้อมูล...',
         text: 'โปรดรอสักครู่ ระบบกำลังอัปเดตข้อมูลขึ้น Cloud',
@@ -1264,11 +1315,8 @@ async function executeSave(isNewBill) {
     });
 
     try {
-        // 3.1 คำสั่งหลักในการบันทึกบิล: รอให้ db.set() ทำงานเสร็จสมบูรณ์
         await db.collection("quotations").doc(finalBillNo).set(billDataToSave);
-        console.log("✅ บันทึกข้อมูลขึ้น Cloud Firestore สำเร็จ!");
 
-        // 4. เมื่อบันทึก Cloud สำเร็จแล้ว -> ค่อยบันทึก Local Storage เป็นสำรอง
         let purchases = JSON.parse(localStorage.getItem('saved_quot_purchases') || '[]');
         if (!isNewBill) {
             purchases = purchases.filter(p => p.billNo !== finalBillNo);
@@ -1281,7 +1329,6 @@ async function executeSave(isNewBill) {
         }
         localStorage.setItem('saved_quot_purchases', JSON.stringify(purchases));
 
-        // 5. แสดงข้อความสำเร็จ
         Swal.fire({
             icon: 'success',
             title: isNewBill ? 'บันทึกเป็นบิลใหม่และอัปโหลดขึ้น Cloud สำเร็จ!' : 'บันทึกข้อมูลและอัปโหลดขึ้น Cloud สำเร็จ!',
@@ -1291,7 +1338,6 @@ async function executeSave(isNewBill) {
         });
 
     } catch (error) {
-        // 6. การจัดการข้อผิดพลาด (Error Handling)
         console.error("❌ เกิดข้อผิดพลาดในการบันทึก Firebase: ", error);
         Swal.fire({
             icon: 'error',
@@ -1387,8 +1433,6 @@ async function executeSave(isNewBill) {
 
 async function loadCustomerDropdown() {
     let customers = [];
-    
-    // 1. ดึงข้อมูลรายชื่อลูกค้าจาก Cloud Firestore (master_data) เพื่อให้ทุกเครื่องเห็นตรงกัน
     try {
         if (typeof firebase !== 'undefined') {
             if (!firebase.apps.length) {
@@ -1404,12 +1448,10 @@ async function loadCustomerDropdown() {
         console.warn("⚠️ ไม่สามารถโหลดรายชื่อลูกค้าจาก Cloud ได้:", error);
     }
 
-    // 2. ถ้าบน Cloud ยังไม่มี ให้ใช้ข้อมูลสำรองจาก Local Storage
     if (customers.length === 0) {
         customers = JSON.parse(localStorage.getItem('saved_quot_customers') || '[]');
     }
 
-    // 3. นำข้อมูลมาสร้างตัวเลือกใน Dropdown
     let select = document.getElementById('customerSelect');
     select.innerHTML = '<option value="">-- เลือกลูกค้า/บริษัท --</option>';
     
@@ -1479,7 +1521,6 @@ async function renderHistoryTable(filterText = '') {
     let container = document.getElementById('historyTableContainer');
     let titleElement = document.getElementById('historyModalTitle');
     
-    // ดึงข้อมูลจาก Cloud Firestore
     const db = firebase.firestore();
     const querySnapshot = await db.collection("quotations").orderBy("timestamp", "desc").get();
     
@@ -1494,7 +1535,6 @@ async function renderHistoryTable(filterText = '') {
         return;
     }
 
-    // กรองข้อมูล (ถ้ามีการพิมพ์ค้นหา)
     if (filterText) {
         let lower = filterText.toLowerCase();
         purchases = purchases.filter(p => 
@@ -1504,18 +1544,19 @@ async function renderHistoryTable(filterText = '') {
     }
 
         let html = `
-            <table class="history-table">
-                <thead>
-                    <tr>
-                        <th style="width: 13%;">วันที่</th>
-                        <th style="width: 14%;">เลขที่บิล</th>
-                        <th style="width: 33%;">ชื่อลูกค้า / บริษัท</th>
-                        <th style="width: 18%;">ผู้เสนอราคา</th>
-                        <th style="width: 13%; text-align: right;">ยอดรวมทั้งสิ้น</th>
-                        <th style="width: 9%; text-align: center;">เลือก</th>
-                    </tr>
-                </thead>
-                <tbody>
+            <div style="overflow-x: auto;">
+                <table class="history-table" style="min-width: 500px;">
+                    <thead>
+                        <tr>
+                            <th style="width: 13%;">วันที่</th>
+                            <th style="width: 14%;">เลขที่บิล</th>
+                            <th style="width: 33%;">ชื่อลูกค้า / บริษัท</th>
+                            <th style="width: 18%;">ผู้เสนอราคา</th>
+                            <th style="width: 13%; text-align: right;">ยอดรวมทั้งสิ้น</th>
+                            <th style="width: 9%; text-align: center;">เลือก</th>
+                        </tr>
+                    </thead>
+                    <tbody>
         `;
 
         purchases.forEach(p => {
@@ -1534,7 +1575,7 @@ async function renderHistoryTable(filterText = '') {
             `;
         });
 
-        html += `</tbody></table>`;
+        html += `</tbody></table></div>`;
         container.innerHTML = html;
     }
 
