@@ -1388,7 +1388,7 @@ async function executeSave(isNewBill) {
 async function loadCustomerDropdown() {
     let customers = [];
     
-    // 1. ลองดึงข้อมูลจาก Cloud Firestore ก่อน
+    // 1. ดึงข้อมูลรายชื่อลูกค้าจาก Cloud Firestore (master_data) เพื่อให้ทุกเครื่องเห็นตรงกัน
     try {
         if (typeof firebase !== 'undefined') {
             if (!firebase.apps.length) {
@@ -1401,10 +1401,10 @@ async function loadCustomerDropdown() {
             }
         }
     } catch (error) {
-        console.warn("⚠️ ไม่สามารถโหลดลูกค้าจาก Cloud ได้ กำลังใช้ข้อมูลสำรองในเครื่อง:", error);
+        console.warn("⚠️ ไม่สามารถโหลดรายชื่อลูกค้าจาก Cloud ได้:", error);
     }
 
-    // 2. ถ้าบน Cloud ไม่มี ให้ดึงจาก Local Storage มาแสดงแทน
+    // 2. ถ้าบน Cloud ยังไม่มี ให้ใช้ข้อมูลสำรองจาก Local Storage
     if (customers.length === 0) {
         customers = JSON.parse(localStorage.getItem('saved_quot_customers') || '[]');
     }
