@@ -13,35 +13,26 @@
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-compat-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-compat-firestore.js"></script>
 
-    <script>
+<script>
         // --- [เริ่ม] โค้ดเชื่อมต่อ Firebase ---
-// For Firebase JS SDK v7.20.0 and later, measurementId is optional
-const firebaseConfig = {
-  apiKey: "AIzaSyDAUc2urvUbXTNQ4ALSDIoo9tmN-6VOHuc",
-  authDomain: "quotation-d2453.firebaseapp.com",
-  projectId: "quotation-d2453",
-  storageBucket: "quotation-d2453.firebasestorage.app",
-  messagingSenderId: "579932052426",
-  appId: "1:579932052426:web:31cea6db99aa8a8d7f4d33",
-  measurementId: "G-D5ZTZ2TL8W"
-};
+        const firebaseConfig = {
+          apiKey: "AIzaSyDAUc2urvUbXTNQ4ALSDIoo9tmN-6VOHuc",
+          authDomain: "quotation-d2453.firebaseapp.com",
+          projectId: "quotation-d2453",
+          storageBucket: "quotation-d2453.firebasestorage.app",
+          messagingSenderId: "579932052426",
+          appId: "1:579932052426:web:31cea6db99aa8a8d7f4d33",
+          measurementId: "G-D5ZTZ2TL8W"
+        };
 
         // เริ่มต้นใช้งาน Firebase
-        firebase.initializeApp(firebaseConfig);
-        const db = firebase.firestore();
-
-        // ฟังก์ชันสำหรับบันทึกข้อมูลใบเสนอราคาขึ้น Cloud Firestore
-        async function saveToFirebase(data) {
-            try {
-                await db.collection("quotations").doc(data.billNo).set(data);
-                console.log("บันทึกข้อมูลขึ้น Firebase สำเร็จ!");
-            } catch (error) {
-                console.error("เกิดข้อผิดพลาดในการบันทึก Firebase: ", error);
-            }
+        // ตรวจสอบว่ามีการ initialize ไปแล้วหรือยัง ป้องกัน Error ตอนรีเฟรชหน้า
+        if (!firebase.apps.length) {
+            firebase.initializeApp(firebaseConfig);
         }
+        const db = firebase.firestore();
         // --- [จบ] โค้ดเชื่อมต่อ Firebase ---
     </script>
-    
 <style>
     body { 
         font-family: 'Prompt', 'Tahoma', sans-serif; 
@@ -1111,12 +1102,14 @@ const firebaseConfig = {
         return { qty: parsedQty, price: parsedPrice };
     }
 
-    function executeSave(isNewBill) {
+// [แก้ไข] ฟังก์ชันบันทึกข้อมูลเวอร์ชัน Cloud-First
+    async function executeSave(isNewBill) {
         let cName = document.getElementById('custName').value.trim();
         let cAddr = document.getElementById('custAddress').value.trim();
         let bNoInput = document.getElementById('billNo');
         let bNo = bNoInput.value.trim();
 
+        // 1. การตรวจสอบข้อมูลเบื้องต้น (Validation)
         if (!cName) {
             Swal.fire({
                 icon: 'warning',
@@ -1130,8 +1123,9 @@ const firebaseConfig = {
 
         let rows = document.querySelectorAll('.item-row');
         let currentItems = [];
-        let products = JSON.parse(localStorage.getItem('saved_quot_products') || '[]');
-        let savedCount = 0;
+        // [ส่วนนี้ยังจำเป็นสำหรับการจัดการ Product DB]
+        let products = JSON.parse(localStorage.getItem('saved_quot_products') || '[]'); 
+        let savedProdCount = 0;
 
         rows.forEach(row => {
             let sku = row.querySelector('.sku-input').value.trim();
@@ -1140,7 +1134,6 @@ const firebaseConfig = {
             let rawQty = row.querySelector('.qty').value;
             let rawPrice = row.querySelector('.price').value;
             let validated = validateRowData(rawQty, rawPrice);
-
             let unit = row.querySelector('.unit-input').value.trim();
 
             if (sku || desc) {
@@ -1152,6 +1145,7 @@ const firebaseConfig = {
                     price: validated.price 
                 });
                 
+                // อัปเดตฐานข้อมูลสินค้าใน Local Storage (ยังคงเก็บไว้ใช้สะดวก)
                 if (sku && desc) {
                     let pIndex = products.findIndex(p => p.sku === sku);
                     let prodData = { sku: sku, desc: desc, unit: unit, price: validated.price };
@@ -1160,7 +1154,7 @@ const firebaseConfig = {
                     } else {
                         products.push(prodData);
                     }
-                    savedCount++;
+                    savedProdCount++;
                 }
             }
         });
@@ -1176,24 +1170,27 @@ const firebaseConfig = {
             return;
         }
 
-        if (savedCount > 0) {
+        // บันทึก Product DB ลงเครื่อง
+        if (savedProdCount > 0) {
             localStorage.setItem('saved_quot_products', JSON.stringify(products));
         }
 
+        // 2. การเตรียมข้อมูลสำหรับบันทึก
         let dateField = document.getElementById('billDate');
         let sigSalesDate = document.getElementById('sigSalesDate');
         
+        // อัปเดตวันที่เป็นปัจจุบัน หากเป็นการสร้างบิลใหม่
         if (isNewBill) {
             let d = new Date();
             let day = String(d.getDate()).padStart(2, '0');
             let month = String(d.getMonth() + 1).padStart(2, '0');
             let year = d.getFullYear() + 543;
             let currentDateStr = `${day}/${month}/${year}`;
-
             if (dateField) dateField.value = currentDateStr;
             if (sigSalesDate) sigSalesDate.value = currentDateStr;
         }
 
+        // อัปเดตฐานข้อมูลลูกค้าใน Local Storage
         let customers = JSON.parse(localStorage.getItem('saved_quot_customers') || '[]');
         let existingIndex = customers.findIndex(c => c.name === cName);
         if (existingIndex >= 0) {
@@ -1202,23 +1199,20 @@ const firebaseConfig = {
             customers.push({ name: cName, address: cAddr });
         }
         localStorage.setItem('saved_quot_customers', JSON.stringify(customers));
-        loadCustomerDropdown();
+        loadCustomerDropdown(); // รีเฟรช Dropdown
 
         let grandTotalVal = calculate();
-        let purchases = JSON.parse(localStorage.getItem('saved_quot_purchases') || '[]');
         
         let finalBillNo;
         if (isNewBill || !bNo) {
+            // สร้างเลขที่บิลอัตโนมัติ (Timestamp) หากไม่มี
             finalBillNo = 'QT' + new Date().getTime();
             bNoInput.value = finalBillNo;
         } else {
             finalBillNo = bNo;
         }
-        
-        if (!isNewBill) {
-            purchases = purchases.filter(p => p.billNo !== finalBillNo);
-        }
 
+        // ข้อมูลใบเสนอราคาหลักที่จะถูกบันทึกลง Firestore
         let billDataToSave = {
             billNo: finalBillNo,
             bookNo: document.getElementById('bookNo').value.trim(),
@@ -1239,26 +1233,55 @@ const firebaseConfig = {
             timestamp: new Date().getTime()
         };
 
-        purchases.push(billDataToSave);
-
-        if (purchases.length > 200) {
-            purchases.sort((a, b) => b.timestamp - a.timestamp);
-            purchases = purchases.slice(0, 200);
-        }
-
-        // 1. บันทึกลงในเครื่อง (Local Storage)
-        localStorage.setItem('saved_quot_purchases', JSON.stringify(purchases));
-
-        // 2. บันทึกและซิงค์ขึ้น Cloud Firestore
-        saveToFirebase(billDataToSave);
-
+        // 3. บันทึกลง Cloud Firestore อย่างแท้จริง (รอจนกว่าจะสำเร็จ)
         Swal.fire({
-            icon: 'success',
-            title: isNewBill ? 'บันทึกเป็นบิลใหม่และอัปโหลดขึ้น Cloud สำเร็จ!' : 'บันทึกข้อมูลและอัปโหลดขึ้น Cloud สำเร็จ!',
-            text: `เลขที่บิล: ${finalBillNo}`,
-            timer: 2000,
-            showConfirmButton: false
+            title: 'กำลังบันทึกข้อมูล...',
+            text: 'โปรดรอสักครู่ ระบบกำลังอัปเดตข้อมูลขึ้น Cloud',
+            allowOutsideClick: false,
+            didOpen: () => {
+                Swal.showLoading();
+            }
         });
+
+        try {
+            // 3.1 คำสั่งหลักในการบันทึก: รอให้ db.set() ทำงานเสร็จสมบูรณ์
+            // โดยเราจะใช้ .doc(finalBillNo).set(billDataToSave) เพื่อบันทึกทับ (Overwirte) บิลเดิมได้เลย
+            await db.collection("quotations").doc(finalBillNo).set(billDataToSave);
+            console.log("✅ บันทึกข้อมูลขึ้น Cloud Firestore สำเร็จ!");
+
+            // 4. เมื่อบันทึก Cloud สำเร็จแล้ว -> ค่อยบันทึก Local Storage เป็นสำรอง
+            let purchases = JSON.parse(localStorage.getItem('saved_quot_purchases') || '[]');
+            if (!isNewBill) {
+                purchases = purchases.filter(p => p.billNo !== finalBillNo);
+            }
+            purchases.push(billDataToSave);
+
+            if (purchases.length > 200) {
+                purchases.sort((a, b) => b.timestamp - a.timestamp);
+                purchases = purchases.slice(0, 200);
+            }
+            localStorage.setItem('saved_quot_purchases', JSON.stringify(purchases));
+
+            // 5. แสดงข้อความสำเร็จ
+            Swal.fire({
+                icon: 'success',
+                title: isNewBill ? 'บันทึกเป็นบิลใหม่และอัปโหลดขึ้น Cloud สำเร็จ!' : 'บันทึกข้อมูลและอัปโหลดขึ้น Cloud สำเร็จ!',
+                text: `เลขที่บิล: ${finalBillNo}`,
+                timer: 2000,
+                showConfirmButton: false
+            });
+
+        } catch (error) {
+            // 6. การจัดการข้อผิดพลาด (Error Handling)
+            console.error("❌ เกิดข้อผิดพลาดในการบันทึก Firebase: ", error);
+            Swal.fire({
+                icon: 'error',
+                title: 'บันทึกข้อมูลไม่สำเร็จ',
+                text: 'ไม่สามารถเชื่อมต่อกับ Cloud ได้ โปรดตรวจสอบอินเทอร์เน็ตแล้วลองใหม่อีกครั้ง',
+                confirmButtonText: 'ตกลง',
+                confirmButtonColor: '#ef4444'
+            });
+        }
     }
 
     async function exportAllData() {
