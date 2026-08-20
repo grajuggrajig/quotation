@@ -1504,17 +1504,40 @@ async function loadCustomerDropdown() {
     });
 }
 
-    function selectCustomer(select) {
+    async function selectCustomer(select) {
     let selectedName = select.value;
     if (selectedName === "") return;
     
-    let customers = JSON.parse(localStorage.getItem('saved_quot_customers') || '[]');
-    let c = customers.find(item => item.name === selectedName); // ค้นหาจากชื่อลูกค้าโดยตรง
-    
+    let c = null;
+
+    // 1. ลองค้นหาจาก Firebase Cloud ก่อน (เพื่อความชัวร์ว่าได้ข้อมูลล่าสุดตรงกันทุกเครื่อง)
+    try {
+        if (typeof firebase !== 'undefined') {
+            if (!firebase.apps.length) {
+                firebase.initializeApp(firebaseConfig);
+            }
+            const db = firebase.firestore();
+            const doc = await db.collection("settings").doc("master_data").get();
+            if (doc.exists && doc.data().customers) {
+                let cloudCustomers = doc.data().customers;
+                c = cloudCustomers.find(item => item.name === selectedName);
+            }
+        }
+    } catch (error) {
+        console.warn("⚠️ ไม่สามารถดึงข้อมูลจาก Cloud ได้:", error);
+    }
+
+    // 2. ถ้าใน Cloud ไม่เจอ ให้ลองหาจาก LocalStorage ในเครื่องแทน
+    if (!c) {
+        let localCustomers = JSON.parse(localStorage.getItem('saved_quot_customers') || '[]');
+        c = localCustomers.find(item => item.name === selectedName);
+    }
+
+    // 3. แสดงผลข้อมูลลงในฟอร์ม
     if (c) {
         document.getElementById('custName').value = c.name;
         let addrArea = document.getElementById('custAddress');
-        addrArea.value = c.address;
+        addrArea.value = c.address || "";
         autoGrow(addrArea);
 
         const Toast = Swal.mixin({
@@ -1525,6 +1548,14 @@ async function loadCustomerDropdown() {
             timerProgressBar: true
         });
         Toast.fire({ icon: 'success', title: 'ดึงข้อมูลลูกค้าสำเร็จ' });
+    } else {
+        Swal.fire({
+            icon: 'warning',
+            title: 'ไม่พบข้อมูลที่อยู่',
+            text: 'ไม่พบที่อยู่ของลูกค้ารายนี้ในระบบ',
+            timer: 1500,
+            showConfirmButton: false
+        });
     }
 }
 
