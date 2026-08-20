@@ -1095,184 +1095,193 @@
     }
 
 // [แก้ไข] ฟังก์ชันบันทึกข้อมูลเวอร์ชัน Cloud-First
-   // --- [ใหม่] ฟังก์ชันบันทึกข้อมูลเวอร์ชันแก้ไข ---
-async function executeSave(isNewBill) {
-    // 📢 ย้ายการตั้งค่า db มาไว้ตรงนี้ 📢
+    async function executeSave(isNewBill) {
+	     // 📢 ย้ายการตั้งค่า db มาไว้ตรงนี้ 📢
     // ตรวจสอบว่ามีการ initialize ไปแล้วหรือยัง ป้องกัน Error ตอนรีเฟรชหน้า
     if (!firebase.apps.length) {
         firebase.initializeApp(firebaseConfig);
     }
     // สร้างตัวแปร db ภายในขอบเขตของฟังก์ชันนี้
-    const db = firebase.firestore(); 
+    const db = firebase.firestore();
+        let cName = document.getElementById('custName').value.trim();
+        let cAddr = document.getElementById('custAddress').value.trim();
+        let bNoInput = document.getElementById('billNo');
+        let bNo = bNoInput.value.trim();
 
-    let cName = document.getElementById('custName').value.trim();
-    let cAddr = document.getElementById('custAddress').value.trim();
-    let bNoInput = document.getElementById('billNo');
-    let bNo = bNoInput.value.trim();
+        // 1. การตรวจสอบข้อมูลเบื้องต้น (Validation)
+        if (!cName) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'กรุณากรอกชื่อลูกค้า',
+                text: 'โปรดระบุชื่อลูกค้าหรือบริษัทก่อนทำการบันทึก',
+                confirmButtonText: 'เข้าใจแล้ว',
+                confirmButtonColor: '#0284c7'
+            });
+            return;
+        }
 
-    // 1. การตรวจสอบข้อมูลเบื้องต้น (Validation)
-    if (!cName) {
-        Swal.fire({
-            icon: 'warning',
-            title: 'กรุณากรอกชื่อลูกค้า',
-            text: 'โปรดระบุชื่อลูกค้าหรือบริษัทก่อนทำการบันทึก',
-            confirmButtonText: 'เข้าใจแล้ว',
-            confirmButtonColor: '#0284c7'
+        let rows = document.querySelectorAll('.item-row');
+        let currentItems = [];
+        // [ส่วนนี้ยังจำเป็นสำหรับการจัดการ Product DB]
+        let products = JSON.parse(localStorage.getItem('saved_quot_products') || '[]'); 
+        let savedProdCount = 0;
+
+        rows.forEach(row => {
+            let sku = row.querySelector('.sku-input').value.trim();
+            let desc = row.querySelector('.item-desc').value.trim();
+            
+            let rawQty = row.querySelector('.qty').value;
+            let rawPrice = row.querySelector('.price').value;
+            let validated = validateRowData(rawQty, rawPrice);
+            let unit = row.querySelector('.unit-input').value.trim();
+
+            if (sku || desc) {
+                currentItems.push({ 
+                    sku: sku, 
+                    desc: desc, 
+                    qty: validated.qty, 
+                    unit: unit, 
+                    price: validated.price 
+                });
+                
+                // อัปเดตฐานข้อมูลสินค้าใน Local Storage (ยังคงเก็บไว้ใช้สะดวก)
+                if (sku && desc) {
+                    let pIndex = products.findIndex(p => p.sku === sku);
+                    let prodData = { sku: sku, desc: desc, unit: unit, price: validated.price };
+                    if (pIndex >= 0) {
+                        products[pIndex] = prodData;
+                    } else {
+                        products.push(prodData);
+                    }
+                    savedProdCount++;
+                }
+            }
         });
-        return;
-    }
 
-    let rows = document.querySelectorAll('.item-row');
-    let currentItems = [];
-    let products = JSON.parse(localStorage.getItem('saved_quot_products') || '[]'); 
-    let savedProdCount = 0;
+        if (currentItems.length === 0 || (currentItems.length === 1 && !currentItems[0].desc)) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'ไม่มีรายการสินค้า',
+                text: 'กรุณากรอกข้อมูลสินค้าอย่างน้อย 1 รายการก่อนบันทึก',
+                confirmButtonText: 'เข้าใจแล้ว',
+                confirmButtonColor: '#0284c7'
+            });
+            return;
+        }
 
-    rows.forEach(row => {
-        let sku = row.querySelector('.sku-input').value.trim();
-        let desc = row.querySelector('.item-desc').value.trim();
+        // บันทึก Product DB ลงเครื่อง
+        if (savedProdCount > 0) {
+            localStorage.setItem('saved_quot_products', JSON.stringify(products));
+        }
 
-        let rawQty = row.querySelector('.qty').value;
-        let rawPrice = row.querySelector('.price').value;
-        let validated = validateRowData(rawQty, rawPrice);
-        let unit = row.querySelector('.unit-input').value.trim();
+        // 2. การเตรียมข้อมูลสำหรับบันทึก
+        let dateField = document.getElementById('billDate');
+        let sigSalesDate = document.getElementById('sigSalesDate');
+        
+        // อัปเดตวันที่เป็นปัจจุบัน หากเป็นการสร้างบิลใหม่
+        if (isNewBill) {
+            let d = new Date();
+            let day = String(d.getDate()).padStart(2, '0');
+            let month = String(d.getMonth() + 1).padStart(2, '0');
+            let year = d.getFullYear() + 543;
+            let currentDateStr = `${day}/${month}/${year}`;
+            if (dateField) dateField.value = currentDateStr;
+            if (sigSalesDate) sigSalesDate.value = currentDateStr;
+        }
 
-        if (sku || desc) {
-            currentItems.push({ 
-                sku: sku, 
-                desc: desc, 
-                qty: validated.qty, 
-                unit: unit, 
-                price: validated.price 
+        // อัปเดตฐานข้อมูลลูกค้าใน Local Storage
+        let customers = JSON.parse(localStorage.getItem('saved_quot_customers') || '[]');
+        let existingIndex = customers.findIndex(c => c.name === cName);
+        if (existingIndex >= 0) {
+            customers[existingIndex] = { name: cName, address: cAddr };
+        } else {
+            customers.push({ name: cName, address: cAddr });
+        }
+        localStorage.setItem('saved_quot_customers', JSON.stringify(customers));
+        loadCustomerDropdown(); // รีเฟรช Dropdown
+
+        let grandTotalVal = calculate();
+        
+        let finalBillNo;
+        if (isNewBill || !bNo) {
+            // สร้างเลขที่บิลอัตโนมัติ (Timestamp) หากไม่มี
+            finalBillNo = 'QT' + new Date().getTime();
+            bNoInput.value = finalBillNo;
+        } else {
+            finalBillNo = bNo;
+        }
+
+        // ข้อมูลใบเสนอราคาหลักที่จะถูกบันทึกลง Firestore
+        let billDataToSave = {
+            billNo: finalBillNo,
+            bookNo: document.getElementById('bookNo').value.trim(),
+            billDate: dateField ? dateField.value.trim() : '',
+            customerName: cName,
+            address: cAddr,
+            subject: document.getElementById('quotSubject').value,
+            enclosure: document.getElementById('quotEnclose').value,
+            remark: document.getElementById('remarkText').value,
+            discountRate: parseFloat(document.getElementById('discountRate').value) || 0,
+            discountAmount: parseFloat(document.getElementById('discountAmount').value) || 0,
+            grandTotal: grandTotalVal,
+            items: currentItems,
+            customerSignName: document.getElementById('sigCustomerName').value,
+            customerSignDate: document.getElementById('sigCustomerDate').value,
+            salesSignName: document.getElementById('sigSalesName').value,
+            salesSignDate: sigSalesDate ? sigSalesDate.value.trim() : '',
+            timestamp: new Date().getTime()
+        };
+
+        // 3. บันทึกลง Cloud Firestore อย่างแท้จริง (รอจนกว่าจะสำเร็จ)
+        Swal.fire({
+            title: 'กำลังบันทึกข้อมูล...',
+            text: 'โปรดรอสักครู่ ระบบกำลังอัปเดตข้อมูลขึ้น Cloud',
+            allowOutsideClick: false,
+            didOpen: () => {
+                Swal.showLoading();
+            }
+        });
+
+        try {
+            // 3.1 คำสั่งหลักในการบันทึก: รอให้ db.set() ทำงานเสร็จสมบูรณ์
+            // โดยเราจะใช้ .doc(finalBillNo).set(billDataToSave) เพื่อบันทึกทับ (Overwirte) บิลเดิมได้เลย
+            await db.collection("quotations").doc(finalBillNo).set(billDataToSave);
+            console.log("✅ บันทึกข้อมูลขึ้น Cloud Firestore สำเร็จ!");
+
+            // 4. เมื่อบันทึก Cloud สำเร็จแล้ว -> ค่อยบันทึก Local Storage เป็นสำรอง
+            let purchases = JSON.parse(localStorage.getItem('saved_quot_purchases') || '[]');
+            if (!isNewBill) {
+                purchases = purchases.filter(p => p.billNo !== finalBillNo);
+            }
+            purchases.push(billDataToSave);
+
+            if (purchases.length > 200) {
+                purchases.sort((a, b) => b.timestamp - a.timestamp);
+                purchases = purchases.slice(0, 200);
+            }
+            localStorage.setItem('saved_quot_purchases', JSON.stringify(purchases));
+
+            // 5. แสดงข้อความสำเร็จ
+            Swal.fire({
+                icon: 'success',
+                title: isNewBill ? 'บันทึกเป็นบิลใหม่และอัปโหลดขึ้น Cloud สำเร็จ!' : 'บันทึกข้อมูลและอัปโหลดขึ้น Cloud สำเร็จ!',
+                text: `เลขที่บิล: ${finalBillNo}`,
+                timer: 2000,
+                showConfirmButton: false
             });
 
-            if (sku && desc) {
-                let pIndex = products.findIndex(p => p.sku === sku);
-                let prodData = { sku: sku, desc: desc, unit: unit, price: validated.price };
-                if (pIndex >= 0) {
-                    products[pIndex] = prodData;
-                } else {
-                    products.push(prodData);
-                }
-                savedProdCount++;
-            }
+        } catch (error) {
+            // 6. การจัดการข้อผิดพลาด (Error Handling)
+            console.error("❌ เกิดข้อผิดพลาดในการบันทึก Firebase: ", error);
+            Swal.fire({
+                icon: 'error',
+                title: 'บันทึกข้อมูลไม่สำเร็จ',
+                text: 'ไม่สามารถเชื่อมต่อกับ Cloud ได้ โปรดตรวจสอบอินเทอร์เน็ตแล้วลองใหม่อีกครั้ง',
+                confirmButtonText: 'ตกลง',
+                confirmButtonColor: '#ef4444'
+            });
         }
-    });
-
-    if (currentItems.length === 0 || (currentItems.length === 1 && !currentItems[0].desc)) {
-        Swal.fire({
-            icon: 'warning',
-            title: 'ไม่มีรายการสินค้า',
-            text: 'กรุณากรอกข้อมูลสินค้าอย่างน้อย 1 รายการก่อนบันทึก',
-            confirmButtonText: 'เข้าใจแล้ว',
-            confirmButtonColor: '#0284c7'
-        });
-        return;
     }
-
-    if (savedProdCount > 0) {
-        localStorage.setItem('saved_quot_products', JSON.stringify(products));
-    }
-
-    let dateField = document.getElementById('billDate');
-    let sigSalesDate = document.getElementById('sigSalesDate');
-
-    if (isNewBill) {
-        let d = new Date();
-        let day = String(d.getDate()).padStart(2, '0');
-        let month = String(d.getMonth() + 1).padStart(2, '0');
-        let year = d.getFullYear() + 543;
-        let currentDateStr = `${day}/${month}/${year}`;
-        if (dateField) dateField.value = currentDateStr;
-        if (sigSalesDate) sigSalesDate.value = currentDateStr;
-    }
-
-    let customers = JSON.parse(localStorage.getItem('saved_quot_customers') || '[]');
-    let existingIndex = customers.findIndex(c => c.name === cName);
-    if (existingIndex >= 0) {
-        customers[existingIndex] = { name: cName, address: cAddr };
-    } else {
-        customers.push({ name: cName, address: cAddr });
-    }
-    localStorage.setItem('saved_quot_customers', JSON.stringify(customers));
-    loadCustomerDropdown(); 
-
-    let grandTotalVal = calculate();
-
-    let finalBillNo;
-    if (isNewBill || !bNo) {
-        finalBillNo = 'QT' + new Date().getTime();
-        bNoInput.value = finalBillNo;
-    } else {
-        finalBillNo = bNo;
-    }
-
-    let billDataToSave = {
-        billNo: finalBillNo,
-        bookNo: document.getElementById('bookNo').value.trim(),
-        billDate: dateField ? dateField.value.trim() : '',
-        customerName: cName,
-        address: cAddr,
-        subject: document.getElementById('quotSubject').value,
-        enclosure: document.getElementById('quotEnclose').value,
-        remark: document.getElementById('remarkText').value,
-        discountRate: parseFloat(document.getElementById('discountRate').value) || 0,
-        discountAmount: parseFloat(document.getElementById('discountAmount').value) || 0,
-        grandTotal: grandTotalVal,
-        items: currentItems,
-        customerSignName: document.getElementById('sigCustomerName').value,
-        customerSignDate: document.getElementById('sigCustomerDate').value,
-        salesSignName: document.getElementById('sigSalesName').value,
-        salesSignDate: sigSalesDate ? sigSalesDate.value.trim() : '',
-        timestamp: new Date().getTime()
-    };
-
-    Swal.fire({
-        title: 'กำลังบันทึกข้อมูล...',
-        text: 'โปรดรอสักครู่ ระบบกำลังอัปเดตข้อมูลขึ้น Cloud',
-        allowOutsideClick: false,
-        didOpen: () => {
-            Swal.showLoading();
-        }
-    });
-
-    try {
-        // 3.1 คำสั่งหลักในการบันทึก: รอให้ db.set() ทำงานเสร็จสมบูรณ์
-        await db.collection("quotations").doc(finalBillNo).set(billDataToSave);
-        console.log("✅ บันทึกข้อมูลขึ้น Cloud Firestore สำเร็จ!");
-
-        // 4. เมื่อบันทึก Cloud สำเร็จแล้ว -> ค่อยบันทึก Local Storage เป็นสำรอง
-        let purchases = JSON.parse(localStorage.getItem('saved_quot_purchases') || '[]');
-        if (!isNewBill) {
-            purchases = purchases.filter(p => p.billNo !== finalBillNo);
-        }
-        purchases.push(billDataToSave);
-
-        if (purchases.length > 200) {
-            purchases.sort((a, b) => b.timestamp - a.timestamp);
-            purchases = purchases.slice(0, 200);
-        }
-        localStorage.setItem('saved_quot_purchases', JSON.stringify(purchases));
-
-        // 5. แสดงข้อความสำเร็จ
-        Swal.fire({
-            icon: 'success',
-            title: isNewBill ? 'บันทึกเป็นบิลใหม่และอัปโหลดขึ้น Cloud สำเร็จ!' : 'บันทึกข้อมูลและอัปโหลดขึ้น Cloud สำเร็จ!',
-            text: `เลขที่บิล: ${finalBillNo}`,
-            timer: 2000,
-            showConfirmButton: false
-        });
-
-    } catch (error) {
-        console.error("❌ เกิดข้อผิดพลาดในการบันทึก Firebase: ", error);
-        Swal.fire({
-            icon: 'error',
-            title: 'บันทึกข้อมูลไม่สำเร็จ',
-            text: 'ไม่สามารถเชื่อมต่อกับ Cloud ได้ โปรดตรวจสอบอินเทอร์เน็ตแล้วลองใหม่อีกครั้ง',
-            confirmButtonText: 'ตกลง',
-            confirmButtonColor: '#ef4444'
-        });
-    }
-}
 
     async function exportAllData() {
         try {
