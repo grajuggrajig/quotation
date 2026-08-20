@@ -1465,78 +1465,83 @@ async function executeSave(isNewBill) {
     }
 }
 
-    function importAllData(event) {
-        const file = event.target.files[0];
-        if (!file) return;
 
-        const reader = new FileReader();
-        reader.onload = async function(e) {
-            try {
-                const jsonContent = JSON.parse(e.target.result);
 
-                if (!jsonContent.customers && !jsonContent.products && !jsonContent.purchases) {
-                    throw new Error('โครงสร้างไฟล์ JSON ไม่ถูกต้อง');
-                }
 
-                Swal.fire({
-                    title: 'ยืนยันการนำเข้าข้อมูล?',
-                    text: 'ข้อมูลปัจจุบันทั้งหมดจะถูกแทนที่ด้วยข้อมูลจากไฟล์สำรอง',
-                    icon: 'warning',
-                    showCancelButton: true,
-                    confirmButtonText: 'ยืนยัน',
-                    cancelButtonText: 'ยกเลิก'
-                }).then(async (result) => {
-                    if (result.isConfirmed) {
-                        // 1. บันทึกลง localStorage ของเครื่อง
-                        if (jsonContent.customers) localStorage.setItem('saved_quot_customers', JSON.stringify(jsonContent.customers));
-                        if (jsonContent.products) localStorage.setItem('saved_quot_products', JSON.stringify(jsonContent.products));
-                        if (jsonContent.purchases) localStorage.setItem('saved_quot_purchases', JSON.stringify(jsonContent.purchases));
+    async function importAllData(event) {
+    const file = event.target.files[0];
+    if (!file) return;
 
-                        // 2. อัปเดตข้อมูลขึ้น Firebase Cloud (ทั้งลูกค้า และ ประวัติบิล)
-                        try {
-                            if (typeof firebase !== 'undefined') {
-                                if (!firebase.apps.length) {
-                                    firebase.initializeApp(firebaseConfig);
-                                }
-                                const db = firebase.firestore();
+    const reader = new FileReader();
+    reader.onload = async function(e) {
+        try {
+            const jsonContent = JSON.parse(e.target.result);
 
-                                // อัปเดตรายชื่อลูกค้า
-                                if (jsonContent.customers) {
-                                    await db.collection("settings").doc("master_data").set({
-                                        customers: jsonContent.customers
-                                    }, { merge: true });
-                                }
-
-                                // 🛠️ เพิ่มส่วนนี้: อัปเดตประวัติบิลทั้งหมดขึ้น Cloud Firestore
-                                if (jsonContent.purchases && Array.isArray(jsonContent.purchases)) {
-                                    let batch = db.batch();
-                                    jsonContent.purchases.forEach(bill => {
-                                        if (bill.billNo) {
-                                            let docRef = db.collection("quotations").doc(bill.billNo);
-                                            batch.set(docRef, bill);
-                                        }
-                                    });
-                                    await batch.commit();
-                                }
-                            }
-                        } catch (cloudErr) {
-                            console.warn("⚠️ ไม่สามารถอัปเดตข้อมูลขึ้น Cloud หลัง Import ได้:", cloudErr);
-                        }
-
-                        // 3. แจ้งเตือนและรีโหลดหน้าจอ
-                        Swal.fire('สำเร็จ!', 'นำเข้าข้อมูลทั้งหมดและซิงค์ขึ้น Cloud เรียบร้อยแล้ว', 'success').then(() => {
-                            location.reload();
-                        });
-                    }
-                });
-            } catch (err) {
-                Swal.fire('เกิดข้อผิดพลาด', 'ไฟล์ไม่ถูกต้องหรือเสียหาย: ' + err.message, 'error');
-            } finally {
-                event.target.value = '';
+            if (!jsonContent.customers && !jsonContent.products && !jsonContent.purchases) {
+                throw new Error('โครงสร้างไฟล์ JSON ไม่ถูกต้อง');
             }
-        };
-        reader.readAsText(file);
-    }
+
+            Swal.fire({
+                title: 'ยืนยันการนำเข้าข้อมูล?',
+                text: 'ข้อมูลปัจจุบันทั้งหมดจะถูกแทนที่ด้วยข้อมูลจากไฟล์สำรอง',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'ยืนยัน',
+                cancelButtonText: 'ยกเลิก'
+            }).then(async (result) => {
+                if (result.isConfirmed) {
+                    // 1. บันทึกลง localStorage ของเครื่อง
+                    if (jsonContent.customers) localStorage.setItem('saved_quot_customers', JSON.stringify(jsonContent.customers));
+                    if (jsonContent.products) localStorage.setItem('saved_quot_products', JSON.stringify(jsonContent.products));
+                    if (jsonContent.purchases) localStorage.setItem('saved_quot_purchases', JSON.stringify(jsonContent.purchases));
+
+                    // 2. อัปเดตข้อมูลขึ้น Firebase Cloud (ทั้งลูกค้า, สินค้า และประวัติบิล)
+                    try {
+                        if (typeof firebase !== 'undefined') {
+                            if (!firebase.apps.length) {
+                                firebase.initializeApp(firebaseConfig);
+                            }
+                            const db = firebase.firestore();
+
+                            // อัปเดตรายชื่อลูกค้า และ รายการสินค้า ขึ้น Cloud ที่ master_data จุดเดียวจบ
+                            let masterDataToUpdate = {};
+                            if (jsonContent.customers) masterDataToUpdate.customers = jsonContent.customers;
+                            if (jsonContent.products) masterDataToUpdate.products = jsonContent.products;
+
+                            if (Object.keys(masterDataToUpdate).length > 0) {
+                                await db.collection("settings").doc("master_data").set(masterDataToUpdate, { merge: true });
+                            }
+
+                            // อัปเดตประวัติบิลทั้งหมดขึ้น Cloud Firestore
+                            if (jsonContent.purchases && Array.isArray(jsonContent.purchases)) {
+                                let batch = db.batch();
+                                jsonContent.purchases.forEach(bill => {
+                                    if (bill.billNo) {
+                                        let docRef = db.collection("quotations").doc(bill.billNo);
+                                        batch.set(docRef, bill);
+                                    }
+                                });
+                                await batch.commit();
+                            }
+                        }
+                    } catch (cloudErr) {
+                        console.warn("⚠️ ไม่สามารถอัปเดตข้อมูลขึ้น Cloud หลัง Import ได้:", cloudErr);
+                    }
+
+                    // 3. แจ้งเตือนและรีโหลดหน้าจอ
+                    Swal.fire('สำเร็จ!', 'นำเข้าข้อมูลทั้งหมดและซิงค์ขึ้น Cloud เรียบร้อยแล้ว', 'success').then(() => {
+                        location.reload();
+                    });
+                }
+            });
+        } catch (err) {
+            Swal.fire('เกิดข้อผิดพลาด', 'ไฟล์ไม่ถูกต้องหรือเสียหาย: ' + err.message, 'error');
+        } finally {
+            event.target.value = '';
+        }
+    };
+    reader.readAsText(file);
+}
 
 async function loadCustomerDropdown() {
     let customers = [];
@@ -2007,16 +2012,17 @@ async function deleteHistoryBill(billNo) {
             firebase.initializeApp(firebaseConfig);
         }
         const db = firebase.firestore();
-        // ดึงข้อมูลสินค้าจาก Firestore (สมมติใช้ collection ชื่อ "products")
-        const querySnapshot = await db.collection("products").get();
         
-        querySnapshot.forEach((doc) => {
-            // เก็บข้อมูลพร้อม id ของเอกสารเผื่อใช้ลบหรือแก้ไข
-            products.push({ id: doc.id, ...doc.data() });
-        });
+        // ดึงข้อมูลสินค้าจาก Cloud ที่เก็บไว้ใน settings -> master_data
+        const docSnap = await db.collection("settings").doc("master_data").get();
+        if (docSnap.exists && docSnap.data().products) {
+            products = docSnap.data().products;
+        } else {
+            // ถ้าใน Cloud ไม่มี ให้ดึงจาก localStorage เครื่องตัวเอง
+            products = JSON.parse(localStorage.getItem('saved_quot_products') || '[]');
+        }
     } catch (error) {
         console.error("❌ โหลดสินค้าจาก Cloud ไม่สำเร็จ:", error);
-        // สำรองเผื่อกรณีออฟไลน์ ดึงจาก localStorage
         products = JSON.parse(localStorage.getItem('saved_quot_products') || '[]');
     }
     
@@ -2039,12 +2045,10 @@ async function deleteHistoryBill(billNo) {
     }
     
     filteredProducts.forEach((p) => {
-        // หากเปลี่ยนมาใช้ Firestore แนะนำให้ใช้ doc.id ในการลบแทน originalIndex
-        let deleteId = p.id ? `'${p.id}'` : p.originalIndex;
         container.innerHTML += `
             <div class="list-item-box">
                 <div><strong>[${p.sku || '-'}]</strong> ${p.desc || '-'}<br><small style="color:#64748b;">หน่วย: ${p.unit || '-'} | ราคา: ${p.price || 0} บาท</small></div>
-                <button class="btn-del" onclick="confirmDeleteProduct(${deleteId})">ลบ</button>
+                <button class="btn-del" onclick="confirmDeleteProduct(${p.originalIndex})">ลบ</button>
             </div>`;
     });
 }
