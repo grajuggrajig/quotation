@@ -1565,15 +1565,39 @@ async function loadCustomerDropdown() {
     }
 
     let select = document.getElementById('customerSelect');
+    if (!select) return; // ป้องกัน Error ถ้าหา element ไม่เจอ
+    
     select.innerHTML = '<option value="">-- เลือกลูกค้า/บริษัท --</option>';
     
     customers.forEach((c) => {
-        let opt = document.createElement('option');
-        opt.value = c.name; // เปลี่ยนมาใช้ชื่อลูกค้าเป็น value
-        opt.innerText = c.name;
-        select.appendChild(opt);
+        // 🛠️ ป้องกันกรณีข้อมูลเก็บคีย์ชื่อไม่ตรงกัน (รองรับทั้ง c.name และ c.customerName)
+        let custName = c.name || c.customerName || '';
+        if (custName) {
+            let opt = document.createElement('option');
+            opt.value = custName; 
+            opt.innerText = custName;
+            select.appendChild(opt);
+        }
     });
 }
+
+// วางไว้ที่บรรทัดล่างสุดของไฟล์ .js เลยครับ
+window.addEventListener('DOMContentLoaded', () => {
+    console.log("🚀 ระบบกำลังโหลดข้อมูลเริ่มต้น...");
+    
+    // เรียกโหลดรายการลูกค้า
+    loadCustomerDropdown();
+    
+    // เรียกโหลดรายการสินค้า (ถ้ามีฟังก์ชันนี้)
+    if (typeof renderProductList === 'function') {
+        renderProductList();
+    }
+    
+    // หากมีฟังก์ชันโหลดประวัติบิลด้วย ก็ใส่ได้เลย
+    if (typeof loadHistoryData === 'function') {
+        loadHistoryData();
+    }
+});
 
     async function selectCustomer(select) {
     let selectedName = select.value;
@@ -2148,6 +2172,7 @@ async function deleteHistoryBill(billNo) {
     document.getElementById('discountRate').addEventListener('input', function() {
         calculate();
     });
+	
 </script>
 </body>
 </html>
