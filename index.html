@@ -1640,6 +1640,8 @@ async function loadCustomerDropdown() {
         renderHistoryTable();
         document.getElementById('historyModal').style.display = 'flex';
     }
+	
+	
 
 async function renderHistoryTable(filterText = '') {
     let container = document.getElementById('historyTableContainer');
@@ -1649,12 +1651,22 @@ async function renderHistoryTable(filterText = '') {
     
     let purchases = [];
     try {
+        if (!firebase.apps.length) {
+            firebase.initializeApp(firebaseConfig);
+        }
         const db = firebase.firestore();
-        const querySnapshot = await db.collection("quotations").orderBy("timestamp", "desc").get();
+        // เอา .orderBy ออก เพื่อป้องกันปัญหาเรื่อง Index ของ Firebase
+        const querySnapshot = await db.collection("quotations").get();
         
         querySnapshot.forEach((doc) => {
             purchases.push(doc.data());
         });
+
+        // จัดเรียงลำดับใหม่ด้วย JavaScript แทน (เรียงจากใหม่ไปเก่า ตาม timestamp หรือเลขที่บิล)
+        purchases.sort((a, b) => {
+            return (b.timestamp || '').localeCompare(a.timestamp || '');
+        });
+
     } catch (error) {
         console.warn("⚠️ ไม่สามารถโหลดประวัติจาก Cloud ได้ กำลังโหลดจาก LocalStorage แทน:", error);
         purchases = JSON.parse(localStorage.getItem('saved_quot_purchases') || '[]');
