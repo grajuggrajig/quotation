@@ -1529,7 +1529,32 @@ async function renderHistoryTable(filterText = '') {
         renderHistoryTable(query);
     }
 
-    async function selectHistoryBill(billNo)
+    async function selectHistoryBill(billNo) {
+    try {
+        const db = firebase.firestore();
+        const docRef = await db.collection("quotations").doc(billNo).get();
+        
+        if (docRef.exists) {
+            let billData = docRef.data();
+            fillPurchaseDataToDOM(billData);
+            closeModal('historyModal');
+            
+            const Toast = Swal.mixin({
+                toast: true,
+                position: 'top-end',
+                showConfirmButton: false,
+                timer: 1500,
+                timerProgressBar: true
+            });
+            Toast.fire({ icon: 'success', title: `ดึงข้อมูลบิล ${billNo} สำเร็จ` });
+        } else {
+            Swal.fire({ icon: 'error', title: 'ไม่พบข้อมูล', text: 'ไม่พบข้อมูลบิลดังกล่าวบน Cloud' });
+        }
+    } catch (error) {
+        console.error("❌ เกิดข้อผิดพลาดในการดึงข้อมูลบิล:", error);
+        Swal.fire({ icon: 'error', title: 'เกิดข้อผิดพลาด', text: 'ไม่สามารถดึงข้อมูลจาก Cloud ได้' });
+    }
+}
 
     function fillPurchaseDataToDOM(data) {
         if(data.billNo) document.getElementById('billNo').value = data.billNo;
