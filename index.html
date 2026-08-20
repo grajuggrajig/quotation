@@ -24,15 +24,7 @@
           appId: "1:579932052426:web:31cea6db99aa8a8d7f4d33",
           measurementId: "G-D5ZTZ2TL8W"
         };
-
-        // เริ่มต้นใช้งาน Firebase
-        // ตรวจสอบว่ามีการ initialize ไปแล้วหรือยัง ป้องกัน Error ตอนรีเฟรชหน้า
-        if (!firebase.apps.length) {
-            firebase.initializeApp(firebaseConfig);
-        }
-        const db = firebase.firestore();
-        // --- [จบ] โค้ดเชื่อมต่อ Firebase ---
-    </script>
+</script>
 <style>
     body { 
         font-family: 'Prompt', 'Tahoma', sans-serif; 
@@ -1104,6 +1096,13 @@
 
 // [แก้ไข] ฟังก์ชันบันทึกข้อมูลเวอร์ชัน Cloud-First
     async function executeSave(isNewBill) {
+	     // 📢 ย้ายการตั้งค่า db มาไว้ตรงนี้ 📢
+    // ตรวจสอบว่ามีการ initialize ไปแล้วหรือยัง ป้องกัน Error ตอนรีเฟรชหน้า
+    if (!firebase.apps.length) {
+        firebase.initializeApp(firebaseConfig);
+    }
+    // สร้างตัวแปร db ภายในขอบเขตของฟังก์ชันนี้
+    const db = firebase.firestore();
         let cName = document.getElementById('custName').value.trim();
         let cAddr = document.getElementById('custAddress').value.trim();
         let bNoInput = document.getElementById('billNo');
