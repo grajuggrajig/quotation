@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <title>ใบแจ้งปรับราคาสินค้า - Modern Edition</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        @page { size: A4; margin: 12mm; }
+        
+        * { box-sizing: border-box; }
+        body { 
+            font-family: 'Sarabun', 'Inter', sans-serif; 
+            line-height: 1.6; 
+            color: #2c3e50; 
+            background: #f4f7f6; 
+            margin: 0; 
+            padding: 20px; 
+        }
+
+        .container { 
+            width: 100%; 
+            max-width: 820px; 
+            margin: auto; 
+            padding: 40px; 
+            background: #ffffff; 
+            border-radius: 16px; 
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08); 
+            position: relative;
+        }
+
+        .header-section {
+            display: flex;
+            align-items: center;
+            border-bottom: 2px solid #eef2f7;
+            padding-bottom: 20px;
+            margin-bottom: 25px;
+        }
+
+        .logo-box {
+            width: 100px;
+            height: 100px;
+            border: 2px dashed #cbd5e1;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            background: #f8fafc;
+            margin-right: 20px;
+            flex-shrink: 0;
+            position: relative;
+        }
+
+        .logo-box img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            display: block;
+        }
+
+        .company-details {
+            flex-grow: 1;
+        }
+
+        .company-name { 
+            font-size: 20px; 
+            font-weight: 700; 
+            color: #1e3a8a; 
+            margin-bottom: 4px; 
+        }
+        
+        .company-address {
+            font-size: 14px;
+            color: #64748b;
+        }
+
+        .doc-title { 
+            font-size: 24px; 
+            font-weight: 700; 
+            color: #0f172a;
+            text-align: center; 
+            margin: 20px 0 30px 0; 
+            letter-spacing: 0.5px;
+        }
+
+        .doc-title span {
+            border-bottom: 3px solid #3b82f6;
+            padding-bottom: 4px;
+        }
+
+        .letter-body {
+            font-size: 15px;
+            color: #334155;
+            margin-bottom: 20px;
+        }
+
+        .table-wrapper {
+            margin: 25px 0;
+            border-radius: 10px;
+            overflow: hidden;
+            border: 1px solid #e2e8f0;
+        }
+
+        table { 
+            width: 100%; 
+            border-collapse: collapse; 
+            background: #ffffff; 
+        }
+        
+        th { 
+            background: linear-gradient(135deg, #1e3a8a, #3b82f6); 
+            color: white; 
+            font-weight: 600; 
+            padding: 12px 10px; 
+            text-align: center; 
+            font-size: 14px;
+        }
+
+        td { 
+            padding: 10px; 
+            text-align: center; 
+            border-bottom: 1px solid #f1f5f9; 
+            font-size: 14px;
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        tr:hover {
+            background-color: #f8fafc;
+        }
+        
+        input.table-input { 
+            width: 95%; 
+            border: 1px solid transparent; 
+            background: transparent; 
+            text-align: center; 
+            font-family: inherit; 
+            font-size: 14px; 
+            padding: 6px; 
+            border-radius: 6px;
+            transition: all 0.2s;
+        }
+        
+        input.table-input:focus { 
+            outline: none; 
+            border-color: #3b82f6; 
+            background: #ffffff; 
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15); 
+        }
+        
+        .btn-delete { 
+            background: #fee2e2; 
+            color: #ef4444; 
+            border: none; 
+            width: 30px; 
+            height: 30px; 
+            cursor: pointer; 
+            border-radius: 50%; 
+            font-weight: bold;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+        
+        .btn-delete:hover { 
+            background: #ef4444; 
+            color: white; 
+        }
+
+        .action-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 20px;
+        }
+
+        .btn-add { 
+            background: #0ea5e9; 
+            color: white; 
+            padding: 10px 20px; 
+            border: none; 
+            cursor: pointer; 
+            font-size: 14px; 
+            font-weight: 500;
+            border-radius: 8px; 
+            box-shadow: 0 4px 12px rgba(14, 165, 233, 0.2);
+            transition: all 0.2s;
+        }
+        
+        .btn-add:hover { background: #0284c7; }
+
+        .btn-print { 
+            background: #10b981; 
+            color: white; 
+            padding: 12px 30px; 
+            border: none; 
+            cursor: pointer; 
+            font-size: 16px; 
+            font-weight: 600;
+            border-radius: 8px; 
+            box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+            transition: all 0.2s;
+        }
+        
+        .btn-print:hover { background: #059669; }
+
+        .footer-note-section {
+            margin-top: 25px;
+            font-size: 14px;
+        }
+
+        .editable-note {
+            width: 100%;
+            border: 1px dashed #cbd5e1;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-family: inherit;
+            color: #475569;
+            background: #fafafa;
+            margin-top: 5px;
+        }
+        .editable-note:focus {
+            outline: none;
+            border-color: #3b82f6;
+            background: #fff;
+        }
+
+        .footer-sign { 
+            margin-top: 40px; 
+            text-align: right; 
+            float: right;
+        }
+        
+        .footer-sign input {
+            border: none;
+            border-bottom: 1px dotted #94a3b8;
+            text-align: right;
+            font-family: inherit;
+            font-size: 15px;
+            padding: 4px;
+            background: transparent;
+        }
+        .footer-sign input:focus {
+            outline: none;
+            border-color: #3b82f6;
+        }
+
+        @media print { 
+            body { 
+                background: white; 
+                padding: 0; 
+                -webkit-print-color-adjust: exact; 
+                print-color-adjust: exact; 
+            }
+            .container { box-shadow: none; padding: 0; width: 100%; max-width: 100%; }
+            .action-container, .btn-delete, th:last-child, td:last-child { display: none !important; } 
+            
+            input.table-input, .footer-sign input { 
+                border: none !important; 
+                border-bottom: none !important; 
+                background: transparent !important; 
+                box-shadow: none !important; 
+            }
+            .editable-note { 
+                border: none !important; 
+                background: transparent !important; 
+                padding: 0 !important; 
+            }
+        }
+		.footer-sign { 
+            margin-top: 40px; 
+            text-align: right; 
+            margin-right: 40px; /* เพิ่มระยะห่างจากขอบขวาตรงนี้ (ปรับเพิ่ม-ลดตัวเลขได้ตามต้องการ) */
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="header-section">
+        <div class="logo-box">
+            <img src="https://img2.pic.in.th/7fd9a589-9a88-41bf-8180-6b5dcc12f139.png" alt="KL Stationery Logo">
+        </div>
+        <div class="company-details">
+            <div class="company-name">บริษัท เค แอล สเตชั่นเนอรี่ จำกัด</div>
+            <div class="company-address">873, 875 ถนนลาซาล แขวงบางนา เขตบางนา กทม. 10260</div>
+            <div class="company-address">โทร: 02-748-6788</div>
+        </div>
+    </div>
+
+    <div class="doc-title"><span>ใบแจ้งปรับราคาสินค้า</span></div>
+    
+    <div class="letter-body">
+        <p><strong>เรียน:</strong> ท่านผู้จัดการฝ่ายจัดซื้อ</p>
+        <p>เนื่องจาก บริษัท เค แอล สเตชั่นเนอรี่ มีความจำเป็นต้องปรับราคาสินค้าบางรายการ ดังต่อไปนี้</p>
+    </div>
+
+    <div class="table-wrapper">
+        <table>
+            <thead>
+                <tr>
+                    <th style="width: 8%;">ลำดับ</th>
+                    <th>รายการสินค้า</th>
+                    <th style="width: 20%;">ราคาเดิม</th>
+                    <th style="width: 20%;">ราคาใหม่</th>
+                    <th style="width: 8%;" class="col-action">ลบ</th>
+                </tr>
+            </thead>
+            <tbody id="price-table-body">
+                <tr>
+                    <td>1</td>
+                    <td><input type="text" class="table-input" placeholder="ระบุชื่อสินค้า..."></td>
+                    <td><input type="text" class="table-input" placeholder="0.00"></td>
+                    <td><input type="text" class="table-input" placeholder="0.00"></td>
+                    <td class="col-action"><button class="btn-delete" onclick="deleteRow(this)">✕</button></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="action-container">
+        <button class="btn-add" onclick="addRow()">+ เพิ่มรายการสินค้า</button>
+    </div>
+
+    <div class="footer-note-section">
+        <p style="margin-bottom: 10px;">ราคาสินค้าใหม่เริ่มใช้ตั้งแต่: <input type="text" class="table-input" style="width: 220px; border-bottom: 1px solid #cbd5e1; text-align: left; display: inline-block;" placeholder="ระบุวันที่เริ่มใช้..."></p>
+        
+        <input type="text" id="noteInput" class="editable-note" value="หมายเหตุ* ราคาสินค้านี้ ยังไม่รวมภาษีมูลค่าเพิ่ม">
+
+        <p style="text-indent: 80px; margin-top: 25px;">จึงเรียนมาเพื่อทราบ</p>
+    </div>
+
+<div style="display: flex; justify-content: flex-end; width: 100%;">
+    <div class="footer-sign" style="margin-right: 50px; text-align: center;">
+        <p style="margin-bottom: 35px;">ขอแสดงความนับถือ</p>
+        <input type="text" value="" style="font-weight: bold; width: 260px; text-align: center;" placeholder="(ระบุชื่อ-นามสกุลผู้ลงนาม)"><br>
+        <input type="text" value="กรรมการผู้จัดการ" style="width: 260px; color: #64748b; font-size: 14px; text-align: center;">
+    </div>
+</div>
+    <div class="action-container" style="margin-top: 60px; border-top: 2px solid #eef2f7; padding-top: 20px;">
+        <span style="font-size: 13px; color: #94a3b8;">ระบบออกเอกสารอัตโนมัติ - KL Stationery</span>
+        <button class="btn-print" onclick="window.print()">🖨️ พิมพ์ / บันทึกเป็น PDF</button>
+    </div>
+</div>
+
+<script>
+    function addRow() {
+        let tbody = document.getElementById("price-table-body");
+        let rowCount = tbody.rows.length + 1;
+        let row = tbody.insertRow();
+        row.innerHTML = `
+            <td>${rowCount}</td>
+            <td><input type="text" class="table-input" placeholder="ระบุชื่อสินค้า..."></td>
+            <td><input type="text" class="table-input" placeholder="0.00"></td>
+            <td><input type="text" class="table-input" placeholder="0.00"></td>
+            <td class="col-action"><button class="btn-delete" onclick="deleteRow(this)">✕</button></td>
+        `;
+    }
+
+    function deleteRow(btn) {
+        let row = btn.parentNode.parentNode;
+        row.parentNode.removeChild(row);
+        updateRowNumbers();
+    }
+
+    function updateRowNumbers() {
+        let tbody = document.getElementById("price-table-body");
+        for (let i = 0; i < tbody.rows.length; i++) {
+            tbody.rows[i].cells[0].innerText = i + 1;
+        }
+    }
+</script>
+
+</body>
+</html>
