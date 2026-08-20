@@ -1431,44 +1431,33 @@
         document.getElementById('historyModal').style.display = 'flex';
     }
 
-    function renderHistoryTable(filterText = '') {
-        let container = document.getElementById('historyTableContainer');
-        let titleElement = document.getElementById('historyModalTitle');
-        let purchases = JSON.parse(localStorage.getItem('saved_quot_purchases') || '[]');
-        
-        let totalRecords = purchases.length;
+async function renderHistoryTable(filterText = '') {
+    let container = document.getElementById('historyTableContainer');
+    let titleElement = document.getElementById('historyModalTitle');
+    
+    // ดึงข้อมูลจาก Cloud Firestore
+    const db = firebase.firestore();
+    const querySnapshot = await db.collection("quotations").orderBy("timestamp", "desc").get();
+    
+    let purchases = [];
+    querySnapshot.forEach((doc) => {
+        purchases.push(doc.data());
+    });
 
-        if (totalRecords === 0) {
-            if (titleElement) titleElement.innerText = `📋 ประวัติการขายและใบเสนอราคาทั้งหมด (0 รายการ)`;
-            container.innerHTML = '<p style="text-align:center; color:#64748b; padding: 20px;">ยังไม่มีประวัติการบันทึกบิลในระบบ</p>';
-            return;
-        }
+    let totalRecords = purchases.length;
+    if (totalRecords === 0) {
+        container.innerHTML = '<p style="text-align:center; color:#64748b; padding: 20px;">ยังไม่มีประวัติการบันทึกบิลบน Cloud</p>';
+        return;
+    }
 
-        purchases.sort((a, b) => b.timestamp - a.timestamp);
-
-        if (filterText) {
-            let lower = filterText.toLowerCase();
-            purchases = purchases.filter(p => 
-                (p.billNo && p.billNo.toLowerCase().includes(lower)) ||
-                (p.customerName && p.customerName.toLowerCase().includes(lower)) ||
-                (p.billDate && p.billDate.toLowerCase().includes(lower)) ||
-                (p.grandTotal && p.grandTotal.toString().includes(lower)) ||
-                (p.salesSignName && p.salesSignName.toLowerCase().includes(lower))
-            );
-        }
-
-        if (titleElement) {
-            if (filterText) {
-                titleElement.innerText = `📋 ประวัติการขายและใบเสนอราคาทั้งหมด (พบ ${purchases.length} จาก ${totalRecords} รายการ)`;
-            } else {
-                titleElement.innerText = `📋 ประวัติการขายและใบเสนอราคาทั้งหมด (${totalRecords} รายการ)`;
-            }
-        }
-
-        if (purchases.length === 0) {
-            container.innerHTML = '<p style="text-align:center; color:#64748b; padding: 20px;">ไม่พบรายการที่ตรงกับการค้นหา</p>';
-            return;
-        }
+    // กรองข้อมูล (ถ้ามีการพิมพ์ค้นหา)
+    if (filterText) {
+        let lower = filterText.toLowerCase();
+        purchases = purchases.filter(p => 
+            (p.billNo && p.billNo.toLowerCase().includes(lower)) ||
+            (p.customerName && p.customerName.toLowerCase().includes(lower))
+        );
+    }
 
         let html = `
             <table class="history-table">
