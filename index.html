@@ -1552,6 +1552,9 @@ async function loadCustomerDropdown() {
             }
             const db = firebase.firestore();
             const doc = await db.collection("settings").doc("master_data").get();
+            
+            console.log("🔍 ข้อมูล Document จาก master_data:", doc.exists ? doc.data() : "ไม่พบ Document นี้");
+
             if (doc.exists && doc.data().customers) {
                 customers = doc.data().customers;
             }
@@ -1561,16 +1564,21 @@ async function loadCustomerDropdown() {
     }
 
     if (customers.length === 0) {
+        console.log("ℹ️ กำลังดึงรายชื่อลูกค้าจาก localStorage แทน");
         customers = JSON.parse(localStorage.getItem('saved_quot_customers') || '[]');
     }
 
+    console.log("📋 รายชื่อลูกค้าทั้งหมดที่จะนำมาใส่ Dropdown:", customers);
+
     let select = document.getElementById('customerSelect');
-    if (!select) return; // ป้องกัน Error ถ้าหา element ไม่เจอ
+    if (!select) {
+        console.error("❌ ไม่พบ Element ที่มี ID เป็น 'customerSelect' ในหน้า HTML!");
+        return;
+    }
     
     select.innerHTML = '<option value="">-- เลือกลูกค้า/บริษัท --</option>';
     
     customers.forEach((c) => {
-        // 🛠️ ป้องกันกรณีข้อมูลเก็บคีย์ชื่อไม่ตรงกัน (รองรับทั้ง c.name และ c.customerName)
         let custName = c.name || c.customerName || '';
         if (custName) {
             let opt = document.createElement('option');
