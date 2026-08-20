@@ -946,7 +946,7 @@
             <button class="close-btn" onclick="closeModal('historyModal')">&times;</button>
         </div>
         <div style="margin-bottom: 12px;">
-            <input type="text" id="historySearchInput" style="width: 100%; padding: 8px 12px;" placeholder="🔍 ค้นหาจากชื่อลูกค้า, เลขที่บิล, วันที่ หรือยอดเงิน..." oninput="filterHistoryTable()">
+            <input type="text" id="historySearchInput" placeholder="🔍 ค้นหา..." oninput="renderHistoryTable(this.value)">
         </div>
         <div id="historyTableContainer" style="max-height: 50vh; overflow-y: auto;"></div>
     </div>
@@ -1678,13 +1678,10 @@ async function renderHistoryTable(filterText = '') {
         const db = firebase.firestore();
         const querySnapshot = await db.collection("quotations").get();
         
-        console.log("🔥 จำนวน Document ที่ดึงมาจาก Firestore:", querySnapshot.size);
-
         querySnapshot.forEach((doc) => {
             purchases.push(doc.data());
         });
 
-        // 🛠️ แก้ไขจุดนี้: แปลงค่า timestamp ให้เป็น String ก่อนใช้งาน .localeCompare ป้องกัน Error
         purchases.sort((a, b) => {
             let timeA = String(a.timestamp || '');
             let timeB = String(b.timestamp || '');
@@ -1696,20 +1693,23 @@ async function renderHistoryTable(filterText = '') {
         purchases = JSON.parse(localStorage.getItem('saved_quot_purchases') || '[]');
     }
 
-    let totalRecords = purchases.length;
-    titleElement.innerHTML = `📋 ประวัติการขายและใบเสนอราคาทั้งหมด (History Log) - พบ ${totalRecords} รายการ`;
-
-    if (totalRecords === 0) {
-        container.innerHTML = '<p style="text-align:center; color:#64748b; padding: 20px;">ยังไม่มีประวัติการบันทึกบิล</p>';
-        return;
-    }
-
+    // 🛠️ ย้ายการกรองมาไว้ตรงนี้ เพื่อให้กรองข้อมูลก่อนนำไปนับจำนวนและแสดงผล
     if (filterText) {
         let lower = filterText.toLowerCase();
         purchases = purchases.filter(p => 
             (p.billNo && p.billNo.toLowerCase().includes(lower)) ||
-            (p.customerName && p.customerName.toLowerCase().includes(lower))
+            (p.customerName && p.customerName.toLowerCase().includes(lower)) ||
+            (p.salesSignName && p.salesSignName.toLowerCase().includes(lower)) ||
+            (p.subject && p.subject.toLowerCase().includes(lower))
         );
+    }
+
+    let totalRecords = purchases.length;
+    titleElement.innerHTML = `📋 ประวัติการขายและใบเสนอราคาทั้งหมด (History Log) - พบ ${totalRecords} รายการ`;
+
+    if (totalRecords === 0) {
+        container.innerHTML = '<p style="text-align:center; color:#64748b; padding: 20px;">ไม่พบข้อมูลประวัติที่ค้นหา</p>';
+        return;
     }
 
     let html = `
@@ -1750,10 +1750,13 @@ async function renderHistoryTable(filterText = '') {
     container.innerHTML = html;
 }
 
-    function filterHistoryTable() {
-        let query = document.getElementById('historySearchInput').value;
-        renderHistoryTable(query);
-    }
+function filterHistoryTable() {
+    // 1. ดึงค่าจากช่อง Input
+    const filterText = document.getElementById('historySearchInput').value;
+    
+    // 2. เรียกฟังก์ชัน Render โดยส่งค่า filterText เข้าไป
+    renderHistoryTable(filterText);
+}
 
     async function selectHistoryBill(billNo) {
     try {
