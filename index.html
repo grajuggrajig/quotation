@@ -1094,15 +1094,24 @@
         return { qty: parsedQty, price: parsedPrice };
     }
 
-// [แก้ไข] ฟังก์ชันบันทึกข้อมูลเวอร์ชัน Cloud-First
-    async function executeSave(isNewBill) {
-	     // 📢 ย้ายการตั้งค่า db มาไว้ตรงนี้ 📢
-    // ตรวจสอบว่ามีการ initialize ไปแล้วหรือยัง ป้องกัน Error ตอนรีเฟรชหน้า
-    if (!firebase.apps.length) {
-        firebase.initializeApp(firebaseConfig);
-    }
-    // สร้างตัวแปร db ภายในขอบเขตของฟังก์ชันนี้
-    const db = firebase.firestore();
+async function executeSave(isNewBill) {
+        // ตรวจสอบว่ามีตัวแปร firebase โหลดเข้ามาหรือยัง
+        if (typeof firebase === 'undefined') {
+            Swal.fire({
+                icon: 'error',
+                title: 'ไม่พบไลบรารี Firebase',
+                text: 'กรุณาตรวจสอบการเชื่อมต่ออินเทอร์เน็ต เนื่องจากสคริปต์ Firebase โหลดไม่สำเร็จ',
+                confirmButtonText: 'ตกลง'
+            });
+            return;
+        }
+
+        // ตรวจสอบว่ามีการ initialize ไปแล้วหรือยัง ป้องกัน Error ตอนรีเฟรชหน้า
+        if (!firebase.apps.length) {
+            firebase.initializeApp(firebaseConfig);
+        }
+        
+        const db = firebase.firestore();
         let cName = document.getElementById('custName').value.trim();
         let cAddr = document.getElementById('custAddress').value.trim();
         let bNoInput = document.getElementById('billNo');
