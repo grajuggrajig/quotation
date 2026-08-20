@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <title>ใบแจ้งปรับราคาสินค้า - Modern Edition</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         @page { size: A4; margin: 12mm; }
         
@@ -26,6 +27,27 @@
             border-radius: 16px; 
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08); 
             position: relative;
+        }
+
+        /* สไตล์ปุ่มย้อนกลับ */
+        .btn-back-home {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background-color: #f1f5f9;
+            color: #475569;
+            padding: 8px 16px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 500;
+            margin-bottom: 20px;
+            transition: all 0.2s;
+            border: 1px solid #e2e8f0;
+        }
+        .btn-back-home:hover {
+            background-color: #e2e8f0;
+            color: #1e293b;
         }
 
         .header-section {
@@ -231,7 +253,7 @@
         .footer-sign { 
             margin-top: 40px; 
             text-align: right; 
-            float: right;
+            margin-right: 40px; 
         }
         
         .footer-sign input {
@@ -256,7 +278,7 @@
                 print-color-adjust: exact; 
             }
             .container { box-shadow: none; padding: 0; width: 100%; max-width: 100%; }
-            .action-container, .btn-delete, th:last-child, td:last-child { display: none !important; } 
+            .action-container, .btn-delete, .btn-back-home, th:last-child, td:last-child { display: none !important; } 
             
             input.table-input, .footer-sign input { 
                 border: none !important; 
@@ -270,16 +292,16 @@
                 padding: 0 !important; 
             }
         }
-		.footer-sign { 
-            margin-top: 40px; 
-            text-align: right; 
-            margin-right: 40px; /* เพิ่มระยะห่างจากขอบขวาตรงนี้ (ปรับเพิ่ม-ลดตัวเลขได้ตามต้องการ) */
-        }
     </style>
 </head>
 <body>
 
 <div class="container">
+    <!-- ปุ่มกลับหน้าแรก -->
+    <a href="index.html" class="btn-back-home">
+        <i class="fa-solid fa-arrow-left"></i> กลับหน้าใบเสนอราคา
+    </a>
+
     <div class="header-section">
         <div class="logo-box">
             <img src="https://img2.pic.in.th/7fd9a589-9a88-41bf-8180-6b5dcc12f139.png" alt="KL Stationery Logo">
@@ -295,7 +317,7 @@
     
     <div class="letter-body">
         <p><strong>เรียน:</strong> ท่านผู้จัดการฝ่ายจัดซื้อ</p>
-        <p>เนื่องจาก บริษัท เค แอล สเตชั่นเนอรี่ มีความจำเป็นต้องปรับราคาสินค้าบางรายการ ดังต่อไปนี้</p>
+        <p>เนื่องจาก บริษัท เค แอล สเตชั่นเนอรี่ มีความจำเป็นต้องปรับราคาสินค้าบางรายการ ดังต่อไปนี้[cite: 3]</p>
     </div>
 
     <div class="table-wrapper">
@@ -333,13 +355,14 @@
         <p style="text-indent: 80px; margin-top: 25px;">จึงเรียนมาเพื่อทราบ</p>
     </div>
 
-<div style="display: flex; justify-content: flex-end; width: 100%;">
-    <div class="footer-sign" style="margin-right: 50px; text-align: center;">
-        <p style="margin-bottom: 35px;">ขอแสดงความนับถือ</p>
-        <input type="text" value="" style="font-weight: bold; width: 260px; text-align: center;" placeholder="(ระบุชื่อ-นามสกุลผู้ลงนาม)"><br>
-        <input type="text" value="กรรมการผู้จัดการ" style="width: 260px; color: #64748b; font-size: 14px; text-align: center;">
+    <div style="display: flex; justify-content: flex-end; width: 100%;">
+        <div class="footer-sign" style="text-align: center;">
+            <p style="margin-bottom: 35px;">ขอแสดงความนับถือ</p>
+            <input type="text" value="" style="font-weight: bold; width: 260px; text-align: center;" placeholder="(ระบุชื่อ-นามสกุลผู้ลงนาม)"><br>
+            <input type="text" value="กรรมการผู้จัดการ" style="width: 260px; color: #64748b; font-size: 14px; text-align: center;">
+        </div>
     </div>
-</div>
+
     <div class="action-container" style="margin-top: 60px; border-top: 2px solid #eef2f7; padding-top: 20px;">
         <span style="font-size: 13px; color: #94a3b8;">ระบบออกเอกสารอัตโนมัติ - KL Stationery</span>
         <button class="btn-print" onclick="window.print()">🖨️ พิมพ์ / บันทึกเป็น PDF</button>
