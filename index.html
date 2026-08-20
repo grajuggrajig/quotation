@@ -1496,35 +1496,37 @@ async function loadCustomerDropdown() {
     let select = document.getElementById('customerSelect');
     select.innerHTML = '<option value="">-- เลือกลูกค้า/บริษัท --</option>';
     
-    customers.forEach((c, index) => {
+    customers.forEach((c) => {
         let opt = document.createElement('option');
-        opt.value = index;
+        opt.value = c.name; // เปลี่ยนมาใช้ชื่อลูกค้าเป็น value
         opt.innerText = c.name;
         select.appendChild(opt);
     });
 }
 
     function selectCustomer(select) {
-        let index = select.value;
-        if (index === "") return;
-        let customers = JSON.parse(localStorage.getItem('saved_quot_customers') || '[]');
-        let c = customers[index];
-        if (c) {
-            document.getElementById('custName').value = c.name;
-            let addrArea = document.getElementById('custAddress');
-            addrArea.value = c.address;
-            autoGrow(addrArea);
+    let selectedName = select.value;
+    if (selectedName === "") return;
+    
+    let customers = JSON.parse(localStorage.getItem('saved_quot_customers') || '[]');
+    let c = customers.find(item => item.name === selectedName); // ค้นหาจากชื่อลูกค้าโดยตรง
+    
+    if (c) {
+        document.getElementById('custName').value = c.name;
+        let addrArea = document.getElementById('custAddress');
+        addrArea.value = c.address;
+        autoGrow(addrArea);
 
-            const Toast = Swal.mixin({
-                toast: true,
-                position: 'top-end',
-                showConfirmButton: false,
-                timer: 1500,
-                timerProgressBar: true
-            });
-            Toast.fire({ icon: 'success', title: 'ดึงข้อมูลลูกค้าสำเร็จ' });
-        }
+        const Toast = Swal.mixin({
+            toast: true,
+            position: 'top-end',
+            showConfirmButton: false,
+            timer: 1500,
+            timerProgressBar: true
+        });
+        Toast.fire({ icon: 'success', title: 'ดึงข้อมูลลูกค้าสำเร็จ' });
     }
+}
 
     function loadDataByBillNo() {
         let searchNo = document.getElementById('searchOldBillNo').value.trim();
