@@ -1995,38 +1995,59 @@ async function deleteHistoryBill(billNo) {
         document.getElementById(modalId).style.display = 'none';
     }
 
-    function renderProductList() {
-        let container = document.getElementById('productListContainer');
-        let countContainer = document.getElementById('productCountText'); 
-        
-        container.innerHTML = '';
-        let products = JSON.parse(localStorage.getItem('saved_quot_products') || '[]');
-        
-        let searchInput = document.getElementById('productSearchInput');
-        let filterText = searchInput ? searchInput.value.trim().toLowerCase() : '';
-
-        let filteredProducts = products.map((p, originalIndex) => ({ ...p, originalIndex })).filter(p => 
-            (p.sku && p.sku.toLowerCase().includes(filterText)) ||
-            (p.desc && p.desc.toLowerCase().includes(filterText))
-        );
-
-        if (countContainer) {
-            countContainer.innerText = `พบสินค้า = ${filteredProducts.length} รายการ (จากทั้งหมด ${products.length} รายการ)`;
+    async function renderProductList() {
+    let container = document.getElementById('productListContainer');
+    let countContainer = document.getElementById('productCountText'); 
+    
+    container.innerHTML = '<p style="text-align:center; color:#64748b; padding: 15px;">กำลังโหลดข้อมูลสินค้าจาก Cloud...</p>';
+    
+    let products = [];
+    try {
+        if (!firebase.apps.length) {
+            firebase.initializeApp(firebaseConfig);
         }
-
-        if (filteredProducts.length === 0) {
-            container.innerHTML = '<p style="text-align:center; color:#64748b; padding: 15px;">ไม่พบข้อมูลสินค้าที่ค้นหา</p>';
-            return;
-        }
+        const db = firebase.firestore();
+        // ดึงข้อมูลสินค้าจาก Firestore (สมมติใช้ collection ชื่อ "products")
+        const querySnapshot = await db.collection("products").get();
         
-        filteredProducts.forEach((p) => {
-            container.innerHTML += `
-                <div class="list-item-box">
-                    <div><strong>[${p.sku}]</strong> ${p.desc}<br><small style="color:#64748b;">หน่วย: ${p.unit || '-'} | ราคา: ${p.price} บาท</small></div>
-                    <button class="btn-del" onclick="confirmDeleteProduct(${p.originalIndex})">ลบ</button>
-                </div>`;
+        querySnapshot.forEach((doc) => {
+            // เก็บข้อมูลพร้อม id ของเอกสารเผื่อใช้ลบหรือแก้ไข
+            products.push({ id: doc.id, ...doc.data() });
         });
+    } catch (error) {
+        console.error("❌ โหลดสินค้าจาก Cloud ไม่สำเร็จ:", error);
+        // สำรองเผื่อกรณีออฟไลน์ ดึงจาก localStorage
+        products = JSON.parse(localStorage.getItem('saved_quot_products') || '[]');
     }
+    
+    container.innerHTML = '';
+    let searchInput = document.getElementById('productSearchInput');
+    let filterText = searchInput ? searchInput.value.trim().toLowerCase() : '';
+
+    let filteredProducts = products.map((p, originalIndex) => ({ ...p, originalIndex })).filter(p => 
+        (p.sku && p.sku.toLowerCase().includes(filterText)) ||
+        (p.desc && p.desc.toLowerCase().includes(filterText))
+    );
+
+    if (countContainer) {
+        countContainer.innerText = `พบสินค้า = ${filteredProducts.length} รายการ (จากทั้งหมด ${products.length} รายการ)`;
+    }
+
+    if (filteredProducts.length === 0) {
+        container.innerHTML = '<p style="text-align:center; color:#64748b; padding: 15px;">ไม่พบข้อมูลสินค้าที่ค้นหา</p>';
+        return;
+    }
+    
+    filteredProducts.forEach((p) => {
+        // หากเปลี่ยนมาใช้ Firestore แนะนำให้ใช้ doc.id ในการลบแทน originalIndex
+        let deleteId = p.id ? `'${p.id}'` : p.originalIndex;
+        container.innerHTML += `
+            <div class="list-item-box">
+                <div><strong>[${p.sku || '-'}]</strong> ${p.desc || '-'}<br><small style="color:#64748b;">หน่วย: ${p.unit || '-'} | ราคา: ${p.price || 0} บาท</small></div>
+                <button class="btn-del" onclick="confirmDeleteProduct(${deleteId})">ลบ</button>
+            </div>`;
+    });
+}
 
     function confirmDeleteProduct(index) {
         Swal.fire({
