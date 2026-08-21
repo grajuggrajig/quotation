@@ -2,6 +2,7 @@
 <html lang="th">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ใบเสนอราคา (Quotation)</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -9,6 +10,23 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     
+   <!-- [1] Firebase App (Core) -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+    <!-- [2] Firebase Firestore -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
+
+<script>
+        // --- [เริ่ม] โค้ดเชื่อมต่อ Firebase ---
+        const firebaseConfig = {
+          apiKey: "AIzaSyDAUc2urvUbXTNQ4ALSDIoo9tmN-6VOHuc",
+          authDomain: "quotation-d2453.firebaseapp.com",
+          projectId: "quotation-d2453",
+          storageBucket: "quotation-d2453.firebasestorage.app",
+          messagingSenderId: "579932052426",
+          appId: "1:579932052426:web:31cea6db99aa8a8d7f4d33",
+          measurementId: "G-D5ZTZ2TL8W"
+        };
+</script>
 <style>
     body { 
         font-family: 'Prompt', 'Tahoma', sans-serif; 
@@ -31,6 +49,7 @@
         border-radius: 16px;
         box-shadow: 0 10px 20px -5px rgba(0, 0, 0, 0.05);
         border: 1px solid #e2e8f0;
+        box-sizing: border-box;
     }
     
     .header-section { 
@@ -344,6 +363,7 @@
         position: sticky;
         top: 10px;
         z-index: 2500;
+        box-sizing: border-box;
     }
 
     .panel-group {
@@ -388,6 +408,7 @@
         position: relative;
         box-shadow: 0 4px 10px rgba(0,0,0,.15);
         transition: .2s;
+        flex-shrink: 0;
     }
     .icon-btn:hover {
         transform: translateY(-2px) scale(1.05);
@@ -406,6 +427,7 @@
     .btn-clear-ui { background: linear-gradient(135deg, #e11d48, #fb7185); }
     .btn-export-ui { background: linear-gradient(135deg, #0891b2, #06b6d4); }
     .btn-import-ui { background: linear-gradient(135deg, #7c3aed, #a855f7); }
+    .btn-line-ui { background: linear-gradient(135deg, #06c755, #00b900); }
 
     .icon-btn[data-tip]::after {
         content: attr(data-tip);
@@ -468,26 +490,30 @@
         background-color: rgba(0,0,0,0.5);
         justify-content: center;
         align-items: center;
+        padding: 10px;
+        box-sizing: border-box;
     }
     .modal-content {
         background: #fff;
         padding: 20px;
         border-radius: 14px;
         width: 450px;
-        max-width: 90%;
+        max-width: 100%;
         box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1);
         max-height: 80vh;
         overflow-y: auto;
+        box-sizing: border-box;
     }
     .modal-content-wide {
         background: #fff;
         padding: 20px;
         border-radius: 14px;
         width: 750px;
-        max-width: 95%;
+        max-width: 100%;
         box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1);
         max-height: 85vh;
         overflow-y: auto;
+        box-sizing: border-box;
     }
     .modal-header {
         font-size: 15px;
@@ -550,11 +576,10 @@
     }
 
     /* --- Media Print Styles --- */
-    /* --- Media Print Styles --- */
     @media print { 
         @page { 
             size: A4 portrait; 
-            margin: 3mm 5mm 3mm 5mm !important; /* ลดระยะขอบกระดาษรอบด้านลงเหลือ 3-5mm */
+            margin: 3mm 5mm 3mm 5mm !important;
         }
         body { 
             background-color: #ffffff !important; 
@@ -563,7 +588,7 @@
             color: #0f172a !important; 
             -webkit-print-color-adjust: exact !important; 
             print-color-adjust: exact !important; 
-            font-size: 11px !important; /* ลดขนาดฟอนต์รวมลงเล็กน้อยเพื่อให้ทุกอย่างกระชับขึ้น */
+            font-size: 11px !important; 
         } 
         .control-panel, .no-print { display: none !important; } 
         .bill-container { 
@@ -575,27 +600,16 @@
             margin: 0 !important;
         } 
 
-        thead {
-            display: table-header-group !important;
-        }
-        tr {
-            break-inside: avoid !important;
-            page-break-inside: avoid !important;
-        }
-
-        .footer-table, .signature-section {
-            break-inside: avoid !important;
-            page-break-inside: avoid !important;
-        }
+        thead { display: table-header-group !important; }
+        tr { break-inside: avoid !important; page-break-inside: avoid !important; }
+        .footer-table, .signature-section { break-inside: avoid !important; page-break-inside: avoid !important; }
 
         .header-section { 
             border-bottom: 2px dashed #cbd5e1 !important; 
             padding-bottom: 6px !important; 
-            margin-bottom: 6px !important; /* ลดช่องว่างส่วนหัว */
+            margin-bottom: 6px !important; 
         }
-        .logo-container {
-            border: none !important;
-        }
+        .logo-container { border: none !important; }
         .title-box { 
             background: linear-gradient(135deg, #0284c7, #0369a1) !important; 
             color: #ffffff !important; 
@@ -605,7 +619,7 @@
         }
         .top-info { margin-bottom: 6px !important; }
         .customer-info, .no-date-box { 
-            padding: 6px 10px !important; /* ลดช่องว่างกล่องลูกค้า */
+            padding: 6px 10px !important; 
             background-color: #f8fafc !important; 
             border-radius: 8px !important; 
         }
@@ -621,13 +635,10 @@
 
         .data-table th, .data-table td { 
             border: 1px solid #cbd5e1 !important; 
-            padding: 3px 6px !important; /* บีบความสูงของช่องตารางสินค้าให้แคบลง */
+            padding: 3px 6px !important; 
             vertical-align: top !important; 
         }
-        .data-table td.desc-cell {
-            text-align: left !important;
-            vertical-align: top !important;
-        }
+        .data-table td.desc-cell { text-align: left !important; vertical-align: top !important; }
         .data-table th { 
             background: linear-gradient(135deg, #0284c7, #0369a1) !important; 
             color: #ffffff !important; 
@@ -636,63 +647,123 @@
         }
         .data-table tr:nth-child(even) td { background-color: #f8fafc !important; }
         
-        .footer-table td { 
-            border: 1px solid #cbd5e1 !important; 
-            padding: 3px 10px !important; /* บีบความสูงตารางสรุปยอด */
-        }
+        .footer-table td { border: 1px solid #cbd5e1 !important; padding: 3px 10px !important; }
         .footer-total-label { background-color: #f8fafc !important; color: #1e293b !important; }
         #grandTotal { background-color: #f0fdf4 !important; color: #16a34a !important; }
         
-        .signature-section { 
-            margin-top: 10px !important; /* ลดระยะห่างส่วนลายเซ็นกับตารางสรุป */
-        }
+        .signature-section { margin-top: 10px !important; }
         .sig-line { border-bottom: 1px dashed #94a3b8 !important; }
     }
 
-    /* --- Media Screen Styles --- */
+    /* --- Media Screen Styles (มือถือ & แท็บเล็ต) --- */
     @media screen and (max-width: 768px) {
-        body {
-            padding: 5px;
+        body { padding: 4px; }
+        .bill-container { width: 100% !important; padding: 10px !important; }
+        
+        .control-panel { 
+            width: 100% !important; 
+            flex-direction: row; 
+            flex-wrap: nowrap;
+            gap: 12px; 
+            align-items: center; 
+            padding: 8px 12px;
+            top: 5px;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
         }
-        .bill-container {
-            width: 100% !important;
-            padding: 15px !important;
-            box-sizing: border-box;
+        .panel-divider { 
+            display: block; 
+            height: 30px; 
+            flex-shrink: 0;
         }
-        .control-panel {
-            width: 100% !important;
-            flex-direction: column;
-            gap: 15px;
-            box-sizing: border-box;
-            align-items: stretch;
+        .panel-group {
+            flex-shrink: 0;
+            flex-direction: row;
+            align-items: center;
+            gap: 6px;
         }
-        .panel-divider {
-            display: none;
+        .panel-group-label {
+            display: none; 
         }
-        .header-section {
-            flex-direction: column;
-            gap: 10px;
+        .panel-buttons { 
+            display: flex;
+            flex-wrap: nowrap;
+            gap: 6px; 
         }
-        .top-info, .top-info tr, .top-info td {
-            display: block;
-            width: 100% !important;
+        .credit {
+            display: none; 
         }
-        .customer-info {
+        
+        .header-section { flex-direction: column; gap: 10px; }
+        .title-box { width: 100%; box-sizing: border-box; }
+        
+        .top-info, .top-info tr, .top-info td { display: block; width: 100% !important; box-sizing: border-box; }
+        .customer-info { margin-bottom: 10px; width: 100% !important; }
+        .customer-info input, .customer-info textarea, .no-date-box input { max-width: 100% !important; width: 100% !important; }
+        
+        .table-responsive-wrapper {
+            width: 100%;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
             margin-bottom: 10px;
         }
-        .data-table {
+        .data-table { 
+            min-width: 650px; 
+        }
+
+        .footer-table, .footer-table tr, .footer-table td {
             display: block;
-            overflow-x: auto;
-            white-space: nowrap;
+            width: 100% !important;
+            box-sizing: border-box;
+        }
+        .footer-table td {
+            text-align: left !important;
+            padding: 8px 10px !important;
+        }
+        .footer-total-label {
+            text-align: left !important;
+            width: 100% !important;
+            background-color: #f1f5f9 !important;
+        }
+        #grandTotal, #subTotal, #vatAmount, #netTotal {
+            text-align: left !important;
+            padding-left: 0 !important;
+        }
+
+        .signature-section {
+            flex-direction: column;
+            gap: 20px;
+            align-items: center;
+        }
+        .sig-box {
+            width: 100% !important;
+        }
+    }
+	/* สำหรับหน้าจอมือถือ */
+@media screen and (max-width: 768px) {
+    /* เพิ่มเติมความยืดหยุ่นให้กล่องกลุ่มปุ่ม */
+    #backupGroup {
+        flex-wrap: nowrap;
+        overflow-x: auto;
+    }
+}
+/* สำหรับหน้าจอมือถือ (ความกว้างไม่เกิน 767px) */
+@media screen and (max-width: 767px) {
+    .panel-group-label span {
+        display: none !important;
+    }
+}
+@media screen and (max-width: 767px) {
+        /* ซ่อนเฉพาะข้อความ */
+        .label-text {
+            display: none !important;
+        }
+        /* ถ้าต้องการให้ปุ่มตั้งค่าขยับไปอยู่ตรงกลาง หรือขยายพื้นที่ให้ปุ่มอื่นบนมือถือ */
+        .panel-group-label {
+            justify-content: flex-end !important;
         }
     }
 
-    @media screen and (max-height: 768px) {
-        .modal-content, .modal-content-wide {
-            margin-top: 50px; 
-            max-height: 75vh;  
-        }
-    }
 </style>
 </head>
 <body>
@@ -700,27 +771,58 @@
 <div class="control-panel no-print">
     <div class="credit"><i class="fa-solid fa-user" style="margin-right: 4px; color: #0284c7;"></i> ผู้จัดทำ: <strong>Thanong Chooduang</strong></div>
     
-    <div class="panel-group">
-        <div class="panel-group-label">📁 ข้อมูล & ฐานข้อมูล</div>
+<div class="panel-group">
+<div class="panel-group-label" style="display: flex; justify-content: space-between; align-items: center;">
+    <!-- ใส่ class ให้ข้อความเพื่อให้ CSS จัดการง่ายขึ้น -->
+    <span class="label-text">📁 ฐานข้อมูลลูกค้า</span>
+    
+    <button onclick="toggleBackupButtons()" title="ซ่อน/แสดงปุ่มสำรองข้อมูล" style="background: none; border: none; cursor: pointer; color: #64748b; font-size: 12px;">
+        <i class="fa-solid fa-sliders"></i> ตั้งค่า
+    </button>
+</div>
+        
         <div class="panel-buttons">
             <button class="icon-btn btn-history-ui" data-tip="ดูประวัติบิลทั้งหมด" onclick="openHistoryModal()"><i class="fa-solid fa-clipboard-list"></i></button>
             <button class="icon-btn btn-manage-prod" data-tip="ดูรายชื่อสินค้าและราคาที่บันทึก" onclick="openModal('productModal')"><i class="fa-solid fa-boxes-stacked"></i></button>
-            <button class="icon-btn btn-export-ui" data-tip="สำรองข้อมูลทั้งหมด (.JSON)" onclick="exportAllData()"><i class="fa-solid fa-cloud-arrow-down"></i></button>
-            <button class="icon-btn btn-import-ui" data-tip="นำเข้าข้อมูลทั้งหมด" onclick="document.getElementById('importAllFile').click()"><i class="fa-solid fa-cloud-arrow-up"></i></button>
+            
+            <!-- แก้ไขบรรทัดนี้ ให้เหลือ display: none; อันเดียวพอครับ -->
+<span id="backupGroup" style="display: none; gap: 5px; align-items: center;">
+    <button class="icon-btn btn-export-ui" data-tip="สำรองข้อมูลทั้งหมด (.JSON)" onclick="exportAllData()"><i class="fa-solid fa-cloud-arrow-down"></i></button>
+    <button class="icon-btn btn-import-ui" data-tip="นำเข้าข้อมูลทั้งหมด" onclick="document.getElementById('importAllFile').click()"><i class="fa-solid fa-cloud-arrow-up"></i></button>
+</span>
+            
             <input type="file" id="importAllFile" style="display:none" accept=".json" onchange="importAllData(event)">
         </div>
     </div>
 
     <div class="panel-divider"></div>
 
-    <div class="panel-group">
-        <div class="panel-group-label">📝 จัดการเอกสาร</div>
-        <div class="panel-buttons">
-            <button class="icon-btn btn-clear-ui" data-tip="ล้างรายการเพื่อเริ่มใหม่" onclick="clearAllData()"><i class="fa-solid fa-eraser"></i></button>
-            <button class="icon-btn btn-save-ui" data-tip="บันทึกข้อมูล (ทับบิลเดิม)" onclick="saveCurrentData()"><i class="fa-solid fa-floppy-disk"></i></button>
-            <button class="icon-btn btn-savenew-ui" data-tip="บันทึกเป็นบิลใหม่" onclick="saveAsNewData()"><i class="fa-solid fa-file-circle-plus"></i></button>
-        </div>
+<div class="panel-group">
+    <div class="panel-group-label">📝 จัดการเอกสาร</div>
+    <div class="panel-buttons">
+        <button class="icon-btn btn-clear-ui" data-tip="ล้างรายการเพื่อเริ่มใหม่" onclick="clearAllData()"><i class="fa-solid fa-eraser"></i></button>
+        <button class="icon-btn btn-save-ui" data-tip="บันทึกข้อมูล (ทับบิลเดิม)" onclick="saveCurrentData()"><i class="fa-solid fa-floppy-disk"></i></button>
+        <button class="icon-btn btn-savenew-ui" data-tip="บันทึกเป็นบิลใหม่" onclick="saveAsNewData()"><i class="fa-solid fa-file-circle-plus"></i></button>
+		        <a href="price_update.html" class="icon-btn" data-tip="ไปยังหน้าใบแจ้งปรับราคาสินค้า" style="background-color: #3b82f6; color: white; display: inline-flex; align-items: center; justify-content: center; text-decoration: none;">
+            <i class="fa-solid fa-file-invoice-dollar"></i>
+        </a>
     </div>
+</div>
+
+    <div class="panel-divider"></div>
+	<div class="panel-group">
+    <div class="panel-group-label">📤 ส่งเมลล์</div>
+    <div class="panel-buttons">
+        <!-- ปุ่มส่งเมลผ่าน Gmail -->
+<button class="icon-btn btn-export-ui" data-tip="เขียนใบเสนอราคาใน Gmail" onclick="window.open('https://mail.google.com/mail/u/0/?tab=rm&ogbl#inbox?compose=new', 'GmailPopup', 'width=1100,height=800,left=150,top=100,resizable=yes,scrollbars=yes'); return false;">
+    <i class="fa-solid fa-envelope"></i>
+</button>
+        <!-- ปุ่มส่งไลน์ส่วนตัวผ่านมือถือ -->
+     <!--    <button class="icon-btn btn-line-ui" data-tip="ส่งใบเสนอราคาผ่าน LINE" onclick="sendToLine()">
+            <i class="fa-brands fa-line"></i>
+        </button>     -->
+    </div>
+</div>
 
     <div class="panel-divider"></div>
 
@@ -728,7 +830,7 @@
         <div class="panel-group-label">⚙️ พิมพ์ & ออก</div>
         <div class="panel-buttons">
             <button class="icon-btn btn-print-ui" data-tip="พิมพ์ / บันทึก PDF" onclick="window.print()"><i class="fa-solid fa-print"></i></button>
-            <button class="icon-btn btn-close-ui" data-tip="ปิดโปรแกรม" onclick="closeAppWindow()"><i class="fa-solid fa-xmark"></i></button>
+      <!--       <button class="icon-btn btn-close-ui" data-tip="ปิดโปรแกรม" onclick="closeAppWindow()"><i class="fa-solid fa-xmark"></i></button>  -->
         </div>
     </div>
 </div>
@@ -737,7 +839,7 @@
     <div class="header-section">
         <div class="header-left">
             <div class="logo-container">
-                <img src="https://img2.pic.in.th/7fd9a589-9a88-41bf-8180-6b5dcc12f139.th.png" alt="KL Stationery Logo">
+                <img src="logo.png" alt="KL Stationery Logo">
             </div>
             <div class="shop-info-box">
                 <div class="company-name">บริษัท เค แอล สเตชั่นเนอรี่ จำกัด (สำนักงานใหญ่)</div>
@@ -776,42 +878,44 @@
         </tr>
     </table>
 
-    <table class="data-table" id="billTable">
-        <thead>
-            <tr>
-                <th style="width: 5%;">ลำดับ<br><span style="font-size: 9px; font-weight: 300;">Item</span></th>
-				<th style="width: 38%;">รายการสินค้า / รายละเอียด<br><span style="font-size: 9px; font-weight: 300;">Description</span></th>
-                <th style="width: 9%;">แบบรุ่น<br><span style="font-size: 9px; font-weight: 300;">Model</span></th>
-                <th style="width: 8%;">จำนวน<br><span style="font-size: 9px; font-weight: 300;">Qty</span></th>
-                <th style="width: 8%;">หน่วย<br><span style="font-size: 9px; font-weight: 300;">Unit</span></th>
-                <th style="width: 11%;">ราคาต่อหน่วย<br><span style="font-size: 9px; font-weight: 300;">Unit Price</span></th>
-                <th style="width: 13%;">จำนวนเงิน<br><span style="font-size: 9px; font-weight: 300;">Amount</span></th>
-                <th class="no-print" style="width: 6%;">ลบ</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr class="item-row">
-                <td class="row-num" style="text-align: center;">1</td>
-                <td class="desc-cell"><textarea class="item-desc" placeholder="ระบุรายละเอียดสินค้า" oninput="autoGrow(this)"></textarea></td>
-                <td style="text-align: center;">
-                    <input type="text" class="sku-input" placeholder="รุ่น" 
-                           onkeydown="if(event.key === 'Enter'){ fetchProductBySKU(this); this.blur(); }">
-                </td>
-                <td style="text-align: center;"><input type="text" class="qty" value="0" inputmode="decimal" onfocus="if(this.value==='0')this.value='';" onblur="if(this.value==='')this.value='0';" oninput="formatNumberInput(this); calculate();"></td>
-                <td style="text-align: center;"><input type="text" class="unit-input" placeholder="ชิ้น/อัน"></td>
-                <td style="text-align: center;"><input type="text" class="price" value="0" inputmode="decimal" onfocus="if(this.value==='0')this.value='';" onblur="if(this.value==='')this.value='0';" oninput="formatNumberInput(this); calculate();"></td>
-                <td class="amount" style="text-align: right; padding-right: 12px;">0.00</td>
-                <td class="no-print" style="text-align: center;"><button class="btn-del" onclick="removeRow(this)">ลบ</button></td>
-            </tr>
-        </tbody>
-        <tfoot class="no-print">
-            <tr>
-                <td colspan="8" style="text-align: center; padding: 12px; border: 1px solid #cbd5e1; background: #ffffff;">
-                    <button class="btn-add" style="background: linear-gradient(135deg, #059669, #10b981); color: white; border: none; border-radius: 8px; padding: 8px 16px; font-weight: 600; cursor: pointer; box-shadow: none;" onclick="addRow()">+ เพิ่มรายการสินค้า</button>
-                </td>
-            </tr>
-        </tfoot>
-    </table>
+    <div class="table-responsive-wrapper">
+        <table class="data-table" id="billTable">
+            <thead>
+                <tr>
+                    <th style="width: 5%;">ลำดับ<br><span style="font-size: 9px; font-weight: 300;">Item</span></th>
+                    <th style="width: 38%;">รายการสินค้า / รายละเอียด<br><span style="font-size: 9px; font-weight: 300;">Description</span></th>
+                    <th style="width: 9%;">แบบรุ่น<br><span style="font-size: 9px; font-weight: 300;">Model</span></th>
+                    <th style="width: 8%;">จำนวน<br><span style="font-size: 9px; font-weight: 300;">Qty</span></th>
+                    <th style="width: 8%;">หน่วย<br><span style="font-size: 9px; font-weight: 300;">Unit</span></th>
+                    <th style="width: 11%;">ราคาต่อหน่วย<br><span style="font-size: 9px; font-weight: 300;">Unit Price</span></th>
+                    <th style="width: 13%;">จำนวนเงิน<br><span style="font-size: 9px; font-weight: 300;">Amount</span></th>
+                    <th class="no-print" style="width: 6%;">ลบ</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr class="item-row">
+                    <td class="row-num" style="text-align: center;">1</td>
+                    <td class="desc-cell"><textarea class="item-desc" placeholder="ระบุรายละเอียดสินค้า" oninput="autoGrow(this)" onblur="fetchProductByDesc(this)"></textarea></td>
+                    <td style="text-align: center;">
+                        <input type="text" class="sku-input" placeholder="รุ่น" 
+                               onkeydown="if(event.key === 'Enter'){ fetchProductBySKU(this); this.blur(); }">
+                    </td>
+                    <td style="text-align: center;"><input type="text" class="qty" value="0" inputmode="decimal" onfocus="if(this.value==='0')this.value='';" onblur="if(this.value==='')this.value='0';" oninput="formatNumberInput(this); calculate();"></td>
+                    <td style="text-align: center;"><input type="text" class="unit-input" placeholder="ชิ้น/อัน"></td>
+                    <td style="text-align: center;"><input type="text" class="price" value="0" inputmode="decimal" onfocus="if(this.value==='0')this.value='';" onblur="if(this.value==='')this.value='0';" oninput="formatNumberInput(this); calculate();"></td>
+                    <td class="amount" style="text-align: right; padding-right: 12px;">0.00</td>
+                    <td class="no-print" style="text-align: center;"><button class="btn-del" onclick="removeRow(this)">ลบ</button></td>
+                </tr>
+            </tbody>
+            <tfoot class="no-print">
+                <tr>
+                    <td colspan="8" style="text-align: center; padding: 12px; border: 1px solid #cbd5e1; background: #ffffff;">
+                        <button class="btn-add" style="background: linear-gradient(135deg, #059669, #10b981); color: white; border: none; border-radius: 8px; padding: 8px 16px; font-weight: 600; cursor: pointer; box-shadow: none;" onclick="addRow()">+ เพิ่มรายการสินค้า</button>
+                    </td>
+                </tr>
+            </tfoot>
+        </table>
+    </div>
     
     <table class="footer-table" style="width: 100%; border-collapse: collapse;">
     <tr>
@@ -883,7 +987,7 @@
             <button class="close-btn" onclick="closeModal('historyModal')">&times;</button>
         </div>
         <div style="margin-bottom: 12px;">
-            <input type="text" id="historySearchInput" style="width: 100%; padding: 8px 12px;" placeholder="🔍 ค้นหาจากชื่อลูกค้า, เลขที่บิล, วันที่ หรือยอดเงิน..." oninput="filterHistoryTable()">
+            <input type="text" id="historySearchInput" placeholder="🔍 ค้นหาจากชื่อลูกค้า, เลขที่บิล, วันที่ หรือยอดเงิน..." oninput="renderHistoryTable(this.value)">
         </div>
         <div id="historyTableContainer" style="max-height: 50vh; overflow-y: auto;"></div>
     </div>
@@ -927,23 +1031,22 @@
     };
 
     function formatNumberInput(input) {
-    let value = input.value;
-    // ตัดอักษรที่ไม่ใช่ตัวเลขและจุดทศนิยมออก (ไม่ให้มีเครื่องหมายลบ)
-    value = value.replace(/[^0-9.]/g, '');
+        let value = input.value;
+        value = value.replace(/[^0-9.]/g, '');
 
-    let parts = value.split('.');
-    if (parts.length > 2) {
-        value = parts[0] + '.' + parts.slice(1).join('');
-    }
-    if (value.length > 1 && value.startsWith('0') && value.charAt(1) !== '.') {
-        value = value.replace(/^0+/, '');
-        if (value === '') value = '0';
-    }
+        let parts = value.split('.');
+        if (parts.length > 2) {
+            value = parts[0] + '.' + parts.slice(1).join('');
+        }
+        if (value.length > 1 && value.startsWith('0') && value.charAt(1) !== '.') {
+            value = value.replace(/^0+/, '');
+            if (value === '') value = '0';
+        }
 
-    if (input.value !== value) {
-        input.value = value;
+        if (input.value !== value) {
+            input.value = value;
+        }
     }
-}
 
     function closeAppWindow() {
         Swal.fire({
@@ -980,6 +1083,7 @@
         }).then((result) => {
             if (result.isConfirmed) {
                 document.getElementById('customerSelect').value = "";
+				loadCustomerDropdown();
                 document.getElementById('custName').value = "";
                 let addrArea = document.getElementById('custAddress');
                 addrArea.value = "";
@@ -1037,27 +1141,26 @@
         });
     }
 
-    // ค้นหาฟังก์ชัน addRow() แล้วปรับโค้ดด้านในเป็นแบบนี้:
-function addRow() {
-    let table = document.getElementById('billTable').getElementsByTagName('tbody')[0];
-    let rowCount = table.rows.length;
-    let newRow = table.insertRow();
-    newRow.className = "item-row";
-    newRow.innerHTML = `
-        <td class="row-num" style="text-align: center;">${rowCount + 1}</td>
-        <td class="desc-cell"><textarea class="item-desc" placeholder="ระบุรายละเอียดสินค้า" oninput="autoGrow(this)" onblur="fetchProductByDesc(this)"></textarea></td>
-        <td style="text-align: center;">
-            <input type="text" class="sku-input" placeholder="รหัส/รุ่น (กด Enter)" 
-                   onkeydown="if(event.key === 'Enter'){ fetchProductBySKU(this); this.blur(); }">
-        </td>
-        <td style="text-align: center;"><input type="text" class="qty" value="0" inputmode="decimal" onfocus="if(this.value==='0')this.value='';" onblur="if(this.value==='')this.value='0';" oninput="formatNumberInput(this); calculate();"></td>
-        <td style="text-align: center;"><input type="text" class="unit-input" placeholder="ชิ้น/อัน"></td>
-        <td style="text-align: center;"><input type="text" class="price" value="0" inputmode="decimal" onfocus="if(this.value==='0')this.value='';" onblur="if(this.value==='')this.value='0';" oninput="formatNumberInput(this); calculate();"></td>
-        <td class="amount" style="text-align: right; padding-right: 12px;">0.00</td>
-        <td class="no-print" style="text-align: center;"><button class="btn-del" onclick="removeRow(this)">ลบ</button></td>
-    `;
-    calculate();
-}
+    function addRow() {
+        let table = document.getElementById('billTable').getElementsByTagName('tbody')[0];
+        let rowCount = table.rows.length;
+        let newRow = table.insertRow();
+        newRow.className = "item-row";
+        newRow.innerHTML = `
+            <td class="row-num" style="text-align: center;">${rowCount + 1}</td>
+            <td class="desc-cell"><textarea class="item-desc" placeholder="ระบุรายละเอียดสินค้า" oninput="autoGrow(this)" onblur="fetchProductByDesc(this)"></textarea></td>
+            <td style="text-align: center;">
+                <input type="text" class="sku-input" placeholder="รหัส/รุ่น (กด Enter)" 
+                       onkeydown="if(event.key === 'Enter'){ fetchProductBySKU(this); this.blur(); }">
+            </td>
+            <td style="text-align: center;"><input type="text" class="qty" value="0" inputmode="decimal" onfocus="if(this.value==='0')this.value='';" onblur="if(this.value==='')this.value='0';" oninput="formatNumberInput(this); calculate();"></td>
+            <td style="text-align: center;"><input type="text" class="unit-input" placeholder="ชิ้น/อัน"></td>
+            <td style="text-align: center;"><input type="text" class="price" value="0" inputmode="decimal" onfocus="if(this.value==='0')this.value='';" onblur="if(this.value==='')this.value='0';" oninput="formatNumberInput(this); calculate();"></td>
+            <td class="amount" style="text-align: right; padding-right: 12px;">0.00</td>
+            <td class="no-print" style="text-align: center;"><button class="btn-del" onclick="removeRow(this)">ลบ</button></td>
+        `;
+        calculate();
+    }
 
     function removeRow(btn) {
         let rows = document.querySelectorAll('.item-row');
@@ -1076,37 +1179,51 @@ function addRow() {
     }
 
     function calculate() {
-    let rows = document.querySelectorAll('.item-row');
-    let subTotal = 0;
-    rows.forEach((row, index) => {
-        row.querySelector('.row-num').innerText = index + 1;
-        let qty = parseFloat(row.querySelector('.qty').value) || 0;
-        let price = parseFloat(row.querySelector('.price').value) || 0;
-        let amount = qty * price;
-        row.querySelector('.amount').innerText = amount.toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-        subTotal += amount;
-    });
+        let rows = document.querySelectorAll('.item-row');
+        let subTotal = 0;
+        rows.forEach((row, index) => {
+            row.querySelector('.row-num').innerText = index + 1;
+            let qty = parseFloat(row.querySelector('.qty').value) || 0;
+            let price = parseFloat(row.querySelector('.price').value) || 0;
+            let amount = qty * price;
+            row.querySelector('.amount').innerText = amount.toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+            subTotal += amount;
+        });
 
-    // คำนวณส่วนลดจาก discountRate ที่นี่ที่เดียว
-    let discountRate = parseFloat(document.getElementById('discountRate').value) || 0;
-    let discountAmountInput = document.getElementById('discountAmount');
-    let discountAmount = (subTotal * discountRate) / 100;
-    discountAmountInput.value = discountAmount.toFixed(2);
+        let discountRate = parseFloat(document.getElementById('discountRate').value) || 0;
+        let discountAmountInput = document.getElementById('discountAmount');
+        let discountAmount = (subTotal * discountRate) / 100;
+        discountAmountInput.value = discountAmount.toFixed(2);
 
-    let netTotal = subTotal - discountAmount;
-    if (netTotal < 0) netTotal = 0;
+        let netTotal = subTotal - discountAmount;
+        if (netTotal < 0) netTotal = 0;
 
-    let vat = netTotal * 0.07;
-    let grandTotal = netTotal + vat;
+        let vat = netTotal * 0.07;
+        let grandTotal = netTotal + vat;
 
-    document.getElementById('subTotal').innerText = subTotal.toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-    document.getElementById('netTotal').innerText = netTotal.toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-    document.getElementById('vatAmount').innerText = vat.toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-    document.getElementById('grandTotal').innerText = grandTotal.toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        document.getElementById('subTotal').innerText = subTotal.toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        document.getElementById('netTotal').innerText = netTotal.toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        document.getElementById('vatAmount').innerText = vat.toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        document.getElementById('grandTotal').innerText = grandTotal.toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
-    document.getElementById('textAmount').innerText = convertNumberToThaiText(grandTotal);
-    return grandTotal;
-}
+        document.getElementById('textAmount').innerText = convertNumberToThaiText(grandTotal);
+        return grandTotal;
+    }
+
+    // ฟังก์ชันส่งไลน์ผ่านลิงก์ URL Scheme บนมือถือ
+    function sendToLine() {
+        let customerName = document.getElementById('custName').value.trim() || 'ลูกค้าทั่วไป';
+        let billNo = document.getElementById('billNo').value.trim() || '-';
+        let grandTotal = document.getElementById('grandTotal').innerText;
+
+        let text = `สวัสดีครับ/ค่ะ ส่งใบเสนอราคาครับ/ค่ะ\n` +
+                   `เลขที่บิล: ${billNo}\n` +
+                   `ลูกค้า: ${customerName}\n` +
+                   `ยอดรวมทั้งสิ้น: ${grandTotal} บาท`;
+
+        let lineUrl = `https://line.me/R/msg/text/?` + encodeURIComponent(text);
+        window.open(lineUrl, '_blank');
+    }
 
     function saveCurrentData() {
         executeSave(false);
@@ -1116,280 +1233,494 @@ function addRow() {
         executeSave(true);
     }
 
-	function validateRowData(qty, price) {
-    let parsedQty = parseFloat(qty);
-    let parsedPrice = parseFloat(price);
+    function validateRowData(qty, price) {
+        let parsedQty = parseFloat(qty);
+        let parsedPrice = parseFloat(price);
 
-    // ตรวจสอบว่าเป็นค่าว่าง, ติดลบ, หรือ NaN หรือไม่
-    if (isNaN(parsedQty) || parsedQty < 0) parsedQty = 0;
-    if (isNaN(parsedPrice) || parsedPrice < 0) parsedPrice = 0;
+        if (isNaN(parsedQty) || parsedQty < 0) parsedQty = 0;
+        if (isNaN(parsedPrice) || parsedPrice < 0) parsedPrice = 0;
 
-    return { qty: parsedQty, price: parsedPrice };
-}
-    function executeSave(isNewBill) {
-        let cName = document.getElementById('custName').value.trim();
-        let cAddr = document.getElementById('custAddress').value.trim();
-        let bNoInput = document.getElementById('billNo');
-        let bNo = bNoInput.value.trim();
-
-        if (!cName) {
-            Swal.fire({
-                icon: 'warning',
-                title: 'กรุณากรอกชื่อลูกค้า',
-                text: 'โปรดระบุชื่อลูกค้าหรือบริษัทก่อนทำการบันทึก',
-                confirmButtonText: 'เข้าใจแล้ว',
-                confirmButtonColor: '#0284c7'
-            });
-            return;
-        }
-
-        let rows = document.querySelectorAll('.item-row');
-        let currentItems = [];
-        let products = JSON.parse(localStorage.getItem('saved_quot_products') || '[]');
-        let savedCount = 0;
-
-        rows.forEach(row => {
-    let sku = row.querySelector('.sku-input').value.trim();
-    let desc = row.querySelector('.item-desc').value.trim();
-    
-	
-	
-    // เรียกใช้ฟังก์ชันตรวจสอบความถูกต้องของตัวเลขป้อนเข้า
-    let rawQty = row.querySelector('.qty').value;
-    let rawPrice = row.querySelector('.price').value;
-    let validated = validateRowData(rawQty, rawPrice);
-
-    let unit = row.querySelector('.unit-input').value.trim();
-
-    // บันทึกเฉพาะแถวที่มีการกรอกรายละเอียดหรือรหัสสินค้า และมีจำนวน/ราคาที่ถูกต้อง
-    if (sku || desc) {
-        currentItems.push({ 
-            sku: sku, 
-            desc: desc, 
-            qty: validated.qty, 
-            unit: unit, 
-            price: validated.price 
-        });
-        
-        if (sku && desc) {
-            let pIndex = products.findIndex(p => p.sku === sku);
-            let prodData = { sku: sku, desc: desc, unit: unit, price: validated.price };
-            if (pIndex >= 0) {
-                products[pIndex] = prodData;
-            } else {
-                products.push(prodData);
-            }
-            savedCount++;
-        }
+        return { qty: parsedQty, price: parsedPrice };
     }
+
+async function executeSave(isNewBill) {
+    if (typeof firebase === 'undefined') {
+        Swal.fire({
+            icon: 'error',
+            title: 'ไม่พบไลบรารี Firebase',
+            text: 'กรุณาตรวจสอบการเชื่อมต่ออินเทอร์เน็ต เนื่องจากสคริปต์ Firebase โหลดไม่สำเร็จ',
+            confirmButtonText: 'ตกลง'
+        });
+        return;
+    }
+
+    if (!firebase.apps.length) {
+        firebase.initializeApp(firebaseConfig);
+    }
+    
+    const db = firebase.firestore();
+    let cName = document.getElementById('custName').value.trim();
+    let cAddr = document.getElementById('custAddress').value.trim();
+    let bNoInput = document.getElementById('billNo');
+    let bNo = bNoInput.value.trim();
+
+    if (!cName) {
+        Swal.fire({
+            icon: 'warning',
+            title: 'กรุณากรอกชื่อลูกค้า',
+            text: 'โปรดระบุชื่อลูกค้าหรือบริษัทก่อนทำการบันทึก',
+            confirmButtonText: 'เข้าใจแล้ว',
+            confirmButtonColor: '#0284c7'
+        });
+        return;
+    }
+
+    let rows = document.querySelectorAll('.item-row');
+    let currentItems = [];
+    let products = JSON.parse(localStorage.getItem('saved_quot_products') || '[]'); 
+    let savedProdCount = 0;
+
+    rows.forEach(row => {
+        let sku = row.querySelector('.sku-input').value.trim();
+        let desc = row.querySelector('.item-desc').value.trim();
+        
+        let rawQty = row.querySelector('.qty').value;
+        let rawPrice = row.querySelector('.price').value;
+        let validated = validateRowData(rawQty, rawPrice);
+        let unit = row.querySelector('.unit-input').value.trim();
+
+        if (sku || desc) {
+            currentItems.push({ 
+                sku: sku, 
+                desc: desc, 
+                qty: validated.qty, 
+                unit: unit, 
+                price: validated.price 
+            });
+            
+            if (sku && desc) {
+                let pIndex = products.findIndex(p => p.sku === sku);
+                let prodData = { sku: sku, desc: desc, unit: unit, price: validated.price };
+                if (pIndex >= 0) {
+                    products[pIndex] = prodData;
+                } else {
+                    products.push(prodData);
+                }
+                savedProdCount++;
+            }
+        }
+    });
+
+    if (currentItems.length === 0 || (currentItems.length === 1 && !currentItems[0].desc)) {
+        Swal.fire({
+            icon: 'warning',
+            title: 'ไม่มีรายการสินค้า',
+            text: 'กรุณากรอกข้อมูลสินค้าอย่างน้อย 1 รายการก่อนบันทึก',
+            confirmButtonText: 'เข้าใจแล้ว',
+            confirmButtonColor: '#0284c7'
+        });
+        return;
+    }
+
+    if (savedProdCount > 0) {
+        localStorage.setItem('saved_quot_products', JSON.stringify(products));
+    }
+
+    let dateField = document.getElementById('billDate');
+    let sigSalesDate = document.getElementById('sigSalesDate');
+    
+    if (isNewBill) {
+        let d = new Date();
+        let day = String(d.getDate()).padStart(2, '0');
+        let month = String(d.getMonth() + 1).padStart(2, '0');
+        let year = d.getFullYear() + 543;
+        let currentDateStr = `${day}/${month}/${year}`;
+        if (dateField) dateField.value = currentDateStr;
+        if (sigSalesDate) sigSalesDate.value = currentDateStr;
+    }
+
+let customers = JSON.parse(localStorage.getItem('saved_quot_customers') || '[]');
+
+// ปรับวิธีค้นหาให้รอบคอบขึ้น รองรับทั้งข้อมูลเดิมและข้อมูลใหม่
+let existingIndex = customers.findIndex(c => {
+    let existingName = '';
+    if (typeof c === 'string') {
+        existingName = c;
+    } else if (c) {
+        existingName = c.name || c.customerName || c.companyName || '';
+    }
+    return existingName === cName;
 });
 
-        // 🛑 เพิ่มการตรวจสอบรายการสินค้าว่าง ป้องกันการบันทึกบิลเปล่า
-        if (currentItems.length === 0 || (currentItems.length === 1 && !currentItems[0].desc)) {
-            Swal.fire({
-                icon: 'warning',
-                title: 'ไม่มีรายการสินค้า',
-                text: 'กรุณากรอกข้อมูลสินค้าอย่างน้อย 1 รายการก่อนบันทึก',
-                confirmButtonText: 'เข้าใจแล้ว',
-                confirmButtonColor: '#0284c7'
-            });
-            return;
+if (existingIndex >= 0) {
+    customers[existingIndex] = { name: cName, address: cAddr };
+} else {
+    customers.push({ name: cName, address: cAddr });
+}
+localStorage.setItem('saved_quot_customers', JSON.stringify(customers));
+
+    try {
+        await db.collection("settings").doc("master_data").set({
+            customers: customers
+        }, { merge: true });
+    } catch (err) {
+        console.warn("⚠️ ไม่สามารถอัปเดตรายชื่อลูกค้าขึ้น Cloud ได้:", err);
+    }
+
+    loadCustomerDropdown();
+
+    let grandTotalVal = calculate();
+    
+    let finalBillNo;
+    if (isNewBill || !bNo) {
+        finalBillNo = 'QT' + new Date().getTime();
+        bNoInput.value = finalBillNo;
+    } else {
+        finalBillNo = bNo;
+    }
+
+    let billDataToSave = {
+        billNo: finalBillNo,
+        bookNo: document.getElementById('bookNo').value.trim(),
+        billDate: dateField ? dateField.value.trim() : '',
+        customerName: cName,
+        address: cAddr,
+        subject: document.getElementById('quotSubject').value,
+        enclosure: document.getElementById('quotEnclose').value,
+        remark: document.getElementById('remarkText').value,
+        discountRate: parseFloat(document.getElementById('discountRate').value) || 0,
+        discountAmount: parseFloat(document.getElementById('discountAmount').value) || 0,
+        grandTotal: grandTotalVal,
+        items: currentItems,
+        customerSignName: document.getElementById('sigCustomerName').value,
+        customerSignDate: document.getElementById('sigCustomerDate').value,
+        salesSignName: document.getElementById('sigSalesName').value,
+        salesSignDate: sigSalesDate ? sigSalesDate.value.trim() : '',
+        timestamp: new Date().getTime()
+    };
+
+    Swal.fire({
+        title: 'กำลังบันทึกข้อมูล...',
+        text: 'โปรดรอสักครู่ ระบบกำลังอัปเดตข้อมูลขึ้น Cloud',
+        allowOutsideClick: false,
+        didOpen: () => {
+            Swal.showLoading();
         }
+    });
 
-        if (savedCount > 0) {
-            localStorage.setItem('saved_quot_products', JSON.stringify(products));
-        }
+    try {
+        await db.collection("quotations").doc(finalBillNo).set(billDataToSave);
 
-        let dateField = document.getElementById('billDate');
-        let sigSalesDate = document.getElementById('sigSalesDate');
-        
-        if (isNewBill) {
-            let d = new Date();
-            let day = String(d.getDate()).padStart(2, '0');
-            let month = String(d.getMonth() + 1).padStart(2, '0');
-            let year = d.getFullYear() + 543;
-            let currentDateStr = `${day}/${month}/${year}`;
-
-            if (dateField) dateField.value = currentDateStr;
-            if (sigSalesDate) sigSalesDate.value = currentDateStr;
-        }
-
-        let customers = JSON.parse(localStorage.getItem('saved_quot_customers') || '[]');
-        let existingIndex = customers.findIndex(c => c.name === cName);
-        if (existingIndex >= 0) {
-            customers[existingIndex] = { name: cName, address: cAddr };
-        } else {
-            customers.push({ name: cName, address: cAddr });
-        }
-        localStorage.setItem('saved_quot_customers', JSON.stringify(customers));
-        loadCustomerDropdown();
-
-        let grandTotalVal = calculate();
         let purchases = JSON.parse(localStorage.getItem('saved_quot_purchases') || '[]');
-        
-        let finalBillNo;
-        if (isNewBill || !bNo) {
-            finalBillNo = 'QT' + new Date().getTime();
-            bNoInput.value = finalBillNo;
-        } else {
-            finalBillNo = bNo;
-        }
-        
         if (!isNewBill) {
             purchases = purchases.filter(p => p.billNo !== finalBillNo);
         }
-
-        purchases.push({
-            billNo: finalBillNo,
-            bookNo: document.getElementById('bookNo').value.trim(),
-            billDate: dateField ? dateField.value.trim() : '',
-            customerName: cName,
-            address: cAddr,
-            subject: document.getElementById('quotSubject').value,
-            enclosure: document.getElementById('quotEnclose').value,
-            remark: document.getElementById('remarkText').value,
-			discountRate: parseFloat(document.getElementById('discountRate').value) || 0,
-            discountAmount: parseFloat(document.getElementById('discountAmount').value) || 0,
-            grandTotal: grandTotalVal,
-            items: currentItems,
-            customerSignName: document.getElementById('sigCustomerName').value,
-            customerSignDate: document.getElementById('sigCustomerDate').value,
-            salesSignName: document.getElementById('sigSalesName').value,
-            salesSignDate: sigSalesDate ? sigSalesDate.value.trim() : '',
-            timestamp: new Date().getTime()
-        });
+        purchases.push(billDataToSave);
 
         if (purchases.length > 200) {
             purchases.sort((a, b) => b.timestamp - a.timestamp);
             purchases = purchases.slice(0, 200);
         }
-
         localStorage.setItem('saved_quot_purchases', JSON.stringify(purchases));
 
         Swal.fire({
             icon: 'success',
-            title: isNewBill ? 'บันทึกเป็นบิลใหม่สำเร็จ!' : 'บันทึกข้อมูลสำเร็จ!',
+            title: isNewBill ? 'บันทึกเป็นบิลใหม่และอัปโหลดขึ้น Cloud สำเร็จ!' : 'บันทึกข้อมูลและอัปโหลดขึ้น Cloud สำเร็จ!',
             text: `เลขที่บิล: ${finalBillNo}`,
             timer: 2000,
             showConfirmButton: false
         });
-    }
 
-    async function exportAllData() {
-        try {
-            const allData = {
-                customers: JSON.parse(localStorage.getItem('saved_quot_customers') || '[]'),
-                products: JSON.parse(localStorage.getItem('saved_quot_products') || '[]'),
-                purchases: JSON.parse(localStorage.getItem('saved_quot_purchases') || '[]')
-            };
-
-            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(allData, null, 2));
-            
-            if ('showSaveFilePicker' in window) {
-                const options = {
-                    suggestedName: `system_backup_${new Date().toISOString().slice(0, 10)}.json`,
-                    types: [{
-                        description: 'JSON Files',
-                        accept: { 'application/json': ['.json'] }
-                    }]
-                };
-                const handle = await window.showSaveFilePicker(options);
-                const writable = await handle.createWritable();
-                await writable.write(JSON.stringify(allData, null, 2));
-                await writable.close();
-                
-                Swal.fire('สำเร็จ', 'สำรองข้อมูลทั้งหมดเรียบร้อยแล้ว', 'success');
-                return;
-            }
-
-            const downloadAnchor = document.createElement('a');
-            downloadAnchor.setAttribute("href", dataStr);
-            downloadAnchor.setAttribute("download", `system_backup_${new Date().toISOString().slice(0, 10)}.json`);
-            document.body.appendChild(downloadAnchor);
-            downloadAnchor.click();
-            downloadAnchor.remove();
-
-            Swal.fire('สำเร็จ', 'สำรองข้อมูลทั้งหมดเรียบร้อยแล้ว', 'success');
-        } catch (err) {
-            if (err.name !== 'AbortError') {
-                Swal.fire('เกิดข้อผิดพลาด', 'ไม่สามารถสำรองข้อมูลได้: ' + err.message, 'error');
-            }
-        }
-    }
-
-    function importAllData(event) {
-        const file = event.target.files[0];
-        if (!file) return;
-
-        const reader = new FileReader();
-        reader.onload = function(e) {
-            try {
-                const jsonContent = JSON.parse(e.target.result);
-
-                if (!jsonContent.customers && !jsonContent.products && !jsonContent.purchases) {
-                    throw new Error('โครงสร้างไฟล์ JSON ไม่ถูกต้อง');
-                }
-
-                Swal.fire({
-                    title: 'ยืนยันการนำเข้าข้อมูล?',
-                    text: 'ข้อมูลปัจจุบันทั้งหมดจะถูกแทนที่ด้วยข้อมูลจากไฟล์สำรอง',
-                    icon: 'warning',
-                    showCancelButton: true,
-                    confirmButtonText: 'ยืนยัน',
-                    cancelButtonText: 'ยกเลิก'
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        if (jsonContent.customers) localStorage.setItem('saved_quot_customers', JSON.stringify(jsonContent.customers));
-                        if (jsonContent.products) localStorage.setItem('saved_quot_products', JSON.stringify(jsonContent.products));
-                        if (jsonContent.purchases) localStorage.setItem('saved_quot_purchases', JSON.stringify(jsonContent.purchases));
-
-                        Swal.fire('สำเร็จ!', 'นำเข้าข้อมูลทั้งหมดเรียบร้อยแล้ว', 'success').then(() => {
-                            location.reload();
-                        });
-                    }
-                });
-            } catch (err) {
-                Swal.fire('เกิดข้อผิดพลาด', 'ไฟล์ไม่ถูกต้องหรือเสียหาย: ' + err.message, 'error');
-            } finally {
-                event.target.value = '';
-            }
-        };
-        reader.readAsText(file);
-    }
-
-    function loadCustomerDropdown() {
-        let select = document.getElementById('customerSelect');
-        select.innerHTML = '<option value="">-- เลือกลูกค้า/บริษัท --</option>';
-        let customers = JSON.parse(localStorage.getItem('saved_quot_customers') || '[]');
-        customers.forEach((c, index) => {
-            let opt = document.createElement('option');
-            opt.value = index;
-            opt.innerText = c.name;
-            select.appendChild(opt);
+    } catch (error) {
+        console.error("❌ เกิดข้อผิดพลาดในการบันทึก Firebase: ", error);
+        Swal.fire({
+            icon: 'error',
+            title: 'บันทึกข้อมูลไม่สำเร็จ',
+            text: 'ไม่สามารถเชื่อมต่อกับ Cloud ได้ โปรดตรวจสอบอินเทอร์เน็ตแล้วลองใหม่อีกครั้ง',
+            confirmButtonText: 'ตกลง',
+            confirmButtonColor: '#ef4444'
         });
     }
+}
 
-    function selectCustomer(select) {
-        let index = select.value;
-        if (index === "") return;
+    async function exportAllData() {
+    try {
+        // 1. ดึงข้อมูลล่าสุดจาก LocalStorage มาเป็นค่าเริ่มต้น
         let customers = JSON.parse(localStorage.getItem('saved_quot_customers') || '[]');
-        let c = customers[index];
-        if (c) {
-            document.getElementById('custName').value = c.name;
-            let addrArea = document.getElementById('custAddress');
-            addrArea.value = c.address;
-            autoGrow(addrArea);
+        let products = JSON.parse(localStorage.getItem('saved_quot_products') || '[]');
+        let purchases = JSON.parse(localStorage.getItem('saved_quot_purchases') || '[]');
 
-            const Toast = Swal.mixin({
-                toast: true,
-                position: 'top-end',
-                showConfirmButton: false,
-                timer: 1500,
-                timerProgressBar: true
-            });
-            Toast.fire({ icon: 'success', title: 'ดึงข้อมูลลูกค้าสำเร็จ' });
+        // 2. ดึงข้อมูลล่าสุดจาก Firebase Cloud มารวมด้วย เพื่อให้ไฟล์สำรองสมบูรณ์ที่สุด
+        try {
+            if (typeof firebase !== 'undefined') {
+                if (!firebase.apps.length) {
+                    firebase.initializeApp(firebaseConfig);
+                }
+                const db = firebase.firestore();
+                
+                // ดึงรายชื่อลูกค้าจาก Cloud
+                const custDoc = await db.collection("settings").doc("master_data").get();
+                if (custDoc.exists && custDoc.data().customers) {
+                    customers = custDoc.data().customers;
+                }
+
+                // ดึงประวัติบิลทั้งหมดจาก Cloud
+                const querySnapshot = await db.collection("quotations").get();
+                let cloudPurchases = [];
+                querySnapshot.forEach((doc) => {
+                    cloudPurchases.push(doc.data());
+                });
+                if (cloudPurchases.length > 0) {
+                    purchases = cloudPurchases;
+                }
+            }
+        } catch (cloudErr) {
+            console.warn("⚠️ ไม่สามารถดึงข้อมูลจาก Cloud มาสำรองได้ ใช้ข้อมูลในเครื่องแทน:", cloudErr);
+        }
+
+        const allData = {
+            customers: customers,
+            products: products,
+            purchases: purchases
+        };
+
+        const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(allData, null, 2));
+        
+        if ('showSaveFilePicker' in window) {
+            const options = {
+                suggestedName: `system_backup_${new Date().toISOString().slice(0, 10)}.json`,
+                types: [{
+                    description: 'JSON Files',
+                    accept: { 'application/json': ['.json'] }
+                }]
+            };
+            const handle = await window.showSaveFilePicker(options);
+            const writable = await handle.createWritable();
+            await writable.write(JSON.stringify(allData, null, 2));
+            await writable.close();
+            
+            Swal.fire('สำเร็จ', 'สำรองข้อมูลทั้งหมดเรียบร้อยแล้ว', 'success');
+            return;
+        }
+
+        const downloadAnchor = document.createElement('a');
+        downloadAnchor.setAttribute("href", dataStr);
+        downloadAnchor.setAttribute("download", `system_backup_${new Date().toISOString().slice(0, 10)}.json`);
+        document.body.appendChild(downloadAnchor);
+        downloadAnchor.click();
+        downloadAnchor.remove();
+
+        Swal.fire('สำเร็จ', 'สำรองข้อมูลทั้งหมดเรียบร้อยแล้ว', 'success');
+    } catch (err) {
+        if (err.name !== 'AbortError') {
+            Swal.fire('เกิดข้อผิดพลาด', 'ไม่สามารถสำรองข้อมูลได้: ' + err.message, 'error');
         }
     }
+}
+
+
+
+
+    async function importAllData(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = async function(e) {
+        try {
+            const jsonContent = JSON.parse(e.target.result);
+
+            if (!jsonContent.customers && !jsonContent.products && !jsonContent.purchases) {
+                throw new Error('โครงสร้างไฟล์ JSON ไม่ถูกต้อง');
+            }
+
+            Swal.fire({
+                title: 'ยืนยันการนำเข้าข้อมูล?',
+                text: 'ข้อมูลปัจจุบันทั้งหมดจะถูกแทนที่ด้วยข้อมูลจากไฟล์สำรอง',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'ยืนยัน',
+                cancelButtonText: 'ยกเลิก'
+            }).then(async (result) => {
+                if (result.isConfirmed) {
+                    // 1. บันทึกลง localStorage ของเครื่อง
+                    if (jsonContent.customers) localStorage.setItem('saved_quot_customers', JSON.stringify(jsonContent.customers));
+                    if (jsonContent.products) localStorage.setItem('saved_quot_products', JSON.stringify(jsonContent.products));
+                    if (jsonContent.purchases) localStorage.setItem('saved_quot_purchases', JSON.stringify(jsonContent.purchases));
+
+                    // 2. อัปเดตข้อมูลขึ้น Firebase Cloud (ทั้งลูกค้า, สินค้า และประวัติบิล)
+                    try {
+                        if (typeof firebase !== 'undefined') {
+                            if (!firebase.apps.length) {
+                                firebase.initializeApp(firebaseConfig);
+                            }
+                            const db = firebase.firestore();
+
+                            // อัปเดตรายชื่อลูกค้า และ รายการสินค้า ขึ้น Cloud ที่ master_data จุดเดียวจบ
+                            let masterDataToUpdate = {};
+                            if (jsonContent.customers) masterDataToUpdate.customers = jsonContent.customers;
+                            if (jsonContent.products) masterDataToUpdate.products = jsonContent.products;
+
+                            if (Object.keys(masterDataToUpdate).length > 0) {
+                                await db.collection("settings").doc("master_data").set(masterDataToUpdate, { merge: true });
+                            }
+
+                            // อัปเดตประวัติบิลทั้งหมดขึ้น Cloud Firestore
+                            if (jsonContent.purchases && Array.isArray(jsonContent.purchases)) {
+                                let batch = db.batch();
+                                jsonContent.purchases.forEach(bill => {
+                                    if (bill.billNo) {
+                                        let docRef = db.collection("quotations").doc(bill.billNo);
+                                        batch.set(docRef, bill);
+                                    }
+                                });
+                                await batch.commit();
+                            }
+                        }
+                    } catch (cloudErr) {
+                        console.warn("⚠️ ไม่สามารถอัปเดตข้อมูลขึ้น Cloud หลัง Import ได้:", cloudErr);
+                    }
+
+                    // 3. แจ้งเตือนและรีโหลดหน้าจอ
+                    Swal.fire('สำเร็จ!', 'นำเข้าข้อมูลทั้งหมดและซิงค์ขึ้น Cloud เรียบร้อยแล้ว', 'success').then(() => {
+                        location.reload();
+                    });
+                }
+            });
+        } catch (err) {
+            Swal.fire('เกิดข้อผิดพลาด', 'ไฟล์ไม่ถูกต้องหรือเสียหาย: ' + err.message, 'error');
+        } finally {
+            event.target.value = '';
+        }
+    };
+    reader.readAsText(file);
+}
+
+async function loadCustomerDropdown() {
+    let customers = [];
+    try {
+        if (typeof firebase !== 'undefined') {
+            if (!firebase.apps.length) {
+                firebase.initializeApp(firebaseConfig);
+            }
+            const db = firebase.firestore();
+            const doc = await db.collection("settings").doc("master_data").get();
+            
+            console.log("🔍 ข้อมูล Document จาก master_data:", doc.exists ? doc.data() : "ไม่พบ Document นี้");
+
+            if (doc.exists && doc.data().customers) {
+                customers = doc.data().customers;
+            }
+        }
+    } catch (error) {
+        console.warn("⚠️ ไม่สามารถโหลดรายชื่อลูกค้าจาก Cloud ได้:", error);
+    }
+
+    if (customers.length === 0) {
+        console.log("ℹ️ กำลังดึงรายชื่อลูกค้าจาก localStorage แทน");
+        customers = JSON.parse(localStorage.getItem('saved_quot_customers') || '[]');
+    }
+
+    console.log("📋 รายชื่อลูกค้าทั้งหมดที่จะนำมาใส่ Dropdown:", customers);
+
+    let select = document.getElementById('customerSelect');
+    if (!select) {
+        console.error("❌ ไม่พบ Element ที่มี ID เป็น 'customerSelect' ในหน้า HTML!");
+        return;
+    }
+    
+    select.innerHTML = '<option value="">-- เลือกลูกค้า/บริษัท --</option>';
+    
+    // วนลูปสร้างตัวเลือกใน Dropdown พร้อมรองรับข้อมูลทุกรูปแบบ
+    customers.forEach((c) => {
+        let custName = '';
+        if (typeof c === 'string') {
+            custName = c;
+        } else if (c) {
+            custName = c.name || c.customerName || c.companyName || '';
+        }
+
+        if (custName) {
+            let opt = document.createElement('option');
+            opt.value = custName; 
+            opt.innerText = custName;
+            select.appendChild(opt);
+        }
+    });
+}
+
+// วางไว้ที่บรรทัดล่างสุดของไฟล์ .js เลยครับ
+window.addEventListener('DOMContentLoaded', () => {
+    console.log("🚀 ระบบกำลังโหลดข้อมูลเริ่มต้น...");
+    
+    // เรียกโหลดรายการลูกค้า
+    loadCustomerDropdown();
+    
+    // เรียกโหลดรายการสินค้า (ถ้ามีฟังก์ชันนี้)
+    if (typeof renderProductList === 'function') {
+        renderProductList();
+    }
+    
+    // หากมีฟังก์ชันโหลดประวัติบิลด้วย ก็ใส่ได้เลย
+    if (typeof loadHistoryData === 'function') {
+        loadHistoryData();
+    }
+});
+
+    async function selectCustomer(select) {
+    let selectedName = select.value;
+    if (selectedName === "") return;
+    
+    let c = null;
+
+    // 1. ลองค้นหาจาก Firebase Cloud ก่อน (เพื่อความชัวร์ว่าได้ข้อมูลล่าสุดตรงกันทุกเครื่อง)
+    try {
+        if (typeof firebase !== 'undefined') {
+            if (!firebase.apps.length) {
+                firebase.initializeApp(firebaseConfig);
+            }
+            const db = firebase.firestore();
+            const doc = await db.collection("settings").doc("master_data").get();
+            if (doc.exists && doc.data().customers) {
+                let cloudCustomers = doc.data().customers;
+                c = cloudCustomers.find(item => item.name === selectedName);
+            }
+        }
+    } catch (error) {
+        console.warn("⚠️ ไม่สามารถดึงข้อมูลจาก Cloud ได้:", error);
+    }
+
+    // 2. ถ้าใน Cloud ไม่เจอ ให้ลองหาจาก LocalStorage ในเครื่องแทน
+    if (!c) {
+        let localCustomers = JSON.parse(localStorage.getItem('saved_quot_customers') || '[]');
+        c = localCustomers.find(item => item.name === selectedName);
+    }
+
+    // 3. แสดงผลข้อมูลลงในฟอร์ม
+    if (c) {
+        document.getElementById('custName').value = c.name;
+        let addrArea = document.getElementById('custAddress');
+        addrArea.value = c.address || "";
+        autoGrow(addrArea);
+
+        const Toast = Swal.mixin({
+            toast: true,
+            position: 'top-end',
+            showConfirmButton: false,
+            timer: 1500,
+            timerProgressBar: true
+        });
+        Toast.fire({ icon: 'success', title: 'ดึงข้อมูลลูกค้าสำเร็จ' });
+    } else {
+        Swal.fire({
+            icon: 'warning',
+            title: 'ไม่พบข้อมูลที่อยู่',
+            text: 'ไม่พบที่อยู่ของลูกค้ารายนี้ในระบบ',
+            timer: 1500,
+            showConfirmButton: false
+        });
+    }
+}
 
     function loadDataByBillNo() {
         let searchNo = document.getElementById('searchOldBillNo').value.trim();
@@ -1422,48 +1753,100 @@ function addRow() {
         renderHistoryTable();
         document.getElementById('historyModal').style.display = 'flex';
     }
+	
+	
 
-    function renderHistoryTable(filterText = '') {
-        let container = document.getElementById('historyTableContainer');
-        let titleElement = document.getElementById('historyModalTitle');
-        let purchases = JSON.parse(localStorage.getItem('saved_quot_purchases') || '[]');
+async function renderHistoryTable(filterText = '') {
+    let container = document.getElementById('historyTableContainer');
+    let titleElement = document.getElementById('historyModalTitle');
+    
+    container.innerHTML = '<p style="text-align:center; color:#64748b; padding: 20px;">กำลังโหลดข้อมูลประวัติจาก Cloud...</p>';
+    
+    let purchases = [];
+    try {
+        if (!firebase.apps.length) {
+            firebase.initializeApp(firebaseConfig);
+        }
+        const db = firebase.firestore();
+        const querySnapshot = await db.collection("quotations").get();
         
-        let totalRecords = purchases.length;
+        querySnapshot.forEach((doc) => {
+            purchases.push(doc.data());
+        });
 
-        if (totalRecords === 0) {
-            if (titleElement) titleElement.innerText = `📋 ประวัติการขายและใบเสนอราคาทั้งหมด (0 รายการ)`;
-            container.innerHTML = '<p style="text-align:center; color:#64748b; padding: 20px;">ยังไม่มีประวัติการบันทึกบิลในระบบ</p>';
-            return;
-        }
+purchases.sort((a, b) => {
+            // แปลงวันที่จากรูปแบบ "DD/MM/YYYY" (เช่น 07/08/2569) ให้เป็นตัวเลขสำหรับเทียบ
+            let parseDate = (dateStr) => {
+                if (!dateStr || !dateStr.includes('/')) return 0;
+                let parts = dateStr.split('/');
+                if (parts.length !== 3) return 0;
+                let day = parts[0];
+                let month = parts[1];
+                let year = parts[2];
+                return parseInt(`${year}${month}${day}`) || 0;
+            };
 
-        purchases.sort((a, b) => b.timestamp - a.timestamp);
+            let dateA = parseDate(a.billDate);
+            let dateB = parseDate(b.billDate);
 
-        if (filterText) {
-            let lower = filterText.toLowerCase();
-            purchases = purchases.filter(p => 
-                (p.billNo && p.billNo.toLowerCase().includes(lower)) ||
-                (p.customerName && p.customerName.toLowerCase().includes(lower)) ||
-                (p.billDate && p.billDate.toLowerCase().includes(lower)) ||
-                (p.grandTotal && p.grandTotal.toString().includes(lower)) ||
-                (p.salesSignName && p.salesSignName.toLowerCase().includes(lower))
-            );
-        }
-
-        if (titleElement) {
-            if (filterText) {
-                titleElement.innerText = `📋 ประวัติการขายและใบเสนอราคาทั้งหมด (พบ ${purchases.length} จาก ${totalRecords} รายการ)`;
-            } else {
-                titleElement.innerText = `📋 ประวัติการขายและใบเสนอราคาทั้งหมด (${totalRecords} รายการ)`;
+            // เรียงจากวันที่ล่าสุดไปเก่าสุด (เช่น 21, 20, 19 ... ลงไปถึง 7, 6, 5)
+            if (dateB !== dateA) {
+                return dateB - dateA;
             }
-        }
 
-        if (purchases.length === 0) {
-            container.innerHTML = '<p style="text-align:center; color:#64748b; padding: 20px;">ไม่พบรายการที่ตรงกับการค้นหา</p>';
-            return;
-        }
+            // ถ้าวันเดียวกัน ให้เทียบตามเวลาสร้างเดิมเพื่อความเสถียร
+            let timeA = Number(a.timestamp || 0);
+            let timeB = Number(b.timestamp || 0);
+            return timeB - timeA;
+        });
 
-        let html = `
-            <table class="history-table">
+    } catch (error) {
+        console.error("❌ เกิดข้อผิดพลาดในการโหลดจาก Cloud:", error);
+        purchases = JSON.parse(localStorage.getItem('saved_quot_purchases') || '[]');
+    }
+
+if (filterText) {
+        let lower = filterText.toLowerCase();
+        
+        // แปลงข้อความค้นหาเบื้องต้น (เผื่อผู้ใช้พิมพ์ เช่น 19/8 ให้ลองเทียบกับ 19/08)
+        purchases = purchases.filter(p => {
+            let bNo = (p.billNo || '').toLowerCase();
+            let cName = (p.customerName || '').toLowerCase();
+            let sName = (p.salesSignName || '').toLowerCase();
+            let subj = (p.subject || '').toLowerCase();
+            let bDate = (p.billDate || '').toLowerCase(); // รูปแบบเช่น 19/08/2569
+
+            // เช็คคำค้นหากับฟิลด์ทั่วไป
+            let matchGeneral = bNo.includes(lower) || cName.includes(lower) || sName.includes(lower) || subj.includes(lower);
+            
+            // เช็คคำค้นหากับวันที่ (รองรับทั้งแบบมีเลข 0 และไม่มีเลข 0 เช่น พิมพ์ 19/8 หรือ 19/08)
+            let matchDate = bDate.includes(lower);
+            if (!matchDate && lower.includes('/')) {
+                let parts = lower.split('/');
+                if (parts.length === 2 || parts.length === 3) {
+                    let d = parts[0].padStart(2, '0');
+                    let m = parts[1].padStart(2, '0');
+                    let y = parts[2] || '';
+                    let normalizedQuery = y ? `${d}/${m}/${y}` : `${d}/${m}`;
+                    matchDate = bDate.includes(normalizedQuery);
+                }
+            }
+
+            return matchGeneral || matchDate;
+        });
+    }
+
+    let totalRecords = purchases.length;
+    titleElement.innerHTML = `📋 ประวัติการขายและใบเสนอราคาทั้งหมด (History Log) - พบ ${totalRecords} รายการ`;
+
+    if (totalRecords === 0) {
+        container.innerHTML = '<p style="text-align:center; color:#64748b; padding: 20px;">ไม่พบข้อมูลประวัติที่ค้นหา</p>';
+        return;
+    }
+
+    let html = `
+        <div style="overflow-x: auto;">
+            <table class="history-table" style="min-width: 500px;">
                 <thead>
                     <tr>
                         <th style="width: 13%;">วันที่</th>
@@ -1475,39 +1858,48 @@ function addRow() {
                     </tr>
                 </thead>
                 <tbody>
+    `;
+
+    purchases.forEach(p => {
+        let formattedTotal = (p.grandTotal !== undefined ? p.grandTotal : 0).toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        html += `
+            <tr>
+                <td>${p.billDate || '-'}</td>
+                <td><strong>${p.billNo || '-'}</strong></td>
+                <td>${p.customerName || '-'}</td>
+                <td>${p.salesSignName || '-'}</td>
+                <td style="text-align: right; color: #0369a1; font-weight: 600;">${formattedTotal}</td>
+                <td style="text-align: center; white-space: nowrap;">
+                    <button class="btn-select-history" onclick="selectHistoryBill('${p.billNo}')">เลือก</button>
+                    <button class="btn-select-history" style="background: #f59e0b; margin-left: 2px;" onclick="selectHistoryBill('${p.billNo}'); closeModal('historyModal');">แก้ไข</button>
+                    <button class="btn-del" style="padding: 4px 8px; margin-left: 2px;" onclick="deleteHistoryBill('${p.billNo}')">ลบ</button>
+                </td>
+            </tr>
         `;
+    });
 
-        purchases.forEach(p => {
-            let formattedTotal = (p.grandTotal !== undefined ? p.grandTotal : 0).toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-            html += `
-                <tr>
-                    <td>${p.billDate || '-'}</td>
-                    <td><strong>${p.billNo || '-'}</strong></td>
-                    <td>${p.customerName || '-'}</td>
-                    <td>${p.salesSignName || '-'}</td>
-                    <td style="text-align: right; color: #0369a1; font-weight: 600;">${formattedTotal}</td>
-                    <td style="text-align: center;">
-                        <button class="btn-select-history" onclick="selectHistoryBill('${p.billNo}')">เลือก</button>
-                    </td>
-                </tr>
-            `;
-        });
+    html += `</tbody></table></div>`;
+    container.innerHTML = html;
+}
 
-        html += `</tbody></table>`;
-        container.innerHTML = html;
-    }
+function filterHistoryTable() {
+    // 1. ดึงค่าจากช่อง Input
+    const filterText = document.getElementById('historySearchInput').value;
+    
+    // 2. เรียกฟังก์ชัน Render โดยส่งค่า filterText เข้าไป
+    renderHistoryTable(filterText);
+}
 
-    function filterHistoryTable() {
-        let query = document.getElementById('historySearchInput').value;
-        renderHistoryTable(query);
-    }
-
-    function selectHistoryBill(billNo) {
-        let purchases = JSON.parse(localStorage.getItem('saved_quot_purchases') || '[]');
-        let found = purchases.find(p => p.billNo === billNo);
-        if (found) {
-            fillPurchaseDataToDOM(found);
+    async function selectHistoryBill(billNo) {
+    try {
+        const db = firebase.firestore();
+        const docRef = await db.collection("quotations").doc(billNo).get();
+        
+        if (docRef.exists) {
+            let billData = docRef.data();
+            fillPurchaseDataToDOM(billData);
             closeModal('historyModal');
+            
             const Toast = Swal.mixin({
                 toast: true,
                 position: 'top-end',
@@ -1516,8 +1908,44 @@ function addRow() {
                 timerProgressBar: true
             });
             Toast.fire({ icon: 'success', title: `ดึงข้อมูลบิล ${billNo} สำเร็จ` });
+        } else {
+            Swal.fire({ icon: 'error', title: 'ไม่พบข้อมูล', text: 'ไม่พบข้อมูลบิลดังกล่าวบน Cloud' });
         }
+    } catch (error) {
+        console.error("❌ เกิดข้อผิดพลาดในการดึงข้อมูลบิล:", error);
+        Swal.fire({ icon: 'error', title: 'เกิดข้อผิดพลาด', text: 'ไม่สามารถดึงข้อมูลจาก Cloud ได้' });
     }
+}
+
+async function deleteHistoryBill(billNo) {
+    Swal.fire({
+        title: 'ยืนยันการลบประวัติ?',
+        text: `คุณต้องการลบใบเสนอเลขที่ ${billNo} ใช่หรือไม่`,
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#ef4444',
+        cancelButtonColor: '#94a3b8',
+        confirmButtonText: 'ลบ',
+        cancelButtonText: 'ยกเลิก'
+    }).then(async (result) => {
+        if (result.isConfirmed) {
+            try {
+                const db = firebase.firestore();
+                await db.collection("quotations").doc(billNo).delete();
+
+                let purchases = JSON.parse(localStorage.getItem('saved_quot_purchases') || '[]');
+                purchases = purchases.filter(p => p.billNo !== billNo);
+                localStorage.setItem('saved_quot_purchases', JSON.stringify(purchases));
+
+                renderHistoryTable(document.getElementById('historySearchInput').value);
+                Swal.fire({ icon: 'success', title: 'ลบประวัติสำเร็จ', showConfirmButton: false, timer: 1000 });
+            } catch (error) {
+                console.error("❌ ลบไม่สำเร็จ: ", error);
+                Swal.fire({ icon: 'error', title: 'เกิดข้อผิดพลาด', text: 'ไม่สามารถลบข้อมูลบน Cloud ได้' });
+            }
+        }
+    });
+}
 
     function fillPurchaseDataToDOM(data) {
         if(data.billNo) document.getElementById('billNo').value = data.billNo;
@@ -1540,7 +1968,6 @@ function addRow() {
         if(data.salesSignName !== undefined) document.getElementById('sigSalesName').value = data.salesSignName;
         if(data.salesSignDate !== undefined) document.getElementById('sigSalesDate').value = data.salesSignDate;
 
-        // 💡 เพิ่มการดึงค่าส่วนลดจากบิลเก่า (ถ้าไม่มีให้เซ็ตเป็น 0 อัตโนมัติ)
         document.getElementById('discountRate').value = data.discountRate !== undefined ? data.discountRate : 0;
         document.getElementById('discountAmount').value = data.discountAmount !== undefined ? data.discountAmount.toFixed(2) : "0.00";
 
@@ -1549,41 +1976,41 @@ function addRow() {
             tbody.innerHTML = ''; 
 
             data.items.forEach((item, index) => {
-    let newRow = tbody.insertRow();
-    newRow.className = "item-row";
-    newRow.innerHTML = `
-        <td class="row-num" style="text-align: center;">${index + 1}</td>
-        <td class="desc-cell"><textarea class="item-desc" placeholder="ระบุรายละเอียดสินค้า" oninput="autoGrow(this)" onblur="fetchProductByDesc(this)">${item.desc || ''}</textarea></td>
-        <td style="text-align: center;">
-            <input type="text" class="sku-input" value="${item.sku || ''}" placeholder="รหัส/รุ่น (กด Enter)" 
-                   onkeydown="if(event.key === 'Enter'){ fetchProductBySKU(this); this.blur(); }">
-        </td>
-        <td style="text-align: center;"><input type="text" class="qty" value="${item.qty || 0}" inputmode="decimal" onfocus="if(this.value==='0')this.value='';" onblur="if(this.value==='')this.value='0';" oninput="formatNumberInput(this); calculate();"></td>
-        <td style="text-align: center;"><input type="text" class="unit-input" value="${item.unit || ''}" placeholder="ชิ้น/อัน"></td>
-        <td style="text-align: center;"><input type="text" class="price" value="${item.price || 0}" inputmode="decimal" onfocus="if(this.value==='0')this.value='';" onblur="if(this.value==='')this.value='0';" oninput="formatNumberInput(this); calculate();"></td>
-        <td class="amount" style="text-align: right; padding-right: 12px;">0.00</td>
-        <td class="no-print" style="text-align: center;"><button class="btn-del" onclick="removeRow(this)">ลบ</button></td>
-    `;
-    let descArea = newRow.querySelector('.item-desc');
-    autoGrow(descArea);
-});
+                let newRow = tbody.insertRow();
+                newRow.className = "item-row";
+                newRow.innerHTML = `
+                    <td class="row-num" style="text-align: center;">${index + 1}</td>
+                    <td class="desc-cell"><textarea class="item-desc" placeholder="ระบุรายละเอียดสินค้า" oninput="autoGrow(this)" onblur="fetchProductByDesc(this)">${item.desc || ''}</textarea></td>
+                    <td style="text-align: center;">
+                        <input type="text" class="sku-input" value="${item.sku || ''}" placeholder="รหัส/รุ่น (กด Enter)" 
+                               onkeydown="if(event.key === 'Enter'){ fetchProductBySKU(this); this.blur(); }">
+                    </td>
+                    <td style="text-align: center;"><input type="text" class="qty" value="${item.qty || 0}" inputmode="decimal" onfocus="if(this.value==='0')this.value='';" onblur="if(this.value==='')this.value='0';" oninput="formatNumberInput(this); calculate();"></td>
+                    <td style="text-align: center;"><input type="text" class="unit-input" value="${item.unit || ''}" placeholder="ชิ้น/อัน"></td>
+                    <td style="text-align: center;"><input type="text" class="price" value="${item.price || 0}" inputmode="decimal" onfocus="if(this.value==='0')this.value='';" onblur="if(this.value==='')this.value='0';" oninput="formatNumberInput(this); calculate();"></td>
+                    <td class="amount" style="text-align: right; padding-right: 12px;">0.00</td>
+                    <td class="no-print" style="text-align: center;"><button class="btn-del" onclick="removeRow(this)">ลบ</button></td>
+                `;
+                let descArea = newRow.querySelector('.item-desc');
+                autoGrow(descArea);
+            });
             calculate();
         }
     }
 
     function fetchProductBySKU(input) {
-    let sku = input.value.trim();
-    if (!sku) return;
-    let products = JSON.parse(localStorage.getItem('saved_quot_products') || '[]');
-    let found = products.find(p => p.sku === sku);
-    if (found) {
-        let row = input.closest('tr');
-        let descArea = row.querySelector('.item-desc'); // ต้องดึงช่องรายละเอียดให้ถูกช่อง
-        descArea.value = found.desc;
-        autoGrow(descArea);
-        if(found.unit) row.querySelector('.unit-input').value = found.unit;
-        row.querySelector('.price').value = found.price;
-        calculate();
+        let sku = input.value.trim();
+        if (!sku) return;
+        let products = JSON.parse(localStorage.getItem('saved_quot_products') || '[]');
+        let found = products.find(p => p.sku === sku);
+        if (found) {
+            let row = input.closest('tr');
+            let descArea = row.querySelector('.item-desc'); 
+            descArea.value = found.desc;
+            autoGrow(descArea);
+            if(found.unit) row.querySelector('.unit-input').value = found.unit;
+            row.querySelector('.price').value = found.price;
+            calculate();
 
             input.style.borderColor = '#10b981';
             input.style.backgroundColor = '#f0fdf4';
@@ -1612,93 +2039,88 @@ function addRow() {
         }
     }
 
-    // เพิ่มฟังก์ชัน fetchProductByDesc ที่ขาดหายไป
     function fetchProductByDesc(textarea) {
-    let searchText = textarea.value.trim();
-    if (!searchText) return;
+        let searchText = textarea.value.trim();
+        if (!searchText) return;
 
-    let products = JSON.parse(localStorage.getItem('saved_quot_products') || '[]');
-    let keyword = searchText.toLowerCase();
+        let products = JSON.parse(localStorage.getItem('saved_quot_products') || '[]');
+        let keyword = searchText.toLowerCase();
 
-    // กรองหาสินค้าที่มีข้อความตรงกับที่พิมพ์
-    let matchedProducts = products.filter(p => 
-        p.desc && p.desc.toLowerCase().includes(keyword)
-    );
+        let matchedProducts = products.filter(p => 
+            p.desc && p.desc.toLowerCase().includes(keyword)
+        );
 
-    if (matchedProducts.length === 1) {
-        // กรณีเจอสินค้าตรงเป๊ะๆ เพียง 1 รายการ ดึงข้อมูลมาเติมทันที
-        let found = matchedProducts[0]; 
-        let row = textarea.closest('tr');
-        let skuInput = row.querySelector('.sku-input'); // ช่อง Model
-        
-        skuInput.value = found.sku;  // นำรหัสรุ่นมาใส่ช่อง Model
-        textarea.value = found.desc; // นำรายละเอียดมาใส่ช่อง Description
-        autoGrow(textarea);
-        if(found.unit) row.querySelector('.unit-input').value = found.unit;
-        row.querySelector('.price').value = found.price;
-        calculate();
+        if (matchedProducts.length === 1) {
+            let found = matchedProducts[0]; 
+            let row = textarea.closest('tr');
+            let skuInput = row.querySelector('.sku-input'); 
+            
+            skuInput.value = found.sku;  
+            textarea.value = found.desc; 
+            autoGrow(textarea);
+            if(found.unit) row.querySelector('.unit-input').value = found.unit;
+            row.querySelector('.price').value = found.price;
+            calculate();
 
-        const Toast = Swal.mixin({
-            toast: true,
-            position: 'top-end',
-            showConfirmButton: false,
-            timer: 1500,
-            timerProgressBar: true
-        });
-        Toast.fire({ icon: 'success', title: `✅ พบสินค้า: [${found.sku}]` });
+            const Toast = Swal.mixin({
+                toast: true,
+                position: 'top-end',
+                showConfirmButton: false,
+                timer: 1500,
+                timerProgressBar: true
+            });
+            Toast.fire({ icon: 'success', title: `✅ พบสินค้า: [${found.sku}]` });
 
-    } else if (matchedProducts.length > 1) {
-        // กรณีเจอสินค้าหลายรายการ ให้แสดง SweetAlert เลือกรายการที่ต้องการ
-        let options = {};
-        matchedProducts.forEach((p, idx) => {
-            options[idx] = `[${p.sku}] ${p.desc} (${p.price} บาท)`;
-        });
+        } else if (matchedProducts.length > 1) {
+            let options = {};
+            matchedProducts.forEach((p, idx) => {
+                options[idx] = `[${p.sku}] ${p.desc} (${p.price} บาท)`;
+            });
 
-        Swal.fire({
-            title: 'พบสินค้าหลายรายการ',
-            input: 'select',
-            inputOptions: options,
-            inputPlaceholder: '== เลือกสินค้าที่ต้องการ ==',
-            showCancelButton: true,
-            confirmButtonText: 'เลือก',
-            cancelButtonText: 'ยกเลิก',
-            confirmButtonColor: '#0284c7'
-        }).then((result) => {
-            if (result.isConfirmed && result.value !== "") {
-                let found = matchedProducts[result.value];
-                let row = textarea.closest('tr');
-                let skuInput = row.querySelector('.sku-input');
-                
-                skuInput.value = found.sku;
-                textarea.value = found.desc;
-                autoGrow(textarea);
-                if(found.unit) row.querySelector('.unit-input').value = found.unit;
-                row.querySelector('.price').value = found.price;
-                calculate();
+            Swal.fire({
+                title: 'พบสินค้าหลายรายการ',
+                input: 'select',
+                inputOptions: options,
+                inputPlaceholder: '== เลือกสินค้าที่ต้องการ ==',
+                showCancelButton: true,
+                confirmButtonText: 'เลือก',
+                cancelButtonText: 'ยกเลิก',
+                confirmButtonColor: '#0284c7'
+            }).then((result) => {
+                if (result.isConfirmed && result.value !== "") {
+                    let found = matchedProducts[result.value];
+                    let row = textarea.closest('tr');
+                    let skuInput = row.querySelector('.sku-input');
+                    
+                    skuInput.value = found.sku;
+                    textarea.value = found.desc;
+                    autoGrow(textarea);
+                    if(found.unit) row.querySelector('.unit-input').value = found.unit;
+                    row.querySelector('.price').value = found.price;
+                    calculate();
 
-                const Toast = Swal.mixin({
-                    toast: true,
-                    position: 'top-end',
-                    showConfirmButton: false,
-                    timer: 1500,
-                    timerProgressBar: true
-                });
-                Toast.fire({ icon: 'success', title: `✅ เลือกสินค้า: [${found.sku}]` });
-            }
-        });
+                    const Toast = Swal.mixin({
+                        toast: true,
+                        position: 'top-end',
+                        showConfirmButton: false,
+                        timer: 1500,
+                        timerProgressBar: true
+                    });
+                    Toast.fire({ icon: 'success', title: `✅ เลือกสินค้า: [${found.sku}]` });
+                }
+            });
 
-    } else {
-        // กรณีไม่พบในฐานข้อมูล จะไม่เขียนทับข้อความที่ผู้ใช้พิมพ์ เพื่อให้พิมพ์รายละเอียดอิสระได้
-        const Toast = Swal.mixin({
-            toast: true,
-            position: 'top-end',
-            showConfirmButton: false,
-            timer: 1500,
-            timerProgressBar: true
-        });
-        Toast.fire({ icon: 'info', title: `⚠️ ไม่พบรายละเอียดสินค้าใกล้เคียง (ใช้ข้อความอิสระ)` });
+        } else {
+            const Toast = Swal.mixin({
+                toast: true,
+                position: 'top-end',
+                showConfirmButton: false,
+                timer: 1500,
+                timerProgressBar: true
+            });
+            Toast.fire({ icon: 'info', title: `⚠️ ไม่พบรายละเอียดสินค้าใกล้เคียง (ใช้ข้อความอิสระ)` });
+        }
     }
-}
 
     function openModal(modalId) {
         if (modalId === 'productModal') {
@@ -1713,60 +2135,134 @@ function addRow() {
         document.getElementById(modalId).style.display = 'none';
     }
 
-    // ปรับปรุงฟังก์ชัน renderProductList ให้ส่ง index ที่ถูกต้อง
-    function renderProductList() {
-        let container = document.getElementById('productListContainer');
-        let countContainer = document.getElementById('productCountText'); 
-        
-        container.innerHTML = '';
-        let products = JSON.parse(localStorage.getItem('saved_quot_products') || '[]');
-        
-        let searchInput = document.getElementById('productSearchInput');
-        let filterText = searchInput ? searchInput.value.trim().toLowerCase() : '';
-
-        let filteredProducts = products.map((p, originalIndex) => ({ ...p, originalIndex })).filter(p => 
-            (p.sku && p.sku.toLowerCase().includes(filterText)) ||
-            (p.desc && p.desc.toLowerCase().includes(filterText))
-        );
-
-        if (countContainer) {
-            countContainer.innerText = `พบสินค้า = ${filteredProducts.length} รายการ (จากทั้งหมด ${products.length} รายการ)`;
+    async function renderProductList() {
+    let container = document.getElementById('productListContainer');
+    let countContainer = document.getElementById('productCountText'); 
+    
+    container.innerHTML = '<p style="text-align:center; color:#64748b; padding: 15px;">กำลังโหลดข้อมูลสินค้าจาก Cloud...</p>';
+    
+    let products = [];
+    try {
+        if (!firebase.apps.length) {
+            firebase.initializeApp(firebaseConfig);
         }
-
-        if (filteredProducts.length === 0) {
-            container.innerHTML = '<p style="text-align:center; color:#64748b; padding: 15px;">ไม่พบข้อมูลสินค้าที่ค้นหา</p>';
-            return;
-        }
+        const db = firebase.firestore();
         
-        filteredProducts.forEach((p) => {
-            container.innerHTML += `
-                <div class="list-item-box">
-                    <div><strong>[${p.sku}]</strong> ${p.desc}<br><small style="color:#64748b;">หน่วย: ${p.unit || '-'} | ราคา: ${p.price} บาท</small></div>
-                    <button class="btn-del" onclick="confirmDeleteProduct(${p.originalIndex})">ลบ</button>
-                </div>`;
-        });
+        const docSnap = await db.collection("settings").doc("master_data").get();
+        if (docSnap.exists && docSnap.data().products) {
+            products = docSnap.data().products;
+        } else {
+            products = JSON.parse(localStorage.getItem('saved_quot_products') || '[]');
+        }
+    } catch (error) {
+        console.error("❌ โหลดสินค้าจาก Cloud ไม่สำเร็จ:", error);
+        products = JSON.parse(localStorage.getItem('saved_quot_products') || '[]');
+    }
+    
+    container.innerHTML = '';
+    let searchInput = document.getElementById('productSearchInput');
+    let filterText = searchInput ? searchInput.value.trim().toLowerCase() : '';
+
+    let filteredProducts = products.map((p, originalIndex) => ({ ...p, originalIndex })).filter(p => 
+        (p.sku && p.sku.toLowerCase().includes(filterText)) ||
+        (p.desc && p.desc.toLowerCase().includes(filterText))
+    );
+
+    if (countContainer) {
+        countContainer.innerText = `พบสินค้า = ${filteredProducts.length} รายการ (จากทั้งหมด ${products.length} รายการ)`;
     }
 
-    // เพิ่มการตรวจสอบรายการสินค้าว่างใน executeSave()
-    // (แทรกไว้ช่วงต้นของฟังก์ชัน executeSave หลังจากเช็คชื่อลูกค้า)
-    /*
-    let rows = document.querySelectorAll('.item-row');
-    let currentItems = [];
-    rows.forEach(row => {
-        ...
-    });
-
-    if (currentItems.length === 0) {
-        Swal.fire({
-            icon: 'warning',
-            title: 'ไม่มีรายการสินค้า',
-            text: 'กรุณากรอกข้อมูลสินค้าอย่างน้อย 1 รายการก่อนบันทึก',
-            confirmButtonText: 'เข้าใจแล้ว',
-            confirmButtonColor: '#0284c7'
-        });
+    if (filteredProducts.length === 0) {
+        container.innerHTML = '<p style="text-align:center; color:#64748b; padding: 15px;">ไม่พบข้อมูลสินค้าที่ค้นหา</p>';
         return;
     }
-    */
+    
+    filteredProducts.forEach((p) => {
+        container.innerHTML += `
+            <div class="list-item-box" style="display: flex; justify-content: space-between; align-items: center;">
+                <div><strong>[${p.sku || '-'}]</strong> ${p.desc || '-'}<br><small style="color:#64748b;">หน่วย: ${p.unit || '-'} | ราคา: ${p.price || 0} บาท</small></div>
+                <div style="display: flex; gap: 4px;">
+                    <!-- 🛠️ เพิ่มปุ่มแก้ไขตรงนี้ -->
+                    <button class="btn-select-history" style="background: #f59e0b; padding: 4px 8px;" onclick="openEditProductModal(${p.originalIndex})">แก้ไข</button>
+                    <button class="btn-del" onclick="confirmDeleteProduct(${p.originalIndex})">ลบ</button>
+                </div>
+            </div>`;
+    });
+}
+
+
+
+async function openEditProductModal(index) {
+    try {
+        if (!firebase.apps.length) {
+            firebase.initializeApp(firebaseConfig);
+        }
+        const db = firebase.firestore();
+        const docSnap = await db.collection("settings").doc("master_data").get();
+        
+        if (docSnap.exists && docSnap.data().products) {
+            let products = docSnap.data().products;
+            let p = products[index];
+
+            if (!p) {
+                Swal.fire('Error', 'ไม่พบข้อมูลสินค้านี้', 'error');
+                return;
+            }
+
+            // ใช้ SweetAlert2 ทำ Modal สำหรับแก้ไขข้อมูลสินค้า
+            const { value: formValues } = await Swal.fire({
+                title: 'แก้ไขข้อมูลสินค้า',
+                html:
+                    `<input id="swal-edit-sku" class="swal2-input" placeholder="รหัส/รุ่น" value="${p.sku || ''}">` +
+                    `<input id="swal-edit-desc" class="swal2-input" placeholder="รายละเอียดสินค้า" value="${p.desc || ''}">` +
+                    `<input id="swal-edit-unit" class="swal2-input" placeholder="หน่วย (เช่น ชิ้น, อัน)" value="${p.unit || ''}">` +
+                    `<input id="swal-edit-price" type="number" class="swal2-input" placeholder="ราคา" value="${p.price || 0}">`,
+                focusConfirm: false,
+                showCancelButton: true,
+                confirmButtonText: 'บันทึกการแก้ไข',
+                cancelButtonText: 'ยกเลิก',
+                confirmButtonUrl: '',
+                preConfirm: () => {
+                    return {
+                        sku: document.getElementById('swal-edit-sku').value.trim(),
+                        desc: document.getElementById('swal-edit-desc').value.trim(),
+                        unit: document.getElementById('swal-edit-unit').value.trim(),
+                        price: parseFloat(document.getElementById('swal-edit-price').value) || 0
+                    }
+                }
+            });
+
+            // ถ้าผู้ใช้กดบันทึก
+            if (formValues) {
+                products[index] = formValues; // อัปเดตข้อมูลในอาเรย์ตำแหน่งเดิม
+
+                // บันทึกกลับลง Cloud Firestore
+                await db.collection("settings").doc("master_data").update({
+                    products: products
+                });
+
+                // บันทึกสำรองลง LocalStorage ด้วย
+                localStorage.setItem('saved_quot_products', JSON.stringify(products));
+
+                Swal.fire({
+                    icon: 'success',
+                    title: 'แก้ไขสินค้าสำเร็จ',
+                    showConfirmButton: false,
+                    timer: 1500
+                });
+
+                // รีเฟรชรายการสินค้าบนหน้าจอใหม่
+                renderProductList();
+            }
+        }
+    } catch (error) {
+        console.error("❌ แก้ไขสินค้าไม่สำเร็จ:", error);
+        Swal.fire('Error', 'เกิดข้อผิดพลาดในการแก้ไขสินค้า', 'error');
+    }
+}
+
+
+
 
     function confirmDeleteProduct(index) {
         Swal.fire({
@@ -1856,9 +2352,23 @@ function addRow() {
         let finalResult = bahtText + satangText;
         return isNegative ? "ลบ" + finalResult : finalResult;
     }
-	document.getElementById('discountRate').addEventListener('input', function() {
-    calculate();
-});
+
+    document.getElementById('discountRate').addEventListener('input', function() {
+        calculate();
+    });
+	
+	
+function toggleBackupButtons() {
+    const backupGroup = document.getElementById('backupGroup');
+    // ตรวจสอบสถานะการแสดงผลปัจจุบัน
+    if (backupGroup.style.display === 'none' || backupGroup.style.display === '') {
+        backupGroup.style.setProperty('display', 'inline-flex', 'important');
+    } else {
+        backupGroup.style.setProperty('display', 'none', 'important');
+    }
+}
+
+
 </script>
 </body>
 </html>
