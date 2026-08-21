@@ -1083,6 +1083,7 @@
         }).then((result) => {
             if (result.isConfirmed) {
                 document.getElementById('customerSelect').value = "";
+				loadCustomerDropdown();
                 document.getElementById('custName').value = "";
                 let addrArea = document.getElementById('custAddress');
                 addrArea.value = "";
@@ -2232,6 +2233,8 @@ function toggleBackupButtons() {
         backupGroup.style.setProperty('display', 'none', 'important');
     }
 }
+
+
 </script>
 </body>
 </html>
