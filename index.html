@@ -1339,14 +1339,25 @@ async function executeSave(isNewBill) {
         if (sigSalesDate) sigSalesDate.value = currentDateStr;
     }
 
-    let customers = JSON.parse(localStorage.getItem('saved_quot_customers') || '[]');
-    let existingIndex = customers.findIndex(c => c.name === cName);
-    if (existingIndex >= 0) {
-        customers[existingIndex] = { name: cName, address: cAddr };
-    } else {
-        customers.push({ name: cName, address: cAddr });
+let customers = JSON.parse(localStorage.getItem('saved_quot_customers') || '[]');
+
+// ปรับวิธีค้นหาให้รอบคอบขึ้น รองรับทั้งข้อมูลเดิมและข้อมูลใหม่
+let existingIndex = customers.findIndex(c => {
+    let existingName = '';
+    if (typeof c === 'string') {
+        existingName = c;
+    } else if (c) {
+        existingName = c.name || c.customerName || c.companyName || '';
     }
-    localStorage.setItem('saved_quot_customers', JSON.stringify(customers));
+    return existingName === cName;
+});
+
+if (existingIndex >= 0) {
+    customers[existingIndex] = { name: cName, address: cAddr };
+} else {
+    customers.push({ name: cName, address: cAddr });
+}
+localStorage.setItem('saved_quot_customers', JSON.stringify(customers));
 
     try {
         await db.collection("settings").doc("master_data").set({
@@ -1620,15 +1631,25 @@ async function loadCustomerDropdown() {
     
     select.innerHTML = '<option value="">-- เลือกลูกค้า/บริษัท --</option>';
     
-    customers.forEach((c) => {
-        let custName = c.name || c.customerName || '';
-        if (custName) {
-            let opt = document.createElement('option');
-            opt.value = custName; 
-            opt.innerText = custName;
-            select.appendChild(opt);
-        }
-    });
+let customers = JSON.parse(localStorage.getItem('saved_quot_customers') || '[]');
+
+// ปรับวิธีค้นหาให้รอบคอบขึ้น รองรับทั้งข้อมูลเดิมและข้อมูลใหม่
+let existingIndex = customers.findIndex(c => {
+    let existingName = '';
+    if (typeof c === 'string') {
+        existingName = c;
+    } else if (c) {
+        existingName = c.name || c.customerName || c.companyName || '';
+    }
+    return existingName === cName;
+});
+
+if (existingIndex >= 0) {
+    customers[existingIndex] = { name: cName, address: cAddr };
+} else {
+    customers.push({ name: cName, address: cAddr });
+}
+localStorage.setItem('saved_quot_customers', JSON.stringify(customers));
 }
 
 // วางไว้ที่บรรทัดล่างสุดของไฟล์ .js เลยครับ
