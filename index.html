@@ -9,7 +9,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    
    <!-- [1] Firebase App (Core) -->
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
     <!-- [2] Firebase Firestore -->
@@ -772,21 +772,14 @@
 </div>
 
     <div class="panel-divider"></div>
-<div class="panel-group">
-    <div class="panel-group-label">📥 ดาวน์โหลด & แชร์</div>
+	<div class="panel-group">
+    <div class="panel-group-label">📤 ส่งออก (เมล/ไลน์)</div>
     <div class="panel-buttons">
-        <!-- ปุ่มดาวน์โหลด PDF -->
-        <button class="icon-btn btn-export-ui" data-tip="ดาวน์โหลดเอกสาร (PDF)" onclick="downloadPDF()"><i class="fa-solid fa-download"></i></button>
-        
-        <!-- ปุ่มแชร์ผ่านระบบมือถือ/เบราว์เซอร์ -->
-        <button class="icon-btn btn-line-ui" data-tip="แชร์ใบเสนอราคา" onclick="shareDocument()"><i class="fa-solid fa-share-nodes"></i></button>
-
         <!-- ปุ่มส่งเมลผ่าน Gmail -->
-        <button class="icon-btn btn-export-ui" data-tip="เขียนใบเสนอราคาใน Gmail" onclick="window.open('https://mail.google.com/mail/u/0/?tab=rm&ogbl#inbox?compose=new', 'GmailPopup', 'width=1100,height=800,left=150,top=100,resizable=yes,scrollbars=yes'); return false;">
-            <i class="fa-solid fa-envelope"></i>
-        </button>
-
-        <!-- ปุ่มส่งไลน์ -->
+<button class="icon-btn btn-export-ui" data-tip="เขียนใบเสนอราคาใน Gmail" onclick="window.open('https://mail.google.com/mail/u/0/?tab=rm&ogbl#inbox?compose=new', 'GmailPopup', 'width=1100,height=800,left=150,top=100,resizable=yes,scrollbars=yes'); return false;">
+    <i class="fa-solid fa-envelope"></i>
+</button>
+        <!-- ปุ่มส่งไลน์ส่วนตัวผ่านมือถือ -->
         <button class="icon-btn btn-line-ui" data-tip="ส่งใบเสนอราคาผ่าน LINE" onclick="sendToLine()">
             <i class="fa-brands fa-line"></i>
         </button>
@@ -2191,77 +2184,6 @@ async function deleteHistoryBill(billNo) {
         calculate();
     });
 	
-	
-	// ฟังก์ชันสำหรับดาวน์โหลด (ในที่นี้ใช้คำสั่ง Print เป็นค่ามาตรฐานเพื่อให้ผู้ใช้เลือกบันทึกเป็น PDF ได้ทันที หรือหากต้องการใช้ไลบรารีเสริมเช่น html2pdf ก็สามารถเปลี่ยนได้)
-function downloadPDF() {
-    Swal.fire({
-        title: 'กำลังเตรียมดาวน์โหลด...',
-        text: 'ระบบกำลังเปิดหน้าต่างบันทึกเป็น PDF ให้คุณ',
-        icon: 'info',
-        timer: 1500,
-        showConfirmButton: false
-    });
-    setTimeout(() => {
-        window.print();
-    }, 1000);
-}
-
-// ฟังก์ชันแชร์ผ่านระบบ Web Share API ของมือถือหรือเบราว์เซอร์ (รองรับการแชร์เข้า Line, Facebook, Email ฯลฯ)
-async function shareDocument() {
-    const billNo = document.getElementById('billNo').value || 'Quotation';
-    const custName = document.getElementById('custName').value || 'ลูกค้า';
-    
-    // แจ้งผู้ใช้ว่ากำลังประสร้างไฟล์ PDF เพื่อแชร์
-    Swal.fire({
-        title: 'กำลังเตรียมไฟล์ PDF...',
-        text: 'กรุณารอสักครู่ ระบบกำลังสร้างเอกสารเพื่อแชร์',
-        icon: 'info',
-        allowOutsideClick: false,
-        showConfirmButton: false,
-        timer: 3000
-    });
-
-    // กำหนดพื้นที่ส่วนที่จะแปลงเป็น PDF (เลือกส่วนที่เป็นใบเสนอราคาของคุณ เช่น ตั้งไอดีให้divใบเสนอราคาว่า quotation-area)
-    const element = document.getElementById('quotation-area') || document.body; 
-
-    const options = {
-        margin:       10,
-        filename:     `Quotation_${billNo}.pdf`,
-        image:        { type: 'jpeg', quality: 0.98 },
-        html2canvas:  { scale: 2, useCORS: true },
-        jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
-    };
-
-    try {
-        // แปลงหน้าเว็บเป็นไฟล์ PDF ในรูปแบบ Blob / File
-        const pdfWorker = html2pdf().set(options).from(element);
-        const pdfBlob = await pdfWorker.output('blob');
-        
-        const file = new File([pdfBlob], `Quotation_${billNo}.pdf`, { type: 'application/pdf' });
-
-        // ตรวจสอบว่าเบราว์เซอร์รองรับการแชร์ไฟล์หรือไม่
-        if (navigator.canShare && navigator.canShare({ files: [file] })) {
-            await navigator.share({
-                title: 'ใบเสนอราคา - ' + billNo,
-                text: `ใบเสนอราคาสำหรับคุณ ${custName} (เลขที่: ${billNo}) จาก บริษัท เค แอล สเตชั่นเนอรี่ จำกัด`,
-                files: [file],
-            });
-        } else {
-            // หากอุปกรณ์ไม่รองรับการแชร์ไฟล์โดยตรง จะดาวน์โหลดไฟล์ PDF ลงเครื่องแทน เพื่อให้ลากส่ง Line สะดวก
-            pdfWorker.save();
-            Swal.fire({
-                title: 'ดาวน์โหลดไฟล์ PDF แล้ว',
-                text: 'เบราว์เซอร์นี้ไม่รองรับการส่งไฟล์ตรงผ่านหน้าต่างแชร์ ระบบได้ดาวน์โหลดไฟล์ PDF ลงเครื่องให้คุณนำไปส่งใน Line แทนครับ',
-                icon: 'success',
-                confirmButtonColor: '#0284c7'
-            });
-        }
-    } catch (error) {
-        console.log('การแชร์ไฟล์ถูกยกเลิกหรือผิดพลาด', error);
-    }
-}
 </script>
-
-
 </body>
 </html>
