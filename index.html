@@ -739,6 +739,31 @@
             width: 100% !important;
         }
     }
+	/* สำหรับหน้าจอมือถือ */
+@media screen and (max-width: 768px) {
+    /* เพิ่มเติมความยืดหยุ่นให้กล่องกลุ่มปุ่ม */
+    #backupGroup {
+        flex-wrap: nowrap;
+        overflow-x: auto;
+    }
+}
+/* สำหรับหน้าจอมือถือ (ความกว้างไม่เกิน 767px) */
+@media screen and (max-width: 767px) {
+    .panel-group-label span {
+        display: none !important;
+    }
+}
+@media screen and (max-width: 767px) {
+        /* ซ่อนเฉพาะข้อความ */
+        .label-text {
+            display: none !important;
+        }
+        /* ถ้าต้องการให้ปุ่มตั้งค่าขยับไปอยู่ตรงกลาง หรือขยายพื้นที่ให้ปุ่มอื่นบนมือถือ */
+        .panel-group-label {
+            justify-content: flex-end !important;
+        }
+    }
+
 </style>
 </head>
 <body>
@@ -747,12 +772,14 @@
     <div class="credit"><i class="fa-solid fa-user" style="margin-right: 4px; color: #0284c7;"></i> ผู้จัดทำ: <strong>Thanong Chooduang</strong></div>
     
 <div class="panel-group">
-        <div class="panel-group-label" style="display: flex; justify-content: space-between; align-items: center;">
-            <span>📁 ฐานข้อมูลลูกค้า</span>
-            <button onclick="toggleBackupButtons()" title="ซ่อน/แสดงปุ่มสำรองข้อมูล" style="background: none; border: none; cursor: pointer; color: #64748b; font-size: 12px;">
-                <i class="fa-solid fa-sliders"></i> ตั้งค่า
-            </button>
-        </div>
+<div class="panel-group-label" style="display: flex; justify-content: space-between; align-items: center;">
+    <!-- ใส่ class ให้ข้อความเพื่อให้ CSS จัดการง่ายขึ้น -->
+    <span class="label-text">📁 ฐานข้อมูลลูกค้า</span>
+    
+    <button onclick="toggleBackupButtons()" title="ซ่อน/แสดงปุ่มสำรองข้อมูล" style="background: none; border: none; cursor: pointer; color: #64748b; font-size: 12px;">
+        <i class="fa-solid fa-sliders"></i> ตั้งค่า
+    </button>
+</div>
         
         <div class="panel-buttons">
             <button class="icon-btn btn-history-ui" data-tip="ดูประวัติบิลทั้งหมด" onclick="openHistoryModal()"><i class="fa-solid fa-clipboard-list"></i></button>
@@ -2198,11 +2225,11 @@ async function deleteHistoryBill(billNo) {
 	
 function toggleBackupButtons() {
     const backupGroup = document.getElementById('backupGroup');
-    // เช็คสถานะปัจจุบัน ถ้ามันซ่อนอยู่ (รวมถึงค่าว่าง) ให้เปลี่ยนเป็นแสดงแบบ inline-flex
+    // ตรวจสอบสถานะการแสดงผลปัจจุบัน
     if (backupGroup.style.display === 'none' || backupGroup.style.display === '') {
-        backupGroup.style.display = 'inline-flex'; 
+        backupGroup.style.setProperty('display', 'inline-flex', 'important');
     } else {
-        backupGroup.style.display = 'none'; // ซ่อน
+        backupGroup.style.setProperty('display', 'none', 'important');
     }
 }
 </script>
