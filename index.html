@@ -2090,12 +2090,10 @@ async function deleteHistoryBill(billNo) {
         }
         const db = firebase.firestore();
         
-        // ดึงข้อมูลสินค้าจาก Cloud ที่เก็บไว้ใน settings -> master_data
         const docSnap = await db.collection("settings").doc("master_data").get();
         if (docSnap.exists && docSnap.data().products) {
             products = docSnap.data().products;
         } else {
-            // ถ้าใน Cloud ไม่มี ให้ดึงจาก localStorage เครื่องตัวเอง
             products = JSON.parse(localStorage.getItem('saved_quot_products') || '[]');
         }
     } catch (error) {
@@ -2123,12 +2121,90 @@ async function deleteHistoryBill(billNo) {
     
     filteredProducts.forEach((p) => {
         container.innerHTML += `
-            <div class="list-item-box">
+            <div class="list-item-box" style="display: flex; justify-content: space-between; align-items: center;">
                 <div><strong>[${p.sku || '-'}]</strong> ${p.desc || '-'}<br><small style="color:#64748b;">หน่วย: ${p.unit || '-'} | ราคา: ${p.price || 0} บาท</small></div>
-                <button class="btn-del" onclick="confirmDeleteProduct(${p.originalIndex})">ลบ</button>
+                <div style="display: flex; gap: 4px;">
+                    <!-- 🛠️ เพิ่มปุ่มแก้ไขตรงนี้ -->
+                    <button class="btn-select-history" style="background: #f59e0b; padding: 4px 8px;" onclick="openEditProductModal(${p.originalIndex})">แก้ไข</button>
+                    <button class="btn-del" onclick="confirmDeleteProduct(${p.originalIndex})">ลบ</button>
+                </div>
             </div>`;
     });
 }
+
+
+
+async function openEditProductModal(index) {
+    try {
+        if (!firebase.apps.length) {
+            firebase.initializeApp(firebaseConfig);
+        }
+        const db = firebase.firestore();
+        const docSnap = await db.collection("settings").doc("master_data").get();
+        
+        if (docSnap.exists && docSnap.data().products) {
+            let products = docSnap.data().products;
+            let p = products[index];
+
+            if (!p) {
+                Swal.fire('Error', 'ไม่พบข้อมูลสินค้านี้', 'error');
+                return;
+            }
+
+            // ใช้ SweetAlert2 ทำ Modal สำหรับแก้ไขข้อมูลสินค้า
+            const { value: formValues } = await Swal.fire({
+                title: 'แก้ไขข้อมูลสินค้า',
+                html:
+                    `<input id="swal-edit-sku" class="swal2-input" placeholder="รหัส/รุ่น" value="${p.sku || ''}">` +
+                    `<input id="swal-edit-desc" class="swal2-input" placeholder="รายละเอียดสินค้า" value="${p.desc || ''}">` +
+                    `<input id="swal-edit-unit" class="swal2-input" placeholder="หน่วย (เช่น ชิ้น, อัน)" value="${p.unit || ''}">` +
+                    `<input id="swal-edit-price" type="number" class="swal2-input" placeholder="ราคา" value="${p.price || 0}">`,
+                focusConfirm: false,
+                showCancelButton: true,
+                confirmButtonText: 'บันทึกการแก้ไข',
+                cancelButtonText: 'ยกเลิก',
+                confirmButtonUrl: '',
+                preConfirm: () => {
+                    return {
+                        sku: document.getElementById('swal-edit-sku').value.trim(),
+                        desc: document.getElementById('swal-edit-desc').value.trim(),
+                        unit: document.getElementById('swal-edit-unit').value.trim(),
+                        price: parseFloat(document.getElementById('swal-edit-price').value) || 0
+                    }
+                }
+            });
+
+            // ถ้าผู้ใช้กดบันทึก
+            if (formValues) {
+                products[index] = formValues; // อัปเดตข้อมูลในอาเรย์ตำแหน่งเดิม
+
+                // บันทึกกลับลง Cloud Firestore
+                await db.collection("settings").doc("master_data").update({
+                    products: products
+                });
+
+                // บันทึกสำรองลง LocalStorage ด้วย
+                localStorage.setItem('saved_quot_products', JSON.stringify(products));
+
+                Swal.fire({
+                    icon: 'success',
+                    title: 'แก้ไขสินค้าสำเร็จ',
+                    showConfirmButton: false,
+                    timer: 1500
+                });
+
+                // รีเฟรชรายการสินค้าบนหน้าจอใหม่
+                renderProductList();
+            }
+        }
+    } catch (error) {
+        console.error("❌ แก้ไขสินค้าไม่สำเร็จ:", error);
+        Swal.fire('Error', 'เกิดข้อผิดพลาดในการแก้ไขสินค้า', 'error');
+    }
+}
+
+
+
 
     function confirmDeleteProduct(index) {
         Swal.fire({
