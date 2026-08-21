@@ -378,35 +378,30 @@
     overflow: hidden;
 }
 
-/* ส่วนไอคอนวงกลมด้านในปุ่มพิมพ์ */
-.modern-print-btn .btn-icon-wrapper {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 32px;
-    height: 32px;
-    background: rgba(255, 255, 255, 0.2);
-    color: #ffffff;
-    border-radius: 50%;
-    transition: transform 0.3s ease;
-}
-
-/* เอฟเฟกต์เวลาเอาเมาส์มาวาง (Hover) */
-.modern-print-btn:hover {
-    background: linear-gradient(135deg, #059669 0%, #047857 100%);
-    box-shadow: 0 8px 20px rgba(16, 185, 129, 0.45);
-    transform: translateY(-2px);
-}
-
-.modern-print-btn:hover .btn-icon-wrapper {
-    transform: scale(1.1);
-}
-
-/* เอฟเฟกต์ตอนคลิก (Active) */
-.modern-print-btn:active {
-    transform: translateY(0);
-    box-shadow: 0 3px 8px rgba(16, 185, 129, 0.3);
-}
+/* สไตล์ปุ่มพิมพ์แบบไอคอนวงกลมเดี่ยว (Icon-only) ทันสมัย ขนาดกะทัดรัด */
+        .icon-print-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 44px;
+            height: 44px;
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: #ffffff;
+            border: none;
+            border-radius: 50%;
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.35);
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+        }
+        .icon-print-btn:hover {
+            background: linear-gradient(135deg, #059669 0%, #047857 100%);
+            box-shadow: 0 6px 16px rgba(16, 185, 129, 0.45);
+            transform: translateY(-2px) scale(1.05);
+        }
+        .icon-print-btn:active {
+            transform: translateY(0) scale(0.98);
+        }
     </style>
 </head>
 <body>
@@ -481,16 +476,13 @@
     </div>
 
 <div class="action-container" style="margin-top: 40px; border-top: 2px solid #eef2f7; padding-top: 20px;">
-    <span style="font-size: 12px; color: #94a3b8;">ระบบออกเอกสารอัตโนมัติ - KL Stationery</span>
-    
-    <!-- ปุ่มพิมพ์แบบใหม่ ทันสมัย -->
-    <button class="modern-print-btn" onclick="window.print()">
-        <span class="btn-icon-wrapper">
-            <i class="fa-solid fa-print"></i>
-        </span>
-        <span class="btn-text">พิมพ์ / บันทึกเป็น PDF</span>
-    </button>
-</div>
+        <span style="font-size: 12px; color: #94a3b8;">ระบบออกเอกสารอัตโนมัติ - KL Stationery</span>
+        
+        <!-- ปุ่มพิมพ์แบบไอคอนวงกลมเดี่ยว ทันสมัย -->
+        <button class="icon-print-btn" onclick="window.print()" title="พิมพ์ / บันทึกเป็น PDF">
+            <i class="fa-solid fa-print" style="font-size: 18px;"></i>
+        </button>
+    </div>
 </div>
 
 <script>
