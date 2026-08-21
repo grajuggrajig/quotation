@@ -759,10 +759,10 @@
             <button class="icon-btn btn-manage-prod" data-tip="ดูรายชื่อสินค้าและราคาที่บันทึก" onclick="openModal('productModal')"><i class="fa-solid fa-boxes-stacked"></i></button>
             
             <!-- แก้ไขบรรทัดนี้ ให้เหลือ display: none; อันเดียวพอครับ -->
-            <span id="backupGroup" style="display: none; gap: 5px;">
-                <button class="icon-btn btn-export-ui" data-tip="สำรองข้อมูลทั้งหมด (.JSON)" onclick="exportAllData()"><i class="fa-solid fa-cloud-arrow-down"></i></button>
-                <button class="icon-btn btn-import-ui" data-tip="นำเข้าข้อมูลทั้งหมด" onclick="document.getElementById('importAllFile').click()"><i class="fa-solid fa-cloud-arrow-up"></i></button>
-            </span>
+<span id="backupGroup" style="display: none; gap: 5px; align-items: center;">
+    <button class="icon-btn btn-export-ui" data-tip="สำรองข้อมูลทั้งหมด (.JSON)" onclick="exportAllData()"><i class="fa-solid fa-cloud-arrow-down"></i></button>
+    <button class="icon-btn btn-import-ui" data-tip="นำเข้าข้อมูลทั้งหมด" onclick="document.getElementById('importAllFile').click()"><i class="fa-solid fa-cloud-arrow-up"></i></button>
+</span>
             
             <input type="file" id="importAllFile" style="display:none" accept=".json" onchange="importAllData(event)">
         </div>
@@ -2196,12 +2196,13 @@ async function deleteHistoryBill(billNo) {
     });
 	
 	
-	function toggleBackupButtons() {
+function toggleBackupButtons() {
     const backupGroup = document.getElementById('backupGroup');
+    // เช็คสถานะปัจจุบัน ถ้ามันซ่อนอยู่ (รวมถึงค่าว่าง) ให้เปลี่ยนเป็นแสดงแบบ inline-flex
     if (backupGroup.style.display === 'none' || backupGroup.style.display === '') {
-        backupGroup.style.display = 'inline-flex'; // แสดงปุ่ม
+        backupGroup.style.display = 'inline-flex'; 
     } else {
-        backupGroup.style.display = 'none'; // ซ่อนปุ่ม
+        backupGroup.style.display = 'none'; // ซ่อน
     }
 }
 </script>
