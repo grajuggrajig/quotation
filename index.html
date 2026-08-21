@@ -1805,15 +1805,35 @@ purchases.sort((a, b) => {
         purchases = JSON.parse(localStorage.getItem('saved_quot_purchases') || '[]');
     }
 
-    // 🛠️ ย้ายการกรองมาไว้ตรงนี้ เพื่อให้กรองข้อมูลก่อนนำไปนับจำนวนและแสดงผล
-    if (filterText) {
+if (filterText) {
         let lower = filterText.toLowerCase();
-        purchases = purchases.filter(p => 
-            (p.billNo && p.billNo.toLowerCase().includes(lower)) ||
-            (p.customerName && p.customerName.toLowerCase().includes(lower)) ||
-            (p.salesSignName && p.salesSignName.toLowerCase().includes(lower)) ||
-            (p.subject && p.subject.toLowerCase().includes(lower))
-        );
+        
+        // แปลงข้อความค้นหาเบื้องต้น (เผื่อผู้ใช้พิมพ์ เช่น 19/8 ให้ลองเทียบกับ 19/08)
+        purchases = purchases.filter(p => {
+            let bNo = (p.billNo || '').toLowerCase();
+            let cName = (p.customerName || '').toLowerCase();
+            let sName = (p.salesSignName || '').toLowerCase();
+            let subj = (p.subject || '').toLowerCase();
+            let bDate = (p.billDate || '').toLowerCase(); // รูปแบบเช่น 19/08/2569
+
+            // เช็คคำค้นหากับฟิลด์ทั่วไป
+            let matchGeneral = bNo.includes(lower) || cName.includes(lower) || sName.includes(lower) || subj.includes(lower);
+            
+            // เช็คคำค้นหากับวันที่ (รองรับทั้งแบบมีเลข 0 และไม่มีเลข 0 เช่น พิมพ์ 19/8 หรือ 19/08)
+            let matchDate = bDate.includes(lower);
+            if (!matchDate && lower.includes('/')) {
+                let parts = lower.split('/');
+                if (parts.length === 2 || parts.length === 3) {
+                    let d = parts[0].padStart(2, '0');
+                    let m = parts[1].padStart(2, '0');
+                    let y = parts[2] || '';
+                    let normalizedQuery = y ? `${d}/${m}/${y}` : `${d}/${m}`;
+                    matchDate = bDate.includes(normalizedQuery);
+                }
+            }
+
+            return matchGeneral || matchDate;
+        });
     }
 
     let totalRecords = purchases.length;
