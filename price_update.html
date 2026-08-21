@@ -291,15 +291,71 @@
                 padding: 0 !important; 
             }
         }
+		
+	.modern-back-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 20px;
+    background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+    color: #334155;
+    font-family: 'Sarabun', sans-serif; /* ปรับฟอนต์ตามเว็บของคุณ */
+    font-size: 15px;
+    font-weight: 600;
+    text-decoration: none;
+    border: 1px solid #e2e8f0;
+    border-radius: 50px; /* ทำทรงแคปซูลมนสวยงาม */
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+}
+
+/* ส่วนไอคอนวงกลมด้านหน้า */
+.modern-back-btn .btn-icon-wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    background: #0284c7; /* สีฟ้าธีมหลักของคุณ */
+    color: #ffffff;
+    border-radius: 50%;
+    transition: transform 0.3s ease;
+}
+
+/* ลูกเล่นเวลาเอาเมาส์มาวาง (Hover) */
+.modern-back-btn:hover {
+    background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
+    color: #ffffff;
+    border-color: transparent;
+    box-shadow: 0 10px 15px -3px rgba(2, 132, 199, 0.3), 0 4px 6px -4px rgba(2, 132, 199, 0.3);
+    transform: translateY(-2px); /* ยกตัวขึ้นเล็กน้อย */
+}
+
+/* เมื่อเอาเมาส์ชี้ ให้ไอคอนขยับถอยหลังนิดหน่อยเพื่อบอกทิศทาง */
+.modern-back-btn:hover .btn-icon-wrapper {
+    background: #ffffff;
+    color: #0284c7;
+    transform: translateX(-3px);
+}
+
+/* เอฟเฟกต์ตอนกดคลิก (Active) */
+.modern-back-btn:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 4px -1px rgba(0, 0, 0, 0.05);
+}	
     </style>
 </head>
 <body>
 
 <div class="container">
-    <!-- ปุ่มกลับหน้าแรก -->
-    <a href="index.html" class="btn-back-home">
-        <i class="fa-solid fa-arrow-left"></i> กลับหน้าใบเสนอราคา
-    </a>
+<a href="index.html" class="modern-back-btn">
+    <span class="btn-icon-wrapper">
+        <i class="fa-solid fa-arrow-left"></i>
+    </span>
+    <span class="btn-text">กลับหน้าใบเสนอราคา</span>
+</a>
 
     <div class="header-section">
         <div class="logo-box">
@@ -316,7 +372,7 @@
     
     <div class="letter-body">
         <p><strong>เรียน:</strong> ท่านผู้จัดการฝ่ายจัดซื้อ</p>
-        <p>เนื่องจาก บริษัท เค แอล สเตชั่นเนอรี่ มีความจำเป็นต้องปรับราคาสินค้าบางรายการ ดังต่อไปนี้</p>
+        <p>เนื่องจาก บริษัท เค แอล สเตชั่นเนอรี่ มีความจำเป็นต้องปรับราคาสินค้าบางรายการ ดังต่อไปนี้[cite: 3]</p>
     </div>
 
     <div class="table-wrapper">
