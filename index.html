@@ -1317,13 +1317,29 @@ async function executeSave(isNewBill) {
         return;
     }
 
-    // 1. รวบรวมข้อมูลสินค้าจากตารางปัจจุบัน
+ // 1. รวบรวมข้อมูลสินค้าจากตารางปัจจุบัน
     let rows = document.querySelectorAll('.item-row');
     let currentItems = [];
     let savedProdCount = 0;
 
-    // ดึงรายการสินค้าที่มีอยู่บน Cloud และ LocalStorage มา Merge ป้องกันสินค้าหาย
-    let products = JSON.parse(localStorage.getItem('saved_quot_products') || '[]');
+    // ❌ โค้ดเดิม: ดึงแค่ LocalStorage
+    // let products = JSON.parse(localStorage.getItem('saved_quot_products') || '[]');
+
+    // ✅ โค้ดใหม่: ดึงสินค้าจาก Cloud ก่อนเพื่อไม่ให้รายการเก่าหาย
+    let products = [];
+    try {
+        const masterDoc = await db.collection("settings").doc("master_data").get();
+        if (masterDoc.exists && masterDoc.data().products) {
+            products = masterDoc.data().products;
+        }
+    } catch (err) {
+        console.warn("⚠️ ไม่สามารถดึงรายการสินค้าจาก Cloud มา Sync ได้:", err);
+    }
+
+    // ถ้าดึง Cloud ไม่ได้ ค่อยใช้ LocalStorage สำรอง
+    if (products.length === 0) {
+        products = JSON.parse(localStorage.getItem('saved_quot_products') || '[]');
+    }
 
     rows.forEach(row => {
         let sku = row.querySelector('.sku-input').value.trim();
@@ -1346,9 +1362,9 @@ async function executeSave(isNewBill) {
                 let pIndex = products.findIndex(p => p.sku === sku);
                 let prodData = { sku: sku, desc: desc, unit: unit, price: validated.price };
                 if (pIndex >= 0) {
-                    products[pIndex] = prodData;
+                    products[pIndex] = prodData; // ถ้า SKU ซ้ำให้แก้ไขอันเดิม
                 } else {
-                    products.push(prodData);
+                    products.push(prodData); // ถ้าเป็นสินค้าใหม่ให้เพิ่มต่อท้าย
                 }
                 savedProdCount++;
             }
@@ -1523,10 +1539,11 @@ async function executeSave(isNewBill) {
                 }
                 const db = firebase.firestore();
                 
-                // ดึงรายชื่อลูกค้าจาก Cloud
-                const custDoc = await db.collection("settings").doc("master_data").get();
-                if (custDoc.exists && custDoc.data().customers) {
-                    customers = custDoc.data().customers;
+                // 📍 ดึงทั้งรายชื่อลูกค้า และ รายการสินค้า จาก Cloud ในจุดนี้
+                const masterDoc = await db.collection("settings").doc("master_data").get();
+                if (masterDoc.exists) {
+                    if (masterDoc.data().customers) customers = masterDoc.data().customers;
+                    if (masterDoc.data().products) products = masterDoc.data().products; // ✅ เพิ่มการดึงสินค้าตรงนี้
                 }
 
                 // ดึงประวัติบิลทั้งหมดจาก Cloud
