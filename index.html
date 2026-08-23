@@ -792,7 +792,61 @@
 <body>
 
 <div class="control-panel no-print">
-    <div class="credit"><i class="fa-solid fa-user" style="margin-right: 4px; color: #0284c7;"></i> ผู้จัดทำ: <strong>Thanong Chooduang</strong></div>
+   <!-- HTML -->
+<div class="version-badge">
+    <i class="fa-solid fa-code-branch"></i>
+    <span>Version</span>
+    <strong class="version-num">v8.2.3</strong>
+</div>
+
+<!-- CSS (วางไว้ในแท็ก <style> หรือไฟล์ CSS ของคุณ) -->
+<style>
+.version-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 500;
+    color: #38bdf8;
+    background: rgba(15, 23, 42, 0.75);
+    border: 1px solid rgba(56, 189, 248, 0.3);
+    box-shadow: 0 0 12px rgba(56, 189, 248, 0.25);
+    position: relative;
+    overflow: hidden;
+    backdrop-filter: blur(8px);
+}
+
+/* เอฟเฟกต์แสงสะท้อนวิ่งผ่าน (Shimmering Light) */
+.version-badge::after {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -150%;
+    width: 100%;
+    height: 200%;
+    background: linear-gradient(
+        60deg,
+        transparent,
+        rgba(255, 255, 255, 0.4),
+        transparent
+    );
+    transform: rotate(30deg);
+    animation: shimmer 3s infinite;
+}
+
+/* เอฟเฟกต์ไฟกระพริบเปล่งประกาย (Glowing Pulsate) */
+.version-num {
+    color: #38bdf8;
+    text-shadow: 0 0 8px rgba(56, 189, 248, 0.8);
+}
+
+@keyframes shimmer {
+    0% { left: -150%; }
+    50%, 100% { left: 150%; }
+}
+</style>
     
 <div class="panel-group">
 <div class="panel-group-label" style="display: flex; justify-content: space-between; align-items: center;">
