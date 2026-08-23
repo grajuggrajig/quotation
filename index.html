@@ -1032,7 +1032,6 @@
 
 <script>
 
-
 // เริ่มทำงานเมื่อเปิดหน้าเว็บ
 function initAutoBackup(intervalHours = 24) {
     const intervalMs = intervalHours * 60 * 60 * 1000;
@@ -2225,6 +2224,11 @@ async function deleteHistoryBill(billNo) {
         document.getElementById(modalId).style.display = 'none';
     }
 
+// 1. วางฟังก์ชันแก้ Error ตัวนี้ไว้บนสุดเสมอ
+    function performSilentBackup() {
+        // ว่างไว้ป้องกัน Error ค้าง
+    }
+
     async function renderProductList() {
     let container = document.getElementById('productListContainer');
     let countContainer = document.getElementById('productCountText'); 
@@ -2280,7 +2284,59 @@ async function deleteHistoryBill(billNo) {
     });
 }
 
+async function confirmDeleteProduct(index) {
+    // 1. เรียกใช้ SweetAlert2 ถามยืนยัน
+    const result = await Swal.fire({
+        title: 'ยืนยันการลบ?',
+        text: 'หากลบแล้วจะไม่สามารถกู้คืนได้',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#ef4444',
+        cancelButtonColor: '#94a3b8',
+        confirmButtonText: 'ลบ',
+        cancelButtonText: 'ยกเลิก'
+    });
 
+    // ถ้าผู้ใช้กด "ยกเลิก" ให้หยุดทำงาน
+    if (!result.isConfirmed) return;
+
+    try {
+        const db = firebase.firestore();
+        const docRef = db.collection("settings").doc("master_data");
+        const docSnap = await docRef.get();
+
+        if (docSnap.exists) {
+            let products = docSnap.data().products || [];
+            
+            // ลบรายการใน Array
+            products.splice(index, 1);
+
+            // 2. อัปเดตข้อมูลขึ้น Firebase Cloud
+            await docRef.update({ products: products });
+
+            // 3. อัปเดตลง LocalStorage สำรอง
+            localStorage.setItem('saved_quot_products', JSON.stringify(products));
+
+            // 4. แจ้งเตือนลบสำเร็จ
+            Swal.fire({ 
+                icon: 'success', 
+                title: 'ลบสำเร็จ', 
+                showConfirmButton: false, 
+                timer: 1000 
+            });
+
+            // 5. โหลดรายการบนหน้าจอใหม่ทันที
+            await renderProductList();
+        }
+    } catch (error) {
+        console.error("❌ เกิดข้อผิดพลาดในการลบ:", error);
+        Swal.fire({
+            icon: 'error',
+            title: 'เกิดข้อผิดพลาด',
+            text: 'ไม่สามารถลบข้อมูลได้: ' + error.message
+        });
+    }
+}
 
 async function openEditProductModal(index) {
     try {
@@ -2352,27 +2408,6 @@ async function openEditProductModal(index) {
 }
 
 
-
-
-    function confirmDeleteProduct(index) {
-        Swal.fire({
-            title: 'ยืนยันการลบ?',
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonColor: '#ef4444',
-            cancelButtonColor: '#94a3b8',
-            confirmButtonText: 'ลบ',
-            cancelButtonText: 'ยกเลิก'
-        }).then((result) => {
-            if (result.isConfirmed) {
-                let products = JSON.parse(localStorage.getItem('saved_quot_products') || '[]');
-                products.splice(index, 1);
-                localStorage.setItem('saved_quot_products', JSON.stringify(products));
-                renderProductList();
-                Swal.fire({ icon: 'success', title: 'ลบสำเร็จ', showConfirmButton: false, timer: 1000 });
-            }
-        });
-    }
     
     function convertNumberToThaiText(number) {
         if (isNaN(number)) return "";
