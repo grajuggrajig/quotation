@@ -14,7 +14,7 @@
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
     <!-- [2] Firebase Firestore -->
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
-
+	<link rel="shortcut icon" href="#">
 <script>
         // --- [เริ่ม] โค้ดเชื่อมต่อ Firebase ---
         const firebaseConfig = {
@@ -792,7 +792,87 @@
 <body>
 
 <div class="control-panel no-print">
-    <div class="credit"><i class="fa-solid fa-user" style="margin-right: 4px; color: #0284c7;"></i> ผู้จัดทำ: <strong>Thanong Chooduang</strong></div>
+   <!-- HTML -->
+<div class="version-badge">
+    <i class="fa-solid fa-code-branch"></i>
+    <span>Version</span>
+    <strong class="version-num">v8.2.3</strong>
+</div>
+
+<!-- CSS (วางไว้ในแท็ก <style> หรือไฟล์ CSS ของคุณ) -->
+<style>
+.version-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 500;
+    color: #38bdf8;
+    background: rgba(15, 23, 42, 0.75);
+    border: 1px solid rgba(56, 189, 248, 0.3);
+    box-shadow: 0 0 12px rgba(56, 189, 248, 0.25);
+    position: relative;
+    overflow: hidden;
+    backdrop-filter: blur(8px);
+}
+
+/* เอฟเฟกต์แสงสะท้อนวิ่งผ่าน (Shimmering Light) */
+.version-badge::after {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -150%;
+    width: 100%;
+    height: 200%;
+    background: linear-gradient(
+        60deg,
+        transparent,
+        rgba(255, 255, 255, 0.4),
+        transparent
+    );
+    transform: rotate(30deg);
+    animation: shimmer 3s infinite;
+}
+
+/* เอฟเฟกต์ไฟกระพริบเปล่งประกาย (Glowing Pulsate) */
+.version-num {
+    color: #38bdf8;
+    text-shadow: 0 0 8px rgba(56, 189, 248, 0.8);
+}
+
+@keyframes shimmer {
+    0% { left: -150%; }
+    50%, 100% { left: 150%; }
+}
+
+.bill-container {
+    position: relative; /* ให้ .bill-container เป็นกรอบอ้างอิงตำแหน่ง */
+}
+
+.watermark-credit {
+    position: absolute;
+    bottom: 45%;          /* ดึงขึ้นมาอยู่กึ่งกลางแนวตั้ง */
+    left: 50%;            /* ดึงไปกึ่งกลางแนวนอน */
+    transform: translate(-50%, -50%); /* จัดกึ่งกลางพิกัดพอดีเป๊ะ */
+    font-size: 24px;      /* ขนาดตัวหนังสือลายน้ำ */
+    color: #94a3b8;       /* สีเทาจางๆ */
+    opacity: 0.15;        /* ความจางของลายน้ำ */
+    pointer-events: none; /* ป้องกันไม่ให้เมาส์คลิกโดนหรือคลุมดำ */
+    user-select: none;
+    font-family: 'Prompt', sans-serif;
+    white-space: nowrap;  /* ไม่ให้ข้อความขึ้นบรรทัดใหม่ */
+    z-index: 10;
+}
+
+/* เพิ่มคำสั่งนี้เพื่อให้เวลาสั่งพิมพ์ (Print/PDF) ซ่อนข้อความนี้ทันที */
+@media print {
+    .watermark-credit {
+        display: none !important;
+    }
+}
+</style>
     
 <div class="panel-group">
 <div class="panel-group-label" style="display: flex; justify-content: space-between; align-items: center;">
@@ -990,6 +1070,13 @@
             <div class="sig-text">ผู้อนุมัติสั่งซื้อ / ลูกค้า (Approved)</div>
             <div class="sig-date">วันที่: <input type="text" id="sigCustomerDate" class="sig-date-input" placeholder="วว/ดด/ปปปป"></div>
         </div>
+		
+		<div class="watermark-credit">
+    <i class="fa-solid fa-user" style="margin-right: 4px;"></i> 
+    ผู้จัดทำ: Thanong Chooduang
+</div>
+		
+		
         <div class="sig-box">
             <div class="sig-line"></div>
             <input type="text" id="sigSalesName" class="sig-name-input" placeholder="(พิมพ์ชื่อ-นามสกุล ผู้เสนอราคา)">
@@ -1031,6 +1118,29 @@
 </div>
 
 <script>
+function performSilentBackup() {}
+// เริ่มทำงานเมื่อเปิดหน้าเว็บ
+function initAutoBackup(intervalHours = 24) {
+    const intervalMs = intervalHours * 60 * 60 * 1000;
+    const lastBackup = parseInt(localStorage.getItem('last_auto_backup_timestamp') || '0', 10);
+    const now = new Date().getTime();
+
+    // ถ้ายังไม่เคย Backup ในรอบเวลา ให้สั่งทำงานทันทีเมื่อเปิดเว็บ
+    if (now - lastBackup >= intervalMs) {
+        performSilentBackup();
+    }
+
+    // ตั้งเวลาลูปทำงานตามระยะเวลาที่กำหนด
+    setInterval(() => {
+        performSilentBackup();
+    }, intervalMs);
+}
+
+window.addEventListener('DOMContentLoaded', () => {
+    initAutoBackup(24); // สำรองข้อมูลทุกๆ 24 ชั่วโมง (หรือเมื่อเปิดแอปครั้งแรกของวัน)
+});
+
+
     window.onload = function() {
         calculate();
         loadCustomerDropdown();
@@ -1276,8 +1386,8 @@ async function executeSave(isNewBill) {
     if (!firebase.apps.length) {
         firebase.initializeApp(firebaseConfig);
     }
-    
     const db = firebase.firestore();
+
     let cName = document.getElementById('custName').value.trim();
     let cAddr = document.getElementById('custAddress').value.trim();
     let bNoInput = document.getElementById('billNo');
@@ -1294,15 +1404,33 @@ async function executeSave(isNewBill) {
         return;
     }
 
+ // 1. รวบรวมข้อมูลสินค้าจากตารางปัจจุบัน
     let rows = document.querySelectorAll('.item-row');
     let currentItems = [];
-    let products = JSON.parse(localStorage.getItem('saved_quot_products') || '[]'); 
     let savedProdCount = 0;
+
+    // ❌ โค้ดเดิม: ดึงแค่ LocalStorage
+    // let products = JSON.parse(localStorage.getItem('saved_quot_products') || '[]');
+
+    // ✅ โค้ดใหม่: ดึงสินค้าจาก Cloud ก่อนเพื่อไม่ให้รายการเก่าหาย
+    let products = [];
+    try {
+        const masterDoc = await db.collection("settings").doc("master_data").get();
+        if (masterDoc.exists && masterDoc.data().products) {
+            products = masterDoc.data().products;
+        }
+    } catch (err) {
+        console.warn("⚠️ ไม่สามารถดึงรายการสินค้าจาก Cloud มา Sync ได้:", err);
+    }
+
+    // ถ้าดึง Cloud ไม่ได้ ค่อยใช้ LocalStorage สำรอง
+    if (products.length === 0) {
+        products = JSON.parse(localStorage.getItem('saved_quot_products') || '[]');
+    }
 
     rows.forEach(row => {
         let sku = row.querySelector('.sku-input').value.trim();
         let desc = row.querySelector('.item-desc').value.trim();
-        
         let rawQty = row.querySelector('.qty').value;
         let rawPrice = row.querySelector('.price').value;
         let validated = validateRowData(rawQty, rawPrice);
@@ -1321,9 +1449,9 @@ async function executeSave(isNewBill) {
                 let pIndex = products.findIndex(p => p.sku === sku);
                 let prodData = { sku: sku, desc: desc, unit: unit, price: validated.price };
                 if (pIndex >= 0) {
-                    products[pIndex] = prodData;
+                    products[pIndex] = prodData; // ถ้า SKU ซ้ำให้แก้ไขอันเดิม
                 } else {
-                    products.push(prodData);
+                    products.push(prodData); // ถ้าเป็นสินค้าใหม่ให้เพิ่มต่อท้าย
                 }
                 savedProdCount++;
             }
@@ -1347,7 +1475,7 @@ async function executeSave(isNewBill) {
 
     let dateField = document.getElementById('billDate');
     let sigSalesDate = document.getElementById('sigSalesDate');
-    
+
     if (isNewBill) {
         let d = new Date();
         let day = String(d.getDate()).padStart(2, '0');
@@ -1358,38 +1486,57 @@ async function executeSave(isNewBill) {
         if (sigSalesDate) sigSalesDate.value = currentDateStr;
     }
 
-let customers = JSON.parse(localStorage.getItem('saved_quot_customers') || '[]');
-
-// ปรับวิธีค้นหาให้รอบคอบขึ้น รองรับทั้งข้อมูลเดิมและข้อมูลใหม่
-let existingIndex = customers.findIndex(c => {
-    let existingName = '';
-    if (typeof c === 'string') {
-        existingName = c;
-    } else if (c) {
-        existingName = c.name || c.customerName || c.companyName || '';
+    // 2. ดึงรายชื่อลูกค้าล่าสุดจาก Cloud มา Merge เสมอ (ป้องกันการเขียนทับข้อมูลจนลูกค้าหาย)
+    let customers = [];
+    try {
+        const masterDoc = await db.collection("settings").doc("master_data").get();
+        if (masterDoc.exists && masterDoc.data().customers) {
+            customers = masterDoc.data().customers;
+        }
+    } catch (err) {
+        console.warn("⚠️ ไม่สามารถดึงรายชื่อลูกค้าจาก Cloud มา Sync ได้:", err);
     }
-    return existingName === cName;
-});
 
-if (existingIndex >= 0) {
-    customers[existingIndex] = { name: cName, address: cAddr };
-} else {
-    customers.push({ name: cName, address: cAddr });
-}
-localStorage.setItem('saved_quot_customers', JSON.stringify(customers));
+    // ถ้าดึง Cloud ไม่ได้ ให้ใช้ข้อมูลจาก LocalStorage เป็นฐาน
+    if (customers.length === 0) {
+        customers = JSON.parse(localStorage.getItem('saved_quot_customers') || '[]');
+    }
 
+    // ค้นหาและอัปเดตข้อมูลลูกค้า
+    let existingIndex = customers.findIndex(c => {
+        let existingName = '';
+        if (typeof c === 'string') {
+            existingName = c;
+        } else if (c) {
+            existingName = c.name || c.customerName || c.companyName || '';
+        }
+        return existingName === cName;
+    });
+
+    if (existingIndex >= 0) {
+        customers[existingIndex] = { name: cName, address: cAddr };
+    } else {
+        customers.push({ name: cName, address: cAddr });
+    }
+
+    // บันทึกลง LocalStorage
+    localStorage.setItem('saved_quot_customers', JSON.stringify(customers));
+
+    // อัปเดตรายชื่อลูกค้าและสินค้าขึ้น Master Data บน Cloud
     try {
         await db.collection("settings").doc("master_data").set({
-            customers: customers
+            customers: customers,
+            products: products
         }, { merge: true });
     } catch (err) {
-        console.warn("⚠️ ไม่สามารถอัปเดตรายชื่อลูกค้าขึ้น Cloud ได้:", err);
+        console.warn("⚠️ ไม่สามารถอัปเดต Master Data ขึ้น Cloud ได้:", err);
     }
 
+    // โหลด Dropdown ใหม่ให้เป็นข้อมูลล่าสุด
     loadCustomerDropdown();
 
+    // 3. จัดการเลขที่บิลและคำนวณยอดรวม
     let grandTotalVal = calculate();
-    
     let finalBillNo;
     if (isNewBill || !bNo) {
         finalBillNo = 'QT' + new Date().getTime();
@@ -1418,6 +1565,7 @@ localStorage.setItem('saved_quot_customers', JSON.stringify(customers));
         timestamp: new Date().getTime()
     };
 
+    // 4. แสดงสถานะกำลังบันทึก
     Swal.fire({
         title: 'กำลังบันทึกข้อมูล...',
         text: 'โปรดรอสักครู่ ระบบกำลังอัปเดตข้อมูลขึ้น Cloud',
@@ -1427,6 +1575,7 @@ localStorage.setItem('saved_quot_customers', JSON.stringify(customers));
         }
     });
 
+    // 5. บันทึกข้อมูลบิลลง Firebase และ LocalStorage
     try {
         await db.collection("quotations").doc(finalBillNo).set(billDataToSave);
 
@@ -1444,7 +1593,7 @@ localStorage.setItem('saved_quot_customers', JSON.stringify(customers));
 
         Swal.fire({
             icon: 'success',
-            title: isNewBill ? 'บันทึกเป็นบิลใหม่และอัปโหลดขึ้น Cloud สำเร็จ!' : 'บันทึกข้อมูลและอัปโหลดขึ้น Cloud สำเร็จ!',
+            title: isNewBill ? 'บันทึกเป็นบิลใหม่สำเร็จ!' : 'บันทึกข้อมูลสำเร็จ!',
             text: `เลขที่บิล: ${finalBillNo}`,
             timer: 2000,
             showConfirmButton: false
@@ -1477,10 +1626,11 @@ localStorage.setItem('saved_quot_customers', JSON.stringify(customers));
                 }
                 const db = firebase.firestore();
                 
-                // ดึงรายชื่อลูกค้าจาก Cloud
-                const custDoc = await db.collection("settings").doc("master_data").get();
-                if (custDoc.exists && custDoc.data().customers) {
-                    customers = custDoc.data().customers;
+                // 📍 ดึงทั้งรายชื่อลูกค้า และ รายการสินค้า จาก Cloud ในจุดนี้
+                const masterDoc = await db.collection("settings").doc("master_data").get();
+                if (masterDoc.exists) {
+                    if (masterDoc.data().customers) customers = masterDoc.data().customers;
+                    if (masterDoc.data().products) products = masterDoc.data().products; // ✅ เพิ่มการดึงสินค้าตรงนี้
                 }
 
                 // ดึงประวัติบิลทั้งหมดจาก Cloud
@@ -1615,42 +1765,49 @@ localStorage.setItem('saved_quot_customers', JSON.stringify(customers));
     reader.readAsText(file);
 }
 
-async function loadCustomerDropdown() {
-    let customers = [];
+// ==========================================
+// ระบบ Real-time Listener (ดึงข้อมูลอัปเดตทันทีทุกเครื่อง)
+// ==========================================
+
+let isCustomerListenerActive = false;
+
+function initRealtimeMasterData() {
+    if (isCustomerListenerActive) return; // ถ้าเปิดฟังอยู่อยู่แล้ว ให้ข้ามได้เลย
+    
     try {
-        if (typeof firebase !== 'undefined') {
-            if (!firebase.apps.length) {
-                firebase.initializeApp(firebaseConfig);
-            }
-            const db = firebase.firestore();
-            const doc = await db.collection("settings").doc("master_data").get();
-            
-            console.log("🔍 ข้อมูล Document จาก master_data:", doc.exists ? doc.data() : "ไม่พบ Document นี้");
+        if (typeof firebase === 'undefined') return;
+        if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+        
+        const db = firebase.firestore();
 
-            if (doc.exists && doc.data().customers) {
-                customers = doc.data().customers;
-            }
-        }
-    } catch (error) {
-        console.warn("⚠️ ไม่สามารถโหลดรายชื่อลูกค้าจาก Cloud ได้:", error);
+        db.collection("settings").doc("master_data")
+            .onSnapshot((doc) => {
+                if (doc.exists && doc.data().customers) {
+                    const customers = doc.data().customers;
+                    localStorage.setItem('saved_quot_customers', JSON.stringify(customers));
+                    updateCustomerDropdownUI(customers);
+                }
+            }, (error) => {
+                console.warn("⚠️ Real-time Listener ข้อผิดพลาด:", error);
+            });
+
+        isCustomerListenerActive = true; // บันทึกสถานะว่าเปิด Listener เรียบร้อยแล้ว
+
+    } catch (err) {
+        console.error("❌ ไม่สามารถเปิดระบบ Real-time Sync ได้:", err);
     }
+}
 
-    if (customers.length === 0) {
-        console.log("ℹ️ กำลังดึงรายชื่อลูกค้าจาก localStorage แทน");
-        customers = JSON.parse(localStorage.getItem('saved_quot_customers') || '[]');
-    }
-
-    console.log("📋 รายชื่อลูกค้าทั้งหมดที่จะนำมาใส่ Dropdown:", customers);
-
+// 2. ฟังก์ชันอัปเดต Dropdown บนหน้าจอ
+function updateCustomerDropdownUI(customers) {
     let select = document.getElementById('customerSelect');
-    if (!select) {
-        console.error("❌ ไม่พบ Element ที่มี ID เป็น 'customerSelect' ในหน้า HTML!");
-        return;
-    }
-    
+    if (!select) return;
+
+    // จำค่าที่ผู้ใช้กำลังเลือกอยู่ (ถ้ามี) เพื่อไม่ให้หลุดตอนข้อมูลอัปเดต
+    let currentSelected = select.value;
+
     select.innerHTML = '<option value="">-- เลือกลูกค้า/บริษัท --</option>';
-    
-    // วนลูปสร้างตัวเลือกใน Dropdown พร้อมรองรับข้อมูลทุกรูปแบบ
+
     customers.forEach((c) => {
         let custName = '';
         if (typeof c === 'string') {
@@ -1661,11 +1818,28 @@ async function loadCustomerDropdown() {
 
         if (custName) {
             let opt = document.createElement('option');
-            opt.value = custName; 
+            opt.value = custName;
             opt.innerText = custName;
             select.appendChild(opt);
         }
     });
+
+    // คืนค่าที่เคยเลือกไว้
+    if (currentSelected) {
+        select.value = currentSelected;
+    }
+}
+
+// 3. ฟังก์ชันดึงรายชื่อลูกค้าแบบเดิม (ปรับให้เรียกใช้ระบบ Real-time)
+function loadCustomerDropdown() {
+    // ดึงจาก LocalStorage ขึ้นมาแสดงก่อนทันทีเพื่อความเร็ว
+    let localCustomers = JSON.parse(localStorage.getItem('saved_quot_customers') || '[]');
+    if (localCustomers.length > 0) {
+        updateCustomerDropdownUI(localCustomers);
+    }
+    
+    // เริ่มเปิดระบบ Real-time ฟังข้อมูลจาก Cloud
+    initRealtimeMasterData();
 }
 
 // วางไว้ที่บรรทัดล่างสุดของไฟล์ .js เลยครับ
@@ -2154,6 +2328,11 @@ async function deleteHistoryBill(billNo) {
         document.getElementById(modalId).style.display = 'none';
     }
 
+// 1. วางฟังก์ชันแก้ Error ตัวนี้ไว้บนสุดเสมอ
+    function performSilentBackup() {
+        // ว่างไว้ป้องกัน Error ค้าง
+    }
+
     async function renderProductList() {
     let container = document.getElementById('productListContainer');
     let countContainer = document.getElementById('productCountText'); 
@@ -2209,7 +2388,59 @@ async function deleteHistoryBill(billNo) {
     });
 }
 
+async function confirmDeleteProduct(index) {
+    // 1. เรียกใช้ SweetAlert2 ถามยืนยัน
+    const result = await Swal.fire({
+        title: 'ยืนยันการลบ?',
+        text: 'หากลบแล้วจะไม่สามารถกู้คืนได้',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#ef4444',
+        cancelButtonColor: '#94a3b8',
+        confirmButtonText: 'ลบ',
+        cancelButtonText: 'ยกเลิก'
+    });
 
+    // ถ้าผู้ใช้กด "ยกเลิก" ให้หยุดทำงาน
+    if (!result.isConfirmed) return;
+
+    try {
+        const db = firebase.firestore();
+        const docRef = db.collection("settings").doc("master_data");
+        const docSnap = await docRef.get();
+
+        if (docSnap.exists) {
+            let products = docSnap.data().products || [];
+            
+            // ลบรายการใน Array
+            products.splice(index, 1);
+
+            // 2. อัปเดตข้อมูลขึ้น Firebase Cloud
+            await docRef.update({ products: products });
+
+            // 3. อัปเดตลง LocalStorage สำรอง
+            localStorage.setItem('saved_quot_products', JSON.stringify(products));
+
+            // 4. แจ้งเตือนลบสำเร็จ
+            Swal.fire({ 
+                icon: 'success', 
+                title: 'ลบสำเร็จ', 
+                showConfirmButton: false, 
+                timer: 1000 
+            });
+
+            // 5. โหลดรายการบนหน้าจอใหม่ทันที
+            await renderProductList();
+        }
+    } catch (error) {
+        console.error("❌ เกิดข้อผิดพลาดในการลบ:", error);
+        Swal.fire({
+            icon: 'error',
+            title: 'เกิดข้อผิดพลาด',
+            text: 'ไม่สามารถลบข้อมูลได้: ' + error.message
+        });
+    }
+}
 
 async function openEditProductModal(index) {
     try {
@@ -2240,7 +2471,7 @@ async function openEditProductModal(index) {
                 showCancelButton: true,
                 confirmButtonText: 'บันทึกการแก้ไข',
                 cancelButtonText: 'ยกเลิก',
-                confirmButtonUrl: '',
+                
                 preConfirm: () => {
                     return {
                         sku: document.getElementById('swal-edit-sku').value.trim(),
@@ -2281,27 +2512,6 @@ async function openEditProductModal(index) {
 }
 
 
-
-
-    function confirmDeleteProduct(index) {
-        Swal.fire({
-            title: 'ยืนยันการลบ?',
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonColor: '#ef4444',
-            cancelButtonColor: '#94a3b8',
-            confirmButtonText: 'ลบ',
-            cancelButtonText: 'ยกเลิก'
-        }).then((result) => {
-            if (result.isConfirmed) {
-                let products = JSON.parse(localStorage.getItem('saved_quot_products') || '[]');
-                products.splice(index, 1);
-                localStorage.setItem('saved_quot_products', JSON.stringify(products));
-                renderProductList();
-                Swal.fire({ icon: 'success', title: 'ลบสำเร็จ', showConfirmButton: false, timer: 1000 });
-            }
-        });
-    }
     
     function convertNumberToThaiText(number) {
         if (isNaN(number)) return "";
