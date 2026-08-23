@@ -1031,6 +1031,30 @@
 </div>
 
 <script>
+
+
+// เริ่มทำงานเมื่อเปิดหน้าเว็บ
+function initAutoBackup(intervalHours = 24) {
+    const intervalMs = intervalHours * 60 * 60 * 1000;
+    const lastBackup = parseInt(localStorage.getItem('last_auto_backup_timestamp') || '0', 10);
+    const now = new Date().getTime();
+
+    // ถ้ายังไม่เคย Backup ในรอบเวลา ให้สั่งทำงานทันทีเมื่อเปิดเว็บ
+    if (now - lastBackup >= intervalMs) {
+        performSilentBackup();
+    }
+
+    // ตั้งเวลาลูปทำงานตามระยะเวลาที่กำหนด
+    setInterval(() => {
+        performSilentBackup();
+    }, intervalMs);
+}
+
+window.addEventListener('DOMContentLoaded', () => {
+    initAutoBackup(24); // สำรองข้อมูลทุกๆ 24 ชั่วโมง (หรือเมื่อเปิดแอปครั้งแรกของวัน)
+});
+
+
     window.onload = function() {
         calculate();
         loadCustomerDropdown();
@@ -1276,8 +1300,8 @@ async function executeSave(isNewBill) {
     if (!firebase.apps.length) {
         firebase.initializeApp(firebaseConfig);
     }
-    
     const db = firebase.firestore();
+
     let cName = document.getElementById('custName').value.trim();
     let cAddr = document.getElementById('custAddress').value.trim();
     let bNoInput = document.getElementById('billNo');
@@ -1294,15 +1318,17 @@ async function executeSave(isNewBill) {
         return;
     }
 
+    // 1. รวบรวมข้อมูลสินค้าจากตารางปัจจุบัน
     let rows = document.querySelectorAll('.item-row');
     let currentItems = [];
-    let products = JSON.parse(localStorage.getItem('saved_quot_products') || '[]'); 
     let savedProdCount = 0;
+
+    // ดึงรายการสินค้าที่มีอยู่บน Cloud และ LocalStorage มา Merge ป้องกันสินค้าหาย
+    let products = JSON.parse(localStorage.getItem('saved_quot_products') || '[]');
 
     rows.forEach(row => {
         let sku = row.querySelector('.sku-input').value.trim();
         let desc = row.querySelector('.item-desc').value.trim();
-        
         let rawQty = row.querySelector('.qty').value;
         let rawPrice = row.querySelector('.price').value;
         let validated = validateRowData(rawQty, rawPrice);
@@ -1347,7 +1373,7 @@ async function executeSave(isNewBill) {
 
     let dateField = document.getElementById('billDate');
     let sigSalesDate = document.getElementById('sigSalesDate');
-    
+
     if (isNewBill) {
         let d = new Date();
         let day = String(d.getDate()).padStart(2, '0');
@@ -1358,38 +1384,57 @@ async function executeSave(isNewBill) {
         if (sigSalesDate) sigSalesDate.value = currentDateStr;
     }
 
-let customers = JSON.parse(localStorage.getItem('saved_quot_customers') || '[]');
-
-// ปรับวิธีค้นหาให้รอบคอบขึ้น รองรับทั้งข้อมูลเดิมและข้อมูลใหม่
-let existingIndex = customers.findIndex(c => {
-    let existingName = '';
-    if (typeof c === 'string') {
-        existingName = c;
-    } else if (c) {
-        existingName = c.name || c.customerName || c.companyName || '';
+    // 2. ดึงรายชื่อลูกค้าล่าสุดจาก Cloud มา Merge เสมอ (ป้องกันการเขียนทับข้อมูลจนลูกค้าหาย)
+    let customers = [];
+    try {
+        const masterDoc = await db.collection("settings").doc("master_data").get();
+        if (masterDoc.exists && masterDoc.data().customers) {
+            customers = masterDoc.data().customers;
+        }
+    } catch (err) {
+        console.warn("⚠️ ไม่สามารถดึงรายชื่อลูกค้าจาก Cloud มา Sync ได้:", err);
     }
-    return existingName === cName;
-});
 
-if (existingIndex >= 0) {
-    customers[existingIndex] = { name: cName, address: cAddr };
-} else {
-    customers.push({ name: cName, address: cAddr });
-}
-localStorage.setItem('saved_quot_customers', JSON.stringify(customers));
+    // ถ้าดึง Cloud ไม่ได้ ให้ใช้ข้อมูลจาก LocalStorage เป็นฐาน
+    if (customers.length === 0) {
+        customers = JSON.parse(localStorage.getItem('saved_quot_customers') || '[]');
+    }
 
+    // ค้นหาและอัปเดตข้อมูลลูกค้า
+    let existingIndex = customers.findIndex(c => {
+        let existingName = '';
+        if (typeof c === 'string') {
+            existingName = c;
+        } else if (c) {
+            existingName = c.name || c.customerName || c.companyName || '';
+        }
+        return existingName === cName;
+    });
+
+    if (existingIndex >= 0) {
+        customers[existingIndex] = { name: cName, address: cAddr };
+    } else {
+        customers.push({ name: cName, address: cAddr });
+    }
+
+    // บันทึกลง LocalStorage
+    localStorage.setItem('saved_quot_customers', JSON.stringify(customers));
+
+    // อัปเดตรายชื่อลูกค้าและสินค้าขึ้น Master Data บน Cloud
     try {
         await db.collection("settings").doc("master_data").set({
-            customers: customers
+            customers: customers,
+            products: products
         }, { merge: true });
     } catch (err) {
-        console.warn("⚠️ ไม่สามารถอัปเดตรายชื่อลูกค้าขึ้น Cloud ได้:", err);
+        console.warn("⚠️ ไม่สามารถอัปเดต Master Data ขึ้น Cloud ได้:", err);
     }
 
+    // โหลด Dropdown ใหม่ให้เป็นข้อมูลล่าสุด
     loadCustomerDropdown();
 
+    // 3. จัดการเลขที่บิลและคำนวณยอดรวม
     let grandTotalVal = calculate();
-    
     let finalBillNo;
     if (isNewBill || !bNo) {
         finalBillNo = 'QT' + new Date().getTime();
@@ -1418,6 +1463,7 @@ localStorage.setItem('saved_quot_customers', JSON.stringify(customers));
         timestamp: new Date().getTime()
     };
 
+    // 4. แสดงสถานะกำลังบันทึก
     Swal.fire({
         title: 'กำลังบันทึกข้อมูล...',
         text: 'โปรดรอสักครู่ ระบบกำลังอัปเดตข้อมูลขึ้น Cloud',
@@ -1427,6 +1473,7 @@ localStorage.setItem('saved_quot_customers', JSON.stringify(customers));
         }
     });
 
+    // 5. บันทึกข้อมูลบิลลง Firebase และ LocalStorage
     try {
         await db.collection("quotations").doc(finalBillNo).set(billDataToSave);
 
@@ -1444,7 +1491,7 @@ localStorage.setItem('saved_quot_customers', JSON.stringify(customers));
 
         Swal.fire({
             icon: 'success',
-            title: isNewBill ? 'บันทึกเป็นบิลใหม่และอัปโหลดขึ้น Cloud สำเร็จ!' : 'บันทึกข้อมูลและอัปโหลดขึ้น Cloud สำเร็จ!',
+            title: isNewBill ? 'บันทึกเป็นบิลใหม่สำเร็จ!' : 'บันทึกข้อมูลสำเร็จ!',
             text: `เลขที่บิล: ${finalBillNo}`,
             timer: 2000,
             showConfirmButton: false
@@ -1615,42 +1662,49 @@ localStorage.setItem('saved_quot_customers', JSON.stringify(customers));
     reader.readAsText(file);
 }
 
-async function loadCustomerDropdown() {
-    let customers = [];
+// ==========================================
+// ระบบ Real-time Listener (ดึงข้อมูลอัปเดตทันทีทุกเครื่อง)
+// ==========================================
+
+let isCustomerListenerActive = false;
+
+function initRealtimeMasterData() {
+    if (isCustomerListenerActive) return; // ถ้าเปิดฟังอยู่อยู่แล้ว ให้ข้ามได้เลย
+    
     try {
-        if (typeof firebase !== 'undefined') {
-            if (!firebase.apps.length) {
-                firebase.initializeApp(firebaseConfig);
-            }
-            const db = firebase.firestore();
-            const doc = await db.collection("settings").doc("master_data").get();
-            
-            console.log("🔍 ข้อมูล Document จาก master_data:", doc.exists ? doc.data() : "ไม่พบ Document นี้");
+        if (typeof firebase === 'undefined') return;
+        if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+        
+        const db = firebase.firestore();
 
-            if (doc.exists && doc.data().customers) {
-                customers = doc.data().customers;
-            }
-        }
-    } catch (error) {
-        console.warn("⚠️ ไม่สามารถโหลดรายชื่อลูกค้าจาก Cloud ได้:", error);
+        db.collection("settings").doc("master_data")
+            .onSnapshot((doc) => {
+                if (doc.exists && doc.data().customers) {
+                    const customers = doc.data().customers;
+                    localStorage.setItem('saved_quot_customers', JSON.stringify(customers));
+                    updateCustomerDropdownUI(customers);
+                }
+            }, (error) => {
+                console.warn("⚠️ Real-time Listener ข้อผิดพลาด:", error);
+            });
+
+        isCustomerListenerActive = true; // บันทึกสถานะว่าเปิด Listener เรียบร้อยแล้ว
+
+    } catch (err) {
+        console.error("❌ ไม่สามารถเปิดระบบ Real-time Sync ได้:", err);
     }
+}
 
-    if (customers.length === 0) {
-        console.log("ℹ️ กำลังดึงรายชื่อลูกค้าจาก localStorage แทน");
-        customers = JSON.parse(localStorage.getItem('saved_quot_customers') || '[]');
-    }
-
-    console.log("📋 รายชื่อลูกค้าทั้งหมดที่จะนำมาใส่ Dropdown:", customers);
-
+// 2. ฟังก์ชันอัปเดต Dropdown บนหน้าจอ
+function updateCustomerDropdownUI(customers) {
     let select = document.getElementById('customerSelect');
-    if (!select) {
-        console.error("❌ ไม่พบ Element ที่มี ID เป็น 'customerSelect' ในหน้า HTML!");
-        return;
-    }
-    
+    if (!select) return;
+
+    // จำค่าที่ผู้ใช้กำลังเลือกอยู่ (ถ้ามี) เพื่อไม่ให้หลุดตอนข้อมูลอัปเดต
+    let currentSelected = select.value;
+
     select.innerHTML = '<option value="">-- เลือกลูกค้า/บริษัท --</option>';
-    
-    // วนลูปสร้างตัวเลือกใน Dropdown พร้อมรองรับข้อมูลทุกรูปแบบ
+
     customers.forEach((c) => {
         let custName = '';
         if (typeof c === 'string') {
@@ -1661,11 +1715,28 @@ async function loadCustomerDropdown() {
 
         if (custName) {
             let opt = document.createElement('option');
-            opt.value = custName; 
+            opt.value = custName;
             opt.innerText = custName;
             select.appendChild(opt);
         }
     });
+
+    // คืนค่าที่เคยเลือกไว้
+    if (currentSelected) {
+        select.value = currentSelected;
+    }
+}
+
+// 3. ฟังก์ชันดึงรายชื่อลูกค้าแบบเดิม (ปรับให้เรียกใช้ระบบ Real-time)
+function loadCustomerDropdown() {
+    // ดึงจาก LocalStorage ขึ้นมาแสดงก่อนทันทีเพื่อความเร็ว
+    let localCustomers = JSON.parse(localStorage.getItem('saved_quot_customers') || '[]');
+    if (localCustomers.length > 0) {
+        updateCustomerDropdownUI(localCustomers);
+    }
+    
+    // เริ่มเปิดระบบ Real-time ฟังข้อมูลจาก Cloud
+    initRealtimeMasterData();
 }
 
 // วางไว้ที่บรรทัดล่างสุดของไฟล์ .js เลยครับ
