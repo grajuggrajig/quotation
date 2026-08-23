@@ -14,7 +14,7 @@
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
     <!-- [2] Firebase Firestore -->
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
-
+	<link rel="shortcut icon" href="#">
 <script>
         // --- [เริ่ม] โค้ดเชื่อมต่อ Firebase ---
         const firebaseConfig = {
@@ -1031,7 +1031,7 @@
 </div>
 
 <script>
-
+function performSilentBackup() {}
 // เริ่มทำงานเมื่อเปิดหน้าเว็บ
 function initAutoBackup(intervalHours = 24) {
     const intervalMs = intervalHours * 60 * 60 * 1000;
@@ -2367,7 +2367,7 @@ async function openEditProductModal(index) {
                 showCancelButton: true,
                 confirmButtonText: 'บันทึกการแก้ไข',
                 cancelButtonText: 'ยกเลิก',
-                confirmButtonUrl: '',
+                
                 preConfirm: () => {
                     return {
                         sku: document.getElementById('swal-edit-sku').value.trim(),
