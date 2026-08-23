@@ -10,13 +10,17 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     
-   <!-- [1] Firebase App (Core) -->
+    <!-- [1] Firebase App (Core) -->
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
     <!-- [2] Firebase Firestore -->
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
-	<link rel="shortcut icon" href="#">
-<script>
-        // --- [เริ่ม] โค้ดเชื่อมต่อ Firebase ---
+    <!-- [3] Firebase Realtime Database (สำหรับนับจำนวนเครื่อง) -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
+    
+    <link rel="shortcut icon" href="#">
+
+    <script>
+        // --- กำหนดค่า Config และประกาศตัวแปรให้ถูกต้อง ---
         const firebaseConfig = {
           apiKey: "AIzaSyDAUc2urvUbXTNQ4ALSDIoo9tmN-6VOHuc",
           authDomain: "quotation-d2453.firebaseapp.com",
@@ -24,9 +28,16 @@
           storageBucket: "quotation-d2453.firebasestorage.app",
           messagingSenderId: "579932052426",
           appId: "1:579932052426:web:31cea6db99aa8a8d7f4d33",
-          measurementId: "G-D5ZTZ2TL8W"
+          measurementId: "G-D5ZTZ2TL8W",
+          databaseURL: "https://quotation-d2453-default-rtdb.asia-southeast1.firebasedatabase.app"
         };
-</script>
+
+        // --- เริ่มต้นใช้งาน Firebase App ครั้งเดียวจบสำหรับทุกบริการ ---
+        if (!firebase.apps.length) {
+            firebase.initializeApp(firebaseConfig);
+        }
+    </script>
+</head>
 <style>
     body { 
         font-family: 'Prompt', 'Tahoma', sans-serif; 
@@ -793,11 +804,12 @@
 
 <div class="control-panel no-print">
    <!-- HTML -->
-<div class="version-badge">
-    <i class="fa-solid fa-code-branch"></i>
-    <span>Version</span>
-    <strong class="version-num">v8.2.3</strong>
-</div>
+		<div class="version-badge" style="margin-left: auto;">
+            <i class="fa-solid fa-circle-dot" style="font-size: 8px; color: #10b981; animation: pulse 1.5s infinite;"></i>
+            <span>กำลังใช้งาน:</span>
+            <strong class="version-num" id="activeUsersCount">1</strong>
+            <span>เครื่อง</span>
+        </div>
 
 <!-- CSS (วางไว้ในแท็ก <style> หรือไฟล์ CSS ของคุณ) -->
 <style>
@@ -2597,7 +2609,31 @@ function toggleBackupButtons() {
     }
 }
 
+document.addEventListener("DOMContentLoaded", function() {
+        if (typeof firebase !== 'undefined' && firebase.database) {
+            const db = firebase.database();
+            const connectionRef = db.ref(".info/connected");
+            const activeUsersRef = db.ref("active_quotation_users");
 
+            connectionRef.on("value", function(snap) {
+                if (snap.val() === true) {
+                    const userRef = activeUsersRef.push();
+                    userRef.onDisconnect().remove();
+                    userRef.set({
+                        onlineAt: firebase.database.ServerValue.TIMESTAMP
+                    });
+                }
+            });
+
+            activeUsersRef.on("value", function(snapshot) {
+                const count = snapshot.numChildren();
+                const countElement = document.getElementById("activeUsersCount");
+                if (countElement) {
+                    countElement.textContent = count > 0 ? count : 1;
+                }
+            });
+        }
+    });
 </script>
 </body>
 </html>
