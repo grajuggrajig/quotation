@@ -893,18 +893,29 @@
     }
 
     /* ล็อกขนาดช่องกรอกข้อมูล (Textarea/Input) ไม่ให้ยืดขยายเองตอนพิมพ์ */
-    #billTable tbody tr.item-row textarea.item-desc,
-    #billTable tbody tr.item-row input {
-        height: 28px !important;
-        min-height: 28px !important;
-        max-height: 28px !important;
-        padding: 4px 6px !important;
-        font-size: 13px !important;
-        line-height: 1.2 !important;
-        resize: none !important;
-        border: none !important;
-        background: transparent !important;
-    }
+#billTable tbody tr.item-row textarea.item-desc {
+            height: auto !important;
+            min-height: 28px !important;
+            max-height: none !important;
+            white-space: pre-wrap !important;
+            word-break: break-word !important;
+            overflow: visible !important;
+            padding: 2px 4px !important;
+            font-size: 11px !important;
+            line-height: 1.4 !important;
+            border: none !important;
+            background: transparent !important;
+            resize: none !important;
+        }
+
+        #billTable tbody tr.item-row input {
+            height: 28px !important;
+            min-height: 28px !important;
+            padding: 1px 2px !important;
+            font-size: 11px !important;
+            border: none !important;
+            background: transparent !important;
+        }
 
     /* สไตล์และคำสั่งตัดหน้ากระดาษสำหรับแถวข้อความแจ้งเตือน */
     tr.auto-continued-row {
@@ -2677,7 +2688,7 @@ document.addEventListener("DOMContentLoaded", function() {
     if (rows.length === 0) return;
 
     // 💡 กำหนดจำนวนแถวที่แน่นอนต่อหน้า (เนื่องจากล็อกความสูงแถวแล้ว ตัวเลขนี้จะนิ่งและแม่นยำ)
-    const FIRST_PAGE_ROWS = 18; // จำนวนแถวที่พอดีในหน้าแรก (เพราะมีหัวบิลกินพื้นที่)
+    const FIRST_PAGE_ROWS = 17; // จำนวนแถวที่พอดีในหน้าแรก (เพราะมีหัวบิลกินพื้นที่)
     const NEXT_PAGE_ROWS = 24;  // จำนวนแถวที่พอดีในหน้าถัดไป (ไม่มีหัวบิล พื้นที่เลยเยอะขึ้น)
 
     let currentRowCount = 0;
