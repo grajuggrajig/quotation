@@ -531,9 +531,18 @@
 
     .signature-section {
         display: flex;
-        justify-content: flex-end;
+        justify-content: flex-end; /* จัดให้เนื้อหาในกล่องชิดขวาอยู่แล้ว */
         margin-top: 35px;
         padding-right: 0;
+        width: 100%;
+    }
+
+    .sig-box {
+        width: 100%;
+        max-width: 300px;
+        text-align: center;
+        margin-left: auto; /* ดันกล่องลายเซ็นไปทางขวาสุด */
+        margin-right: 0;
     }
 
     @media(min-width: 768px) {
@@ -577,7 +586,20 @@
         margin-bottom: 4px;
         color: #333;
     }
-
+.signature-section {
+            display: flex !important;
+            justify-content: flex-end !important;
+            padding-right: 0 !important;
+            width: 100% !important;
+            page-break-inside: avoid; /* ป้องกันการตัดหน้ากระดาษกลางลายเซ็น */
+        }
+        
+        .sig-box {
+            margin-left: auto !important;
+            margin-right: 0 !important;
+            float: right !important;
+        }
+ 
     @media print { 
         @page { 
             size: A4 portrait; 
