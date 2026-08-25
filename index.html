@@ -797,7 +797,33 @@
   margin: 30px 20px 8px 20px;
 }
 
+/* --- ทำให้หัวตารางลอยได้เฉพาะบนหน้าจอปกติ --- */
+@media screen {
+    .table-responsive-wrapper {
+        max-height: 450px; /* กำหนดความสูงของกรอบตารางที่จะให้เลื่อนดูได้ (ปรับเพื่ม/ลดได้ตามต้องการ) */
+        overflow-y: auto;
+        position: relative;
+    }
 
+    .data-table th {
+        position: sticky;
+        top: 0;
+        z-index: 10;
+        background: linear-gradient(135deg, #0284c7, #0369a1) !important;
+    }
+}
+
+/* --- บังคับให้ตอนสั่งพิมพ์ หัวตารางกลับมาอยู่ตำแหน่งปกติ ไม่ลอยตาม --- */
+@media print {
+    .table-responsive-wrapper {
+        max-height: none !important;
+        overflow: visible !important;
+    }
+
+    .data-table th {
+        position: static !important;
+    }
+}
 </style>
 </head>
 <body>
@@ -1063,14 +1089,14 @@
                     <td class="no-print" style="text-align: center;"><button class="btn-del" onclick="removeRow(this)">ลบ</button></td>
                 </tr>
             </tbody>
-            <tfoot class="no-print">
-                <tr>
-                    <td colspan="8" style="text-align: center; padding: 12px; border: 1px solid #cbd5e1; background: #ffffff;">
-                        <button class="btn-add" style="background: linear-gradient(135deg, #059669, #10b981); color: white; border: none; border-radius: 8px; padding: 8px 16px; font-weight: 600; cursor: pointer; box-shadow: none;" onclick="addRow()">+ เพิ่มรายการสินค้า</button>
-                    </td>
-                </tr>
-            </tfoot>
         </table>
+    </div>
+
+    <!-- ปุ่มเพิ่มรายการแบบลอยตัว/พร้อมใช้งานตลอดเวลา และซ่อนอัตโนมัติเวลาสั่งพิมพ์ -->
+    <div class="no-print" style="margin: 15px 0; text-align: center;">
+        <button class="btn-add" style="background: linear-gradient(135deg, #059669, #10b981); color: white; border: none; border-radius: 8px; padding: 10px 24px; font-weight: 600; cursor: pointer; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3); font-size: 13px;" onclick="addRow()">
+            <i class="fa-solid fa-plus" style="margin-right: 5px;"></i> เพิ่มรายการสินค้า
+        </button>
     </div>
     
     <table class="footer-table" style="width: 100%; border-collapse: collapse;">
