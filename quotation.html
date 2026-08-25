@@ -884,6 +884,51 @@
         display: none !important;
     }
 }
+
+@media print {
+    /* บังคับความสูงของแถวสินค้าให้คงที่ตอนพิมพ์ */
+    #billTable tbody tr.item-row {
+        height: 35px !important;
+        max-height: 35px !important;
+    }
+
+    /* ล็อกขนาดช่องกรอกข้อมูล (Textarea/Input) ไม่ให้ยืดขยายเองตอนพิมพ์ */
+#billTable tbody tr.item-row textarea.item-desc {
+            height: auto !important;
+            min-height: 28px !important;
+            max-height: none !important;
+            white-space: pre-wrap !important;
+            word-break: break-word !important;
+            overflow: visible !important;
+            padding: 2px 4px !important;
+            font-size: 11px !important;
+            line-height: 1.4 !important;
+            border: none !important;
+            background: transparent !important;
+            resize: none !important;
+        }
+
+        #billTable tbody tr.item-row input {
+            height: 28px !important;
+            min-height: 28px !important;
+            padding: 1px 2px !important;
+            font-size: 11px !important;
+            border: none !important;
+            background: transparent !important;
+        }
+
+    /* สไตล์และคำสั่งตัดหน้ากระดาษสำหรับแถวข้อความแจ้งเตือน */
+    tr.auto-continued-row {
+        display: table-row !important;
+        break-after: page;
+        page-break-after: always;
+    }
+}
+
+/* ซ่อนข้อความนี้ในหน้าจอปกติ (ให้แสดงเฉพาะตอนสั่งพิมพ์) */
+.auto-continued-row {
+    display: none;
+}
 </style>
     
 <div class="panel-group">
@@ -2634,6 +2679,47 @@ document.addEventListener("DOMContentLoaded", function() {
             });
         }
     });
+	
+	function preparePrint() {
+    // 1. ลบแถวข้อความเก่าออกก่อนทุกครั้งเพื่อป้องกันการเบิ้ลซ้ำ
+    document.querySelectorAll('.auto-continued-row').forEach(el => el.remove());
+
+    const rows = Array.from(document.querySelectorAll('#billTable tbody tr.item-row'));
+    if (rows.length === 0) return;
+
+    // 💡 กำหนดจำนวนแถวที่แน่นอนต่อหน้า (เนื่องจากล็อกความสูงแถวแล้ว ตัวเลขนี้จะนิ่งและแม่นยำ)
+    const FIRST_PAGE_ROWS = 17; // จำนวนแถวที่พอดีในหน้าแรก (เพราะมีหัวบิลกินพื้นที่)
+    const NEXT_PAGE_ROWS = 24;  // จำนวนแถวที่พอดีในหน้าถัดไป (ไม่มีหัวบิล พื้นที่เลยเยอะขึ้น)
+
+    let currentRowCount = 0;
+    let limit = FIRST_PAGE_ROWS;
+
+    rows.forEach((row) => {
+        currentRowCount++;
+
+        // ถ้ารายการครบโควต้าของหน้าปัจจุบันแล้ว ให้แทรกแถวข้อความ
+        if (currentRowCount >= limit) {
+            const continueRow = document.createElement('tr');
+            continueRow.className = 'auto-continued-row';
+            continueRow.innerHTML = `
+                <td colspan="8" style="text-align: right; padding: 6px 12px; font-weight: bold; border-top: 1px dashed #cbd5e1; font-size: 13px;">
+                    (มีรายการต่อหน้าถัดไป...)
+                </td>
+            `;
+
+            // แทรกข้อความไว้ก่อนหน้าแถวที่จะล้นไปหน้าถัดไป
+            row.parentNode.insertBefore(continueRow, row);
+
+            // เปลี่ยนไปใช้โควต้าของหน้าถัดไป และรีเซ็ตตัวนับแถว
+            limit = NEXT_PAGE_ROWS;
+            currentRowCount = 0; 
+        }
+    });
+}
+
+// ผูกฟังก์ชันเข้ากับการสั่งพิมพ์ของเบราว์เซอร์
+window.onbeforeprint = preparePrint;
+	
 </script>
 </body>
 </html>
