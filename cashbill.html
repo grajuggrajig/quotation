@@ -2,6 +2,7 @@
 <html lang="th">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>บิลเงินสด / ใบเสร็จรับเงิน (Cash Bill)</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -12,11 +13,16 @@
 <style>
     body { 
         font-family: 'Prompt', 'Tahoma', sans-serif; 
-        font-size: 14px; /* ปรับขนาดตัวอักษรพื้นฐานให้ใหญ่ขึ้น */
+        font-size: 14px; 
         margin: 0; 
         padding: 10px;
         background-color: #fdf4f8;
         color: #334155;
+        box-sizing: border-box;
+    }
+
+    *, *:before, *:after {
+        box-sizing: inherit;
     }
     
     .swal2-container {
@@ -24,13 +30,15 @@
     }
 
     .bill-container { 
-        width: 800px; 
+        width: 100%;
+        max-width: 800px; 
         margin: 0 auto; 
-        padding: 25px 30px; 
+        padding: 20px; 
         background-color: #ffffff; 
         border-radius: 20px;
         box-shadow: 0 12px 25px -5px rgba(192, 132, 252, 0.12);
         border: 1px solid #f3e8ff;
+        overflow-x: hidden;
     }
     
     .header-section { 
@@ -40,6 +48,8 @@
         border-bottom: 2px dashed #f3e8ff;
         padding-bottom: 15px; 
         margin-bottom: 15px;
+        gap: 15px;
+        flex-wrap: wrap;
     }
 
     .header-left {
@@ -47,12 +57,14 @@
         gap: 15px;
         align-items: flex-start;
         flex-grow: 1;
+        min-width: 250px;
     }
 
     .shop-info-box {
         line-height: 1.6;
         flex-grow: 1;
         font-size: 14px;
+        width: 100%;
     }
     
     .title-box { 
@@ -75,16 +87,34 @@
         border-collapse: collapse; 
         margin-bottom: 15px;
     }
+
+    .top-info tr {
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+    }
+
+    @media(min-width: 768px) {
+        .top-info tr {
+            display: table-row;
+        }
+    }
     
     .customer-info { 
         border: 1px solid #fdf4f8;
         padding: 12px 15px; 
-        width: 55%; 
+        width: 100%; 
         vertical-align: top; 
         border-radius: 14px;
         background-color: #fcf8fa;
         line-height: 1.8;
         font-size: 14px;
+    }
+
+    @media(min-width: 768px) {
+        .customer-info {
+            width: 55%;
+        }
     }
 
     .customer-info strong, .no-date-box strong {
@@ -100,12 +130,26 @@
         background-color: #fcf8fa;
         line-height: 1.9;
         font-size: 14px;
+        width: 100%;
+    }
+
+    @media(min-width: 768px) {
+        .no-date-box {
+            width: 100%;
+        }
     }
     
+    .table-responsive {
+        width: 100%;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
     .data-table { 
         width: 100%; 
         border-collapse: collapse; 
         margin-top: 10px; 
+        min-width: 600px;
     }
     
     .data-table th, .data-table td { 
@@ -167,12 +211,13 @@
         border: 1px solid #e9d5ff; 
         border-radius: 8px;
         font-family: 'Prompt', sans-serif; 
-        font-size: 14px; /* ขยายขนาดฟอนต์ในช่องกรอกข้อมูล */
+        font-size: 14px; 
         padding: 6px 10px; 
         color: #1e293b;
         background-color: #fff;
         box-sizing: border-box;
         transition: all 0.2s ease;
+        max-width: 100%;
     }
 
     input:focus, textarea:focus, select:focus {
@@ -187,7 +232,8 @@
         border-bottom: 1px dashed #cbd5e1; 
         border-radius: 0;
         padding: 3px 6px;
-        width: 200px; 
+        width: 100%; 
+        max-width: 200px;
     }
 
     .inline-textarea {
@@ -202,6 +248,8 @@
         overflow: hidden;
         height: 32px;
         min-height: 32px;
+        width: 100%;
+        max-width: 320px;
     }
     
     .qty, .unit-input, .price { 
@@ -246,21 +294,28 @@
     }
     
     .control-panel { 
+        width: 100%;
         max-width: 800px;
         margin: 0 auto 15px auto; 
         display: flex;
         justify-content: space-between;
         align-items: center;
         background: linear-gradient(135deg, #ffffff, #faf5ff);
-        padding: 12px 20px;
+        padding: 12px 15px;
         border-radius: 16px;
         box-shadow: 0 8px 20px -4px rgba(168, 85, 247, 0.12);
         border: 2px solid #e9d5ff;
-        gap: 15px;
+        gap: 12px;
         flex-wrap: wrap;
-        position: sticky;
-        top: 10px;
-        z-index: 2500;
+        position: relative;
+    }
+
+    @media(min-width: 992px) {
+        .control-panel {
+            position: sticky;
+            top: 10px;
+            z-index: 2500;
+        }
     }
 
     .panel-group {
@@ -285,10 +340,17 @@
     }
 
     .panel-divider {
-        width: 1px;
-        height: 45px;
-        background-color: #e9d5ff;
-        align-self: center;
+        display: none;
+    }
+
+    @media(min-width: 768px) {
+        .panel-divider {
+            display: block;
+            width: 1px;
+            height: 45px;
+            background-color: #e9d5ff;
+            align-self: center;
+        }
     }
 
     .icon-btn {
@@ -379,7 +441,10 @@
     }
     .btn-select-history:hover, .btn-select-prod:hover { background: #9333ea; }
     
-    .credit { font-size: 12px; color: #64748b; font-weight: 500; align-self: center; }
+    .credit { font-size: 12px; color: #64748b; font-weight: 500; align-self: center; width: 100%; text-align: center; }
+    @media(min-width: 768px) {
+        .credit { width: auto; text-align: left; }
+    }
     .credit strong { color: #9333ea; }
 
     .modal {
@@ -393,13 +458,14 @@
         background-color: rgba(0,0,0,0.4);
         justify-content: center;
         align-items: center;
+        padding: 10px;
     }
     .modal-content {
         background: #fff;
         padding: 20px;
         border-radius: 16px;
         width: 450px;
-        max-width: 90%;
+        max-width: 100%;
         box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1);
         max-height: 80vh;
         overflow-y: auto;
@@ -409,7 +475,7 @@
         padding: 20px;
         border-radius: 16px;
         width: 750px;
-        max-width: 95%;
+        max-width: 100%;
         box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1);
         max-height: 85vh;
         overflow-y: auto;
@@ -467,12 +533,26 @@
         display: flex;
         justify-content: flex-end;
         margin-top: 35px;
-        padding-right: 20px;
+        padding-right: 0;
+    }
+
+    @media(min-width: 768px) {
+        .signature-section {
+            padding-right: 20px;
+        }
     }
 
     .sig-box {
-        width: 300px;
+        width: 100%;
+        max-width: 300px;
         text-align: center;
+        margin: 0 auto;
+    }
+
+    @media(min-width: 768px) {
+        .sig-box {
+            margin: 0 0 0 auto;
+        }
     }
 
     .sig-line {
@@ -512,7 +592,6 @@
             print-color-adjust: exact !important; 
             font-size: 13px !important; 
         } 
-        /* ซ่อนเครื่องมือ เมนูดึงข้อมูล ปุ่มค้นหา/เลือกสินค้า และปุ่มลบแถวทั้งหมดในหน้าพิมพ์ */
         .control-panel, .no-print, .search-product-btn, select#customerSelect { 
             display: none !important; 
         } 
@@ -531,7 +610,6 @@
             padding: 1px 2px !important; 
             color: #1e293b !important; 
         }
-        /* ซ่อน Placeholder ทั้งหมดในหน้าพิมพ์เพื่อความสะอาดเรียบร้อย */
         input::placeholder, textarea::placeholder {
             color: transparent !important;
         }
@@ -591,7 +669,7 @@
         <div class="header-left">
             <div class="shop-info-box">
                 <strong>ชื่อร้าน (Company Name): </strong><input type="text" id="shopName" class="inline-input" placeholder="กรอกชื่อร้าน..."><br>
-                <strong>ที่อยู่ (Address): </strong><textarea id="shopAddress" class="inline-textarea" style="width: 320px;" placeholder="กรอกที่อยู่ร้าน..." oninput="autoGrow(this)"></textarea><br>
+                <strong>ที่อยู่ (Address): </strong><textarea id="shopAddress" class="inline-textarea" placeholder="กรอกที่อยู่ร้าน..." oninput="autoGrow(this)"></textarea><br>
                 <strong>เลขประจำตัวผู้เสียภาษี(Tax ID): </strong><input type="text" id="shopTax" class="inline-input" placeholder="เลขผู้เสียภาษี...">
             </div>
         </div>
@@ -605,15 +683,15 @@
                 <select id="customerSelect" class="inline-input no-print" style="width: 160px; font-weight: 600; color: #9333ea; border-bottom-color: #c084fc;" onchange="selectCustomer(this)">
                     <option value="">-- เลือกลูกค้า --</option>
                 </select><span class="no-print"><br></span>
-                <strong>นามลูกค้า (Customer):</strong> <input type="text" id="custName" class="inline-input" style="width: 230px;" placeholder="ชื่อบริษัท/ลูกค้า..."><br>
-                <strong>ที่อยู่ (Address):</strong> <textarea id="custAddress" class="inline-textarea" style="width: 230px;" placeholder="ที่อยู่ลูกค้า..." oninput="autoGrow(this)"></textarea><br>
-                <strong>เลขประจำตัวผู้เสียภาษี:</strong> <input type="text" id="custTax" class="inline-input" style="width: 170px;" placeholder="เลขผู้เสียภาษีลูกค้า">
+                <strong>นามลูกค้า (Customer):</strong> <input type="text" id="custName" class="inline-input" placeholder="ชื่อบริษัท/ลูกค้า..."><br>
+                <strong>ที่อยู่ (Address):</strong> <textarea id="custAddress" class="inline-textarea" placeholder="ที่อยู่ลูกค้า..." oninput="autoGrow(this)"></textarea><br>
+                <strong>เลขประจำตัวผู้เสียภาษี:</strong> <input type="text" id="custTax" class="inline-input" placeholder="เลขผู้เสียภาษีลูกค้า">
             </td>
-            <td style="padding-left: 15px; width: 40%;">
+            <td style="padding-left: 0; width: 100%;">
                 <div class="no-date-box">
                     <div class="no-print" style="margin-bottom: 6px;">
                         <strong style="color: #9333ea;">🔍 ค้นหาบิลเดิม:</strong> 
-                        <div style="display: flex; gap: 5px; margin-top: 4px;">
+                        <div style="display: flex; gap: 5px; margin-top: 4px; flex-wrap: wrap;">
                             <input type="text" id="searchOldBillNo" class="inline-input" style="width: 110px;" placeholder="เลขที่บิลเก่า">
                             <button style="background: linear-gradient(135deg, #06b6d4, #22d3ee); color: white; border: none; border-radius: 6px; padding: 4px 10px; font-size: 11px; cursor: pointer;" onclick="loadDataByBillNo()">ดึงข้อมูล</button>
                         </div>
@@ -626,42 +704,44 @@
         </tr>
     </table>
 
-    <table class="data-table" id="billTable">
-        <thead>
-            <tr>
-                <th style="width: 5%;">ลำดับ<br><span style="font-size: 10px; font-weight: 300;">Item</span></th>
-                <th style="width: 47%;">รายการสินค้า / รายละเอียด<br><span style="font-size: 10px; font-weight: 300;">Description</span></th>
-                <th style="width: 8%;">จำนวน<br><span style="font-size: 10px; font-weight: 300;">Qty</span></th>
-                <th style="width: 10%;">หน่วย<br><span style="font-size: 10px; font-weight: 300;">Unit</span></th>
-                <th style="width: 13%;">ราคาต่อหน่วย<br><span style="font-size: 10px; font-weight: 300;">Unit Price</span></th>
-                <th style="width: 13%;">จำนวนเงิน<br><span style="font-size: 10px; font-weight: 300;">Amount</span></th>
-                <th class="no-print" style="width: 4%;">ลบ</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr class="item-row">
-                <td class="row-num" style="text-align: center;">1</td>
-                <td class="desc-cell">
-                    <div class="item-desc-wrapper">
-                        <textarea class="item-desc" placeholder="ระบุรายละเอียดสินค้า" oninput="autoGrow(this)"></textarea>
-                        <button type="button" class="search-product-btn no-print" onclick="openProductSelector(this)" title="ค้นหาสินค้า"><i class="fa-solid fa-magnifying-glass"></i></button>
-                    </div>
-                </td>
-                <td style="text-align: center;"><input type="text" class="qty" value="0" inputmode="decimal" onfocus="if(this.value==='0')this.value='';" onblur="if(this.value==='')this.value='0';" oninput="formatNumberInput(this); calculate();"></td>
-                <td style="text-align: center;"><input type="text" class="unit-input" placeholder="ชิ้น/อัน"></td>
-                <td style="text-align: center;"><input type="text" class="price" value="0" inputmode="decimal" onfocus="if(this.value==='0')this.value='';" onblur="if(this.value==='')this.value='0';" oninput="formatNumberInput(this); calculate();"></td>
-                <td class="amount" style="text-align: right; padding-right: 12px;">0.00</td>
-                <td class="no-print" style="text-align: center;"><button class="btn-del" onclick="removeRow(this)">ลบ</button></td>
-            </tr>
-        </tbody>
-        <tfoot class="no-print">
-            <tr>
-                <td colspan="7" style="text-align: center; padding: 12px; border: 1px solid #e9d5ff; background: #ffffff;">
-                    <button style="background: linear-gradient(135deg, #10b981, #34d399); color: white; border: none; border-radius: 8px; padding: 8px 16px; font-weight: 600; cursor: pointer;" onclick="addRow()">+ เพิ่มรายการสินค้า</button>
-                </td>
-            </tr>
-        </tfoot>
-    </table>
+    <div class="table-responsive">
+        <table class="data-table" id="billTable">
+            <thead>
+                <tr>
+                    <th style="width: 5%;">ลำดับ<br><span style="font-size: 10px; font-weight: 300;">Item</span></th>
+                    <th style="width: 47%;">รายการสินค้า / รายละเอียด<br><span style="font-size: 10px; font-weight: 300;">Description</span></th>
+                    <th style="width: 8%;">จำนวน<br><span style="font-size: 10px; font-weight: 300;">Qty</span></th>
+                    <th style="width: 10%;">หน่วย<br><span style="font-size: 10px; font-weight: 300;">Unit</span></th>
+                    <th style="width: 13%;">ราคาต่อหน่วย<br><span style="font-size: 10px; font-weight: 300;">Unit Price</span></th>
+                    <th style="width: 13%;">จำนวนเงิน<br><span style="font-size: 10px; font-weight: 300;">Amount</span></th>
+                    <th class="no-print" style="width: 4%;">ลบ</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr class="item-row">
+                    <td class="row-num" style="text-align: center;">1</td>
+                    <td class="desc-cell">
+                        <div class="item-desc-wrapper">
+                            <textarea class="item-desc" placeholder="ระบุรายละเอียดสินค้า" oninput="autoGrow(this)"></textarea>
+                            <button type="button" class="search-product-btn no-print" onclick="openProductSelector(this)" title="ค้นหาสินค้า"><i class="fa-solid fa-magnifying-glass"></i></button>
+                        </div>
+                    </td>
+                    <td style="text-align: center;"><input type="text" class="qty" value="0" inputmode="decimal" onfocus="if(this.value==='0')this.value='';" onblur="if(this.value==='')this.value='0';" oninput="formatNumberInput(this); calculate();"></td>
+                    <td style="text-align: center;"><input type="text" class="unit-input" placeholder="ชิ้น/อัน"></td>
+                    <td style="text-align: center;"><input type="text" class="price" value="0" inputmode="decimal" onfocus="if(this.value==='0')this.value='';" onblur="if(this.value==='')this.value='0';" oninput="formatNumberInput(this); calculate();"></td>
+                    <td class="amount" style="text-align: right; padding-right: 12px;">0.00</td>
+                    <td class="no-print" style="text-align: center;"><button class="btn-del" onclick="removeRow(this)">ลบ</button></td>
+                </tr>
+            </tbody>
+            <tfoot class="no-print">
+                <tr>
+                    <td colspan="7" style="text-align: center; padding: 12px; border: 1px solid #e9d5ff; background: #ffffff;">
+                        <button style="background: linear-gradient(135deg, #10b981, #34d399); color: white; border: none; border-radius: 8px; padding: 8px 16px; font-weight: 600; cursor: pointer;" onclick="addRow()">+ เพิ่มรายการสินค้า</button>
+                    </td>
+                </tr>
+            </tfoot>
+        </table>
+    </div>
     
     <table class="footer-table" style="width: 100%; border-collapse: collapse;">
         <tr>
@@ -739,7 +819,7 @@
             <strong>➕ เพิ่มสินค้าใหม่เข้าฐานข้อมูล:</strong>
             <div style="display: flex; gap: 8px; margin-top: 8px; flex-wrap: wrap;">
                 <input type="text" id="newProdDesc" placeholder="รายละเอียดสินค้า" style="flex-grow: 2; min-width: 200px;">
-                <input type="text" id="newProdUnit" placeholder="หน่วย (เช่น ชิ้น)" style="width: 100px;">
+                <input type="text" id="newProdUnit" placeholder="หน่วย (ชิ้น)" style="width: 100px;">
                 <input type="text" id="newProdPrice" placeholder="ราคาต่อหน่วย" style="width: 110px;" inputmode="decimal">
                 <button type="button" onclick="addNewProduct()" style="background: #10b981; color: white; border: none; padding: 8px 16px; border-radius: 8px; cursor: pointer; font-weight: 600;">บันทึกสินค้า</button>
             </div>
