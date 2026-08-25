@@ -7,8 +7,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        @page { size: A4; margin: 12mm; }
-        
+        @page { size: A4; margin: 12mm; }                
         * { box-sizing: border-box; }
         body { 
             font-family: 'Sarabun', 'Inter', sans-serif; 
@@ -18,7 +17,6 @@
             margin: 0; 
             padding: 10px; 
         }
-
         .container { 
             width: 100%; 
             max-width: 820px; 
@@ -30,25 +28,61 @@
             position: relative;
         }
 
-        /* สไตล์ปุ่มย้อนกลับ */
-        .btn-back-home {
+        /* จัดกลุ่มปุ่มย้อนกลับด้านบน ให้แยกซ้าย-ขวา */
+        .top-nav-buttons {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        /* สไตล์ปุ่มย้อนกลับ */        
+        .modern-back-btn {
             display: inline-flex;
             align-items: center;
-            gap: 8px;
-            background-color: #f1f5f9;
-            color: #475569;
-            padding: 8px 16px;
-            border-radius: 8px;
-            text-decoration: none;
+            gap: 10px;
+            padding: 8px 18px;
+            background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+            color: #334155;
+            font-family: 'Sarabun', sans-serif;
             font-size: 14px;
-            font-weight: 500;
-            margin-bottom: 20px;
-            transition: all 0.2s;
+            font-weight: 600;
+            text-decoration: none;
             border: 1px solid #e2e8f0;
+            border-radius: 50px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
         }
-        .btn-back-home:hover {
-            background-color: #e2e8f0;
-            color: #1e293b;
+        .modern-back-btn .btn-icon-wrapper {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 28px;
+            height: 28px;
+            background: #0284c7;
+            color: #ffffff;
+            border-radius: 50%;
+            transition: transform 0.3s ease;
+        }
+        .modern-back-btn:hover {
+            background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
+            color: #ffffff;
+            border-color: transparent;
+            box-shadow: 0 10px 15px -3px rgba(2, 132, 199, 0.3), 0 4px 6px -4px rgba(2, 132, 199, 0.3);
+            transform: translateY(-2px);
+        }
+        .modern-back-btn:hover .btn-icon-wrapper {
+            background: #ffffff;
+            color: #0284c7;
+            transform: translateX(-3px);
+        }
+        .modern-back-btn:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 4px -1px rgba(0, 0, 0, 0.05);
         }
 
         .header-section {
@@ -59,7 +93,6 @@
             margin-bottom: 25px;
             gap: 15px;
         }
-
         .logo-box {
             width: 80px;
             height: 80px;
@@ -73,30 +106,25 @@
             flex-shrink: 0;
             position: relative;
         }
-
         .logo-box img {
             width: 100%;
             height: 100%;
             object-fit: contain;
             display: block;
         }
-
         .company-details {
             flex-grow: 1;
         }
-
         .company-name { 
             font-size: 18px; 
             font-weight: 700; 
             color: #1e3a8a; 
             margin-bottom: 4px; 
-        }
-        
+        }                
         .company-address {
             font-size: 13px;
             color: #64748b;
         }
-
         .doc-title { 
             font-size: 22px; 
             font-weight: 700; 
@@ -105,19 +133,15 @@
             margin: 20px 0 25px 0; 
             letter-spacing: 0.5px;
         }
-
         .doc-title span {
             border-bottom: 3px solid #3b82f6;
             padding-bottom: 4px;
         }
-
         .letter-body {
             font-size: 14px;
             color: #334155;
             margin-bottom: 20px;
         }
-
-        /* ทำให้ตารางเลื่อนซ้าย-ขวาได้บนมือถือ */
         .table-wrapper {
             margin: 20px 0;
             border-radius: 10px;
@@ -125,14 +149,12 @@
             overflow-x: auto;
             -webkit-overflow-scrolling: touch;
         }
-
         table { 
             width: 100%; 
-            min-width: 550px; /* บังคับความกว้างขั้นต่ำไม่ให้ตารางยัดเยียดเกินไปบนจอเล็ก */
+            min-width: 550px; 
             border-collapse: collapse; 
             background: #ffffff; 
-        }
-        
+        }                
         th { 
             background: linear-gradient(135deg, #1e3a8a, #3b82f6); 
             color: white; 
@@ -141,21 +163,18 @@
             text-align: center; 
             font-size: 13px;
         }
-
         td { 
             padding: 8px; 
             text-align: center; 
             border-bottom: 1px solid #f1f5f9; 
             font-size: 13px;
         }
-
         tr:last-child td {
             border-bottom: none;
-        }
-        
+        }                
         input.table-input { 
             width: 100%; 
-            border: 1px solid transparent; 
+            border: 1px solid transparent;
             background: transparent; 
             text-align: center; 
             font-family: inherit; 
@@ -163,15 +182,13 @@
             padding: 6px; 
             border-radius: 6px;
             transition: all 0.2s;
-        }
-        
+        }                
         input.table-input:focus { 
             outline: none; 
             border-color: #3b82f6; 
             background: #ffffff; 
             box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15); 
-        }
-        
+        }                
         .btn-delete { 
             background: #fee2e2; 
             color: #ef4444; 
@@ -184,8 +201,7 @@
             display: inline-flex;
             align-items: center;
             justify-content: center;
-        }
-        
+        }                
         .action-container {
             display: flex;
             justify-content: space-between;
@@ -194,7 +210,6 @@
             flex-wrap: wrap;
             gap: 10px;
         }
-
         .btn-add { 
             background: #0ea5e9; 
             color: white; 
@@ -207,25 +222,10 @@
             box-shadow: 0 4px 12px rgba(14, 165, 233, 0.2);
             width: 100%;
         }
-
-        .btn-print { 
-            background: #10b981; 
-            color: white; 
-            padding: 12px 20px; 
-            border: none; 
-            cursor: pointer; 
-            font-size: 15px; 
-            font-weight: 600;
-            border-radius: 8px; 
-            box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
-            width: 100%;
-        }
-
         .footer-note-section {
             margin-top: 20px;
             font-size: 13px;
         }
-
         .editable-note {
             width: 100%;
             border: 1px dashed #cbd5e1;
@@ -236,7 +236,6 @@
             background: #fafafa;
             margin-top: 5px;
         }
-
         .footer-sign { 
             margin-top: 30px; 
             text-align: right; 
@@ -244,8 +243,7 @@
             display: flex;
             flex-direction: column;
             align-items: flex-end;
-        }
-        
+        }                
         .footer-sign input {
             border: none;
             border-bottom: 1px dotted #94a3b8;
@@ -255,130 +253,6 @@
             padding: 4px;
             background: transparent;
         }
-
-        /* Media Query สำหรับหน้าจอคอมพิวเตอร์ (Desktop) ให้ปุ่มและฟอนต์ขยายสวยงามตามเดิม */
-        @media (min-width: 768px) {
-            body { padding: 20px; }
-            .container { padding: 40px; }
-            .logo-box { width: 100px; height: 100px; }
-            .company-name { font-size: 20px; }
-            .company-address, .letter-body, .footer-note-section { font-size: 14px; }
-            th, td, input.table-input { font-size: 14px; }
-            .btn-add { width: auto; }
-            .btn-print { width: auto; }
-            .footer-sign { align-items: center; text-align: center; margin-right: 40px; }
-        }
-
-        @media print { 
-            body { 
-                background: white; 
-                padding: 0; 
-                -webkit-print-color-adjust: exact; 
-                print-color-adjust: exact; 
-            }
-            .container { box-shadow: none; padding: 0; width: 100%; max-width: 100%; }
-            .action-container, .btn-delete, .btn-back-home, th:last-child, td:last-child { display: none !important; } 
-            
-			/* ซ่อนปุ่มต่างๆ และคอลัมน์ลบ เมื่อสั่งพิมพ์ */
-    .action-container, 
-    .btn-delete, 
-    .btn-back-home, 
-    .modern-back-btn, 
-    .modern-print-btn, 
-    th:last-child, 
-    td:last-child { 
-        display: none !important; 
-    }
-			
-            input.table-input, .footer-sign input { 
-                border: none !important; 
-                border-bottom: none !important; 
-                background: transparent !important; 
-                box-shadow: none !important; 
-            }
-            .editable-note { 
-                border: none !important; 
-                background: transparent !important; 
-                padding: 0 !important; 
-            }
-        }
-		
-	.modern-back-btn {
-    display: inline-flex;
-    align-items: center;
-    gap: 12px;
-    padding: 10px 20px;
-    background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
-    color: #334155;
-    font-family: 'Sarabun', sans-serif; /* ปรับฟอนต์ตามเว็บของคุณ */
-    font-size: 15px;
-    font-weight: 600;
-    text-decoration: none;
-    border: 1px solid #e2e8f0;
-    border-radius: 50px; /* ทำทรงแคปซูลมนสวยงาม */
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    position: relative;
-    overflow: hidden;
-}
-
-/* ส่วนไอคอนวงกลมด้านหน้า */
-.modern-back-btn .btn-icon-wrapper {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 32px;
-    height: 32px;
-    background: #0284c7; /* สีฟ้าธีมหลักของคุณ */
-    color: #ffffff;
-    border-radius: 50%;
-    transition: transform 0.3s ease;
-}
-
-/* ลูกเล่นเวลาเอาเมาส์มาวาง (Hover) */
-.modern-back-btn:hover {
-    background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
-    color: #ffffff;
-    border-color: transparent;
-    box-shadow: 0 10px 15px -3px rgba(2, 132, 199, 0.3), 0 4px 6px -4px rgba(2, 132, 199, 0.3);
-    transform: translateY(-2px); /* ยกตัวขึ้นเล็กน้อย */
-}
-
-/* เมื่อเอาเมาส์ชี้ ให้ไอคอนขยับถอยหลังนิดหน่อยเพื่อบอกทิศทาง */
-.modern-back-btn:hover .btn-icon-wrapper {
-    background: #ffffff;
-    color: #0284c7;
-    transform: translateX(-3px);
-}
-
-/* เอฟเฟกต์ตอนกดคลิก (Active) */
-.modern-back-btn:active {
-    transform: translateY(0);
-    box-shadow: 0 2px 4px -1px rgba(0, 0, 0, 0.05);
-}	
-
-/* สไตล์ปุ่มพิมพ์/บันทึก PDF สุดทันสมัย */
-.modern-print-btn {
-    display: inline-flex;
-    align-items: center;
-    gap: 12px;
-    padding: 12px 24px;
-    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-    color: #ffffff;
-    font-family: 'Sarabun', sans-serif;
-    font-size: 15px;
-    font-weight: 600;
-    text-decoration: none;
-    border: none;
-    border-radius: 50px; /* ทรงแคปซูลมน */
-    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.35);
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    cursor: pointer;
-    position: relative;
-    overflow: hidden;
-}
-
-/* สไตล์ปุ่มพิมพ์แบบไอคอนวงกลมเดี่ยว (Icon-only) ทันสมัย ขนาดกะทัดรัด */
         .icon-print-btn {
             display: inline-flex;
             align-items: center;
@@ -402,116 +276,143 @@
         .icon-print-btn:active {
             transform: translateY(0) scale(0.98);
         }
+
+        @media (min-width: 768px) {
+            body { padding: 20px; }
+            .container { padding: 40px; }
+            .logo-box { width: 100px; height: 100px; }
+            .company-name { font-size: 20px; }
+            .company-address, .letter-body, .footer-note-section { font-size: 14px; }
+            th, td, input.table-input { font-size: 14px; }
+            .btn-add { width: auto; }
+            .footer-sign { align-items: center; text-align: center; margin-right: 40px; }
+        }
+
+        @media print { 
+            body { 
+                background: white; 
+                padding: 0; 
+                -webkit-print-color-adjust: exact; 
+                print-color-adjust: exact; 
+            }
+            .container { box-shadow: none; padding: 0; width: 100%; max-width: 100%; }
+            .action-container, .btn-delete, .top-nav-buttons, th:last-child, td:last-child { display: none !important; }             			
+            input.table-input, .footer-sign input { 
+                border: none !important; 
+                border-bottom: none !important; 
+                background: transparent !important; 
+                box-shadow: none !important; 
+            }
+            .editable-note { 
+                border: none !important; 
+                background: transparent !important; 
+                padding: 0 !important; 
+            }
+        }
     </style>
 </head>
 <body>
 
 <div class="container">
-<a href="index.html" class="modern-back-btn">
-    <span class="btn-icon-wrapper">
-        <i class="fa-solid fa-arrow-left"></i>
-    </span>
-    <span class="btn-text">กลับหน้าใบเสนอราคา</span>
-</a>
-
-    <div class="header-section">
-        <div class="logo-box">
-            <img src="logo.png" alt="KL Stationery Logo">
-        </div>
-        <div class="company-details">
-            <div class="company-name">บริษัท เค แอล สเตชั่นเนอรี่ จำกัด</div>
-            <div class="company-address">873, 875 ถนนลาซาล แขวงบางนา เขตบางนา กทม. 10260</div>
-            <div class="company-address">โทร: 02-748-6788</div>
-        </div>
+    <!-- แผงปุ่มกลับซ้าย-ขวา -->
+    <div class="top-nav-buttons">
+        <a href="index.html" class="modern-back-btn">
+            <span class="btn-icon-wrapper"><i class="fa-solid fa-house"></i></span>
+            <span>หน้าแรก</span>
+        </a>
+        <a href="quotation.html" class="modern-back-btn">
+            <span class="btn-icon-wrapper"><i class="fa-solid fa-arrow-left"></i></span>
+            <span>กลับหน้าใบเสนอราคา</span>
+        </a>
     </div>
 
-    <div class="doc-title"><span>ใบแจ้งปรับราคาสินค้า</span></div>
-    
-    <div class="letter-body">
-        <p><strong>เรียน:</strong> ท่านผู้จัดการฝ่ายจัดซื้อ</p>
-        <p>เนื่องจาก บริษัท เค แอล สเตชั่นเนอรี่ มีความจำเป็นต้องปรับราคาสินค้าบางรายการ ดังต่อไปนี้[cite: 3]</p>
+    <div class="header-section">        
+        <div class="logo-box">            
+            <img src="logo.png" alt="KL Stationery Logo">        
+        </div>        
+        <div class="company-details">            
+            <div class="company-name">บริษัท เค แอล สเตชั่นเนอรี่ จำกัด</div>            
+            <div class="company-address">873, 875 ถนนลาซาล แขวงบางนา เขตบางนา กทม. 10260</div>            
+            <div class="company-address">โทร: 02-748-6788</div>        
+        </div>    
     </div>
 
-    <div class="table-wrapper">
-        <table>
-            <thead>
-                <tr>
-                    <th style="width: 8%;">ลำดับ</th>
-                    <th>รายการสินค้า</th>
-                    <th style="width: 22%;">ราคาเดิม</th>
-                    <th style="width: 22%;">ราคาใหม่</th>
-                    <th style="width: 10%;" class="col-action">ลบ</th>
-                </tr>
-            </thead>
-            <tbody id="price-table-body">
-                <tr>
-                    <td>1</td>
-                    <td><input type="text" class="table-input" placeholder="ระบุชื่อสินค้า..."></td>
-                    <td><input type="text" class="table-input" placeholder="0.00"></td>
-                    <td><input type="text" class="table-input" placeholder="0.00"></td>
-                    <td class="col-action"><button class="btn-delete" onclick="deleteRow(this)">✕</button></td>
-                </tr>
-            </tbody>
-        </table>
+    <div class="doc-title"><span>ใบแจ้งปรับราคาสินค้า</span></div>        
+
+    <div class="letter-body">        
+        <p><strong>เรียน:</strong> ท่านผู้จัดการฝ่ายจัดซื้อ</p>        
+        <p>เนื่องจาก บริษัท เค แอล สเตชั่นเนอรี่ มีความจำเป็นต้องปรับราคาสินค้าบางรายการ ดังต่อไปนี้</p>    </div>
+
+    <div class="table-wrapper">        
+        <table>            
+            <thead>                
+                <tr>                    
+                    <th style="width: 8%;">ลำดับ</th>                    
+                    <th>รายการสินค้า</th>                    
+                    <th style="width: 22%;">ราคาเดิม</th>                    
+                    <th style="width: 22%;">ราคาใหม่</th>                    
+                    <th style="width: 10%;" class="col-action">ลบ</th>                
+                </tr>            </thead>            
+            <tbody id="price-table-body">                
+                <tr>                    
+                    <td>1</td>                    
+                    <td><input type="text" class="table-input" placeholder="ระบุชื่อสินค้า..."></td>                    
+                    <td><input type="text" class="table-input" placeholder="0.00"></td>                    
+                    <td><input type="text" class="table-input" placeholder="0.00"></td>                    
+                    <td class="col-action"><button class="btn-delete" onclick="deleteRow(this)">✕</button></td>                
+                </tr>            
+            </tbody>        
+        </table>    
     </div>
 
-    <div class="action-container">
-        <button class="btn-add" onclick="addRow()">+ เพิ่มรายการสินค้า</button>
+    <div class="action-container">        
+        <button class="btn-add" onclick="addRow()">+ เพิ่มรายการสินค้า</button>    
     </div>
 
-    <div class="footer-note-section">
-        <p style="margin-bottom: 10px;">ราคาสินค้าใหม่เริ่มใช้ตั้งแต่: <input type="text" class="table-input" style="width: 220px; border-bottom: 1px solid #cbd5e1; text-align: left; display: inline-block;" placeholder="ระบุวันที่เริ่มใช้..."></p>
-        
+    <div class="footer-note-section">        
+        <p style="margin-bottom: 10px;">ราคาสินค้าใหม่เริ่มใช้ตั้งแต่: <input type="text" class="table-input" style="width: 220px; border-bottom: 1px solid #cbd5e1; text-align: left; display: inline-block;" placeholder="ระบุวันที่เริ่มใช้..."></p>                
         <input type="text" id="noteInput" class="editable-note" value="หมายเหตุ* ราคาสินค้านี้ ยังไม่รวมภาษีมูลค่าเพิ่ม">
+        <p style="text-indent: 40px; margin-top: 25px;">จึงเรียนมาเพื่อทราบ</p>    </div>
 
-        <p style="text-indent: 40px; margin-top: 25px;">จึงเรียนมาเพื่อทราบ</p>
-    </div>
+    <div class="footer-sign">        
+        <div style="text-align: center;">            
+            <p style="margin-bottom: 35px;">ขอแสดงความนับถือ</p>            
+            <input type="text" value="" style="font-weight: bold; width: 240px; text-align: center;" placeholder="(ระบุชื่อ-นามสกุล ผู้ลงนาม)"><br>            
+            <input type="text" value="กรรมการผู้จัดการ" style="width: 240px; color: #64748b; font-size: 13px; text-align: center;">        
+        </div>    </div>
 
-    <div class="footer-sign">
-        <div style="text-align: center;">
-            <p style="margin-bottom: 35px;">ขอแสดงความนับถือ</p>
-            <input type="text" value="" style="font-weight: bold; width: 240px; text-align: center;" placeholder="(ระบุชื่อ-นามสกุล ผู้ลงนาม)"><br>
-            <input type="text" value="กรรมการผู้จัดการ" style="width: 240px; color: #64748b; font-size: 13px; text-align: center;">
-        </div>
-    </div>
-
-<div class="action-container" style="margin-top: 40px; border-top: 2px solid #eef2f7; padding-top: 20px;">
-        <span style="font-size: 12px; color: #94a3b8;">ระบบออกเอกสารอัตโนมัติ - KL Stationery</span>
-        
-        <!-- ปุ่มพิมพ์แบบไอคอนวงกลมเดี่ยว ทันสมัย -->
-        <button class="icon-print-btn" onclick="window.print()" title="พิมพ์ / บันทึกเป็น PDF">
-            <i class="fa-solid fa-print" style="font-size: 18px;"></i>
-        </button>
+    <div class="action-container" style="margin-top: 40px; border-top: 2px solid #eef2f7; padding-top: 20px;">        
+        <span style="font-size: 12px; color: #94a3b8;">ระบบออกเอกสารอัตโนมัติ - KL Stationery</span>                
+        <button class="icon-print-btn" onclick="window.print()" title="พิมพ์ / บันทึกเป็น PDF">            
+            <i class="fa-solid fa-print" style="font-size: 18px;"></i>        
+        </button>    
     </div>
 </div>
 
-<script>
-    function addRow() {
-        let tbody = document.getElementById("price-table-body");
-        let rowCount = tbody.rows.length + 1;
-        let row = tbody.insertRow();
-        row.innerHTML = `
-            <td>${rowCount}</td>
-            <td><input type="text" class="table-input" placeholder="ระบุชื่อสินค้า..."></td>
-            <td><input type="text" class="table-input" placeholder="0.00"></td>
-            <td><input type="text" class="table-input" placeholder="0.00"></td>
-            <td class="col-action"><button class="btn-delete" onclick="deleteRow(this)">✕</button></td>
-        `;
+<script>    
+    function addRow() {        
+        let tbody = document.getElementById("price-table-body");        
+        let rowCount = tbody.rows.length + 1;        
+        let row = tbody.insertRow();        
+        row.innerHTML = `            
+            <td>${rowCount}</td>            
+            <td><input type="text" class="table-input" placeholder="ระบุชื่อสินค้า..."></td>            
+            <td><input type="text" class="table-input" placeholder="0.00"></td>            
+            <td><input type="text" class="table-input" placeholder="0.00"></td>            
+            <td class="col-action"><button class="btn-delete" onclick="deleteRow(this)">✕</button></td>        
+        `;    
     }
-
-    function deleteRow(btn) {
-        let row = btn.parentNode.parentNode;
-        row.parentNode.removeChild(row);
-        updateRowNumbers();
+    function deleteRow(btn) {        
+        let row = btn.parentNode.parentNode;        
+        row.parentNode.removeChild(row);        
+        updateRowNumbers();    
     }
-
-    function updateRowNumbers() {
-        let tbody = document.getElementById("price-table-body");
-        for (let i = 0; i < tbody.rows.length; i++) {
-            tbody.rows[i].cells[0].innerText = i + 1;
-        }
+    function updateRowNumbers() {        
+        let tbody = document.getElementById("price-table-body");        
+        for (let i = 0; i < tbody.rows.length; i++) {            
+            tbody.rows[i].cells[0].innerText = i + 1;        
+        }    
     }
 </script>
-
 </body>
 </html>
