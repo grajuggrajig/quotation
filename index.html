@@ -1372,6 +1372,11 @@ window.addEventListener('DOMContentLoaded', () => {
             <td class="no-print" style="text-align: center;"><button class="btn-del" onclick="removeRow(this)">ลบ</button></td>
         `;
         calculate();
+		// 📌 เพิ่มโค้ดส่วนนี้เพื่อสั่งให้ตารางเลื่อนลงมาแถวล่าสุดอัตโนมัติ
+        let wrapper = document.querySelector('.table-responsive-wrapper');
+        if (wrapper) {
+            wrapper.scrollTop = wrapper.scrollHeight;
+        }
     }
 
     function removeRow(btn) {
