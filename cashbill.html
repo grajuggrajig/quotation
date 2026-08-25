@@ -581,7 +581,7 @@
     @media print { 
         @page { 
             size: A4 portrait; 
-            margin: 3mm 5mm 3mm 5mm !important; 
+            margin: 5mm 8mm 5mm 8mm !important; 
         }
         body { 
             background-color: #ffffff !important; 
@@ -603,6 +603,24 @@
             padding: 0 !important; 
             margin: 0 !important;
         } 
+
+        /* บังคับให้โครงสร้างส่วนหัวตอนพิมพ์เรียงหน้ากระดาษแบบเดียวกับหน้าจอคอมพิวเตอร์ */
+        .top-info tr {
+            display: table-row !important;
+        }
+        .customer-info {
+            width: 55% !important;
+            display: table-cell !important;
+        }
+        .top-info td:last-child {
+            width: 45% !important;
+            display: table-cell !important;
+            padding-left: 10px !important;
+        }
+        .no-date-box {
+            width: 100% !important;
+        }
+
         input, textarea, select, .inline-textarea, .sig-name-input, .sig-date-input { 
             border: none !important; 
             background: transparent !important; 
