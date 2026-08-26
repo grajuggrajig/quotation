@@ -1085,7 +1085,7 @@
         <!-- ปุ่มส่งเมลผ่าน Gmail (บังคับเปิดในหน้าต่างเดิม/แอปเดิม ไม่เด้งแยกออกไป) -->
         <button class="icon-btn btn-export-ui" data-tip="เขียนใบเสนอราคาใน Gmail" onclick="location.href='https://mail.google.com/mail/u/0/?tab=rm&ogbl#inbox?compose=new'; return false;">
             <i class="fa-solid fa-envelope"></i>
-        </button>
+        </button> 
     </div>
 </div>
 
@@ -1097,6 +1097,10 @@
             <button class="icon-btn btn-print-ui" data-tip="พิมพ์ / บันทึก PDF" onclick="window.print()"><i class="fa-solid fa-print"></i></button>
       <!--       <button class="icon-btn btn-close-ui" data-tip="ปิดโปรแกรม" onclick="closeAppWindow()"><i class="fa-solid fa-xmark"></i></button>  -->
         </div>
+		
+	  <!--	<button class="icon-btn" style="background: linear-gradient(135deg, #10b981, #059669);" data-tip="ไปหน้า Quotation" onclick="openQuotation()">
+    <i class="fa-solid fa-arrow-right"></i>
+</button>  -->
     </div>
 </div>
 
@@ -1772,6 +1776,11 @@ async function executeSave(isNewBill) {
             text: `เลขที่บิล: ${finalBillNo}`,
             timer: 2000,
             showConfirmButton: false
+        }).then(() => {
+            // 📌 นำโค้ดของคุณมาวางไว้ตรงนี้ เพื่อให้เด้งไปหน้าใหม่หลังบันทึกเสร็จ
+            let currentBillNo = document.getElementById('billNo').value;
+            let currentBookNo = document.getElementById('bookNo').value;
+            window.location.href = `quotation.html?billNo=${encodeURIComponent(currentBillNo)}&bookNo=${encodeURIComponent(currentBookNo)}`;
         });
 
     } catch (error) {
@@ -2765,6 +2774,14 @@ async function openEditProductModal(index) {
     document.getElementById('discountRate').addEventListener('input', function() {
         calculate();
     });
+	
+	
+function openQuotation() {
+    let currentBillNo = document.getElementById('billNo').value;
+    let currentBookNo = document.getElementById('bookNo').value;
+    
+    window.location.href = `quotation.html?billNo=${encodeURIComponent(currentBillNo)}&bookNo=${encodeURIComponent(currentBookNo)}`;
+}	
 	
 	
 function toggleBackupButtons() {
