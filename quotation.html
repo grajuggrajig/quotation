@@ -953,13 +953,62 @@ function loadCustomerDropdown() {
 }
 
     function loadDataByBillNo() {
-        const bNo = document.getElementById("searchOldBillNo").value;
-        if (bNo) {
-            alert("ดึงข้อมูลใบเสนอเลขที่: " + bNo + " สำเร็จ!");
-        } else {
-            alert("กรุณากรอกเลขที่บิลที่ต้องการค้นหา");
-        }
+    const bNo = document.getElementById("searchOldBillNo").value.trim();
+    if (!bNo) {
+        alert("กรุณากรอกเลขที่บิลที่ต้องการค้นหา");
+        return;
     }
+
+    // ค้นหาจาก Storage ทั้ง 2 รูปแบบที่เป็นไปได้ในระบบของคุณ
+    let savedBills = [];
+    const source1 = localStorage.getItem('saved_quotations');
+    const source2 = localStorage.getItem('saved_quot_purchases');
+
+    if (source1) {
+        try { savedBills = savedBills.concat(JSON.parse(source1)); } catch(e){}
+    }
+    if (source2) {
+        try { savedBills = savedBills.concat(JSON.parse(source2)); } catch(e){}
+    }
+
+    // ค้นหาบิลที่ตรงกับเลขที่กรอก (เทียบแบบไม่สนตัวพิมพ์เล็ก-ใหญ่ หรือช่องว่างส่วนเกิน)
+    const foundBill = savedBills.find(b => {
+        let currentBillNo = (b.billNo || b.quotationNo || '').toString().trim();
+        return currentBillNo === bNo;
+    });
+
+    if (foundBill) {
+        // 1. ดึงข้อมูลหัวบิลมาใส่ (รองรับชื่อฟิลด์ที่อาจแตกต่างกัน)
+        docMeta.custName = foundBill.custName || foundBill.customerName || "";
+        docMeta.custAddress = foundBill.custAddress || foundBill.address || "";
+        docMeta.quotSubject = foundBill.quotSubject || foundBill.subject || "";
+        docMeta.quotEnclose = foundBill.quotEnclose || foundBill.enclose || "-";
+        docMeta.bookNo = foundBill.bookNo || "-";
+        docMeta.billNo = foundBill.billNo || foundBill.quotationNo || autoBillNo;
+        docMeta.billDate = foundBill.billDate || currentDateFormatted;
+        docMeta.discountRate = foundBill.discountRate || foundBill.discount || 0;
+        docMeta.remarkText = foundBill.remarkText || foundBill.remark || "";
+
+        // 2. ดึงรายการสินค้ามาแทนที่ itemsData (รองรับทุกชื่อฟิลด์ที่อาจเคยบันทึกไว้)
+        let rawItems = foundBill.items || foundBill.productList || foundBill.details || [];
+if (rawItems && rawItems.length > 0) {
+    itemsData = rawItems.map(item => ({
+        desc: item.desc || item.description || item.productName || "",
+        model: item.model || item.sku || "-",
+        qty: parseFloat(item.qty || item.quantity) || 1,
+        unit: item.unit || "ชิ้น",
+        // 🔍 ปรับปรุงตรงนี้ให้ครอบคลุมทุกคีย์ชื่อราคาที่เป็นไปได้
+        price: parseFloat(item.price || item.unitPrice || item.unit_price || item.productPrice) || 0.00
+    }));
+}
+
+        // 3. วาดหน้าจอใหม่และคำนวณยอดเงินทั้งหมด
+        renderDocument();
+        alert("ดึงข้อมูลใบเสนอราคาเลขที่: " + bNo + " สำเร็จ!");
+    } else {
+        alert("ไม่พบข้อมูลเลขที่ใบเสนอราคานี้ในระบบ กรุณาตรวจสอบความถูกต้องอีกครั้ง");
+    }
+}
 
     window.onload = function() {
         renderDocument();
@@ -976,7 +1025,6 @@ window.onload = function() {
     loadCustomerDropdown(); // เพิ่มบรรทัดนี้เพื่อให้โหลดรายชื่อลูกค้าทันทีที่เปิดหน้าเว็บ
 };
 	
-	// ฟังก์ชันดึงข้อมูลลูกค้ามาแสดงในฟอร์มเมื่อเลือกจาก Dropdown
 // ฟังก์ชันดึงข้อมูลลูกค้ามาแสดงในฟอร์มเมื่อเลือกจาก Dropdown
 function selectCustomer(selectElement) {
     const selectedName = selectElement.value;
@@ -991,27 +1039,31 @@ function selectCustomer(selectElement) {
 
     let custNameValue = "";
     let custAddressValue = "";
+    let custItems = null;
 
     if (foundCustomer && typeof foundCustomer === 'object') {
         custNameValue = foundCustomer.name || foundCustomer.customerName || foundCustomer.companyName || selectedName;
         custAddressValue = foundCustomer.address || foundCustomer.custAddress || '';
+        // สมมติว่าในข้อมูลลูกค้ามีการผูกรายการสินค้าประจำไว้ เช่น c.items
+        custItems = foundCustomer.items || null;
     } else {
         custNameValue = selectedName;
-        custAddressValue = ""; // ถ้าไม่มีข้อมูลที่อยู่ให้เคลียร์ว่าง
+        custAddressValue = "";
     }
 
-    // 1. อัปเดตค่าลงในตัวแปรกลาง docMeta ของเอกสาร
+    // อัปเดตข้อมูลลูกค้า
     docMeta.custName = custNameValue;
     docMeta.custAddress = custAddressValue;
 
-    // 2. อัปเดตค่าลงในหน้าจอ Input จริงๆ ทุกหน้าที่แสดงผลอยู่
-    document.querySelectorAll('.meta-field[data-field="custName"]').forEach(el => {
-        el.value = custNameValue;
-    });
-    document.querySelectorAll('.meta-field[data-field="custAddress"]').forEach(el => {
-        el.value = custAddressValue;
-    });
+    // ถ้าลูกค้ารายนี้มีรายการสินค้าผูกไว้ ให้ดึงมาแสดงแทนที่แถวว่าง
+    if (custItems && Array.isArray(custItems) && custItems.length > 0) {
+        itemsData = custItems;
+    }
+
+    // เรนเดอร์หน้าจอใหม่เพื่อให้ข้อมูลอัปเดตทั้งที่อยู่และรายการสินค้า
+    renderDocument();
 }
+
 </script>
 
 </body>
