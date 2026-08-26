@@ -527,6 +527,11 @@
 <div id="print-pages-container"></div>
 
 <script>
+// ฟังก์ชันสำรองกัน Error กรณีที่ยังไม่ได้เขียนเชื่อมต่อระบบ Cloud จริง
+function initRealtimeMasterData() {
+    // สามารถใส่โค้ดเชื่อมต่อ Firebase ของคุณตรงนี้ในอนาคต
+    console.log("Realtime Master Data initialized.");
+}
     // ปรับให้ดึงวันที่ปัจจุบันอัตโนมัติ (รูปแบบ DD/MM/YYYY)
     const today = new Date();
     const day = String(today.getDate()).padStart(2, '0');
@@ -960,7 +965,16 @@ function loadCustomerDropdown() {
         renderDocument();
     };
 	
-	
+	// โค้ดเดิม
+window.onload = function() {
+    renderDocument();
+};
+
+// ให้แก้เป็นแบบนี้:
+window.onload = function() {
+    renderDocument();
+    loadCustomerDropdown(); // เพิ่มบรรทัดนี้เพื่อให้โหลดรายชื่อลูกค้าทันทีที่เปิดหน้าเว็บ
+};
 	
 	// ฟังก์ชันดึงข้อมูลลูกค้ามาแสดงในฟอร์มเมื่อเลือกจาก Dropdown
 // ฟังก์ชันดึงข้อมูลลูกค้ามาแสดงในฟอร์มเมื่อเลือกจาก Dropdown
