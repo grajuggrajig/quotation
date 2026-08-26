@@ -878,6 +878,13 @@
                     </table>
                 </div>
 
+                <!-- เพิ่มข้อความแจ้งเตือนเมื่อยังมีหน้าถัดไป -->
+                ${!isLastPage ? `
+                    <div style="text-align: right; font-size: 11px; color: var(--primary-color); font-style: italic; margin-bottom: 8px; font-weight: 600;">
+                        (มีรายการต่อหน้าถัดไป ➔ หน้า ${pageIdx + 2})
+                    </div>
+                ` : ''}
+
                 <table class="footer-table">
                     <tr>
                         <td rowspan="5" style="width: 50%; vertical-align: middle; text-align: center; background-color: var(--bg-light);">
