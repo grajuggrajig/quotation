@@ -797,7 +797,33 @@
   margin: 30px 20px 8px 20px;
 }
 
+/* --- ทำให้หัวตารางลอยได้เฉพาะบนหน้าจอปกติ --- */
+@media screen {
+    .table-responsive-wrapper {
+        max-height: 450px; /* กำหนดความสูงของกรอบตารางที่จะให้เลื่อนดูได้ (ปรับเพื่ม/ลดได้ตามต้องการ) */
+        overflow-y: auto;
+        position: relative;
+    }
 
+    .data-table th {
+        position: sticky;
+        top: 0;
+        z-index: 10;
+        background: linear-gradient(135deg, #0284c7, #0369a1) !important;
+    }
+}
+
+/* --- บังคับให้ตอนสั่งพิมพ์ หัวตารางกลับมาอยู่ตำแหน่งปกติ ไม่ลอยตาม --- */
+@media print {
+    .table-responsive-wrapper {
+        max-height: none !important;
+        overflow: visible !important;
+    }
+
+    .data-table th {
+        position: static !important;
+    }
+}
 </style>
 </head>
 <body>
@@ -929,6 +955,89 @@
 .auto-continued-row {
     display: none;
 }
+
+@keyframes pulse-glow {
+        0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.5), 0 4px 12px rgba(5, 150, 105, 0.25); }
+        70% { box-shadow: 0 0 0 10px rgba(16, 185, 129, 0), 0 6px 16px rgba(5, 150, 105, 0.35); }
+        100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0), 0 4px 12px rgba(5, 150, 105, 0.25); }
+    }
+
+    @keyframes bg-animation {
+        0% { background-position: 0% 50%; }
+        50% { background-position: 100% 50%; }
+        100% { background-position: 0% 50%; }
+    }
+
+    .btn-icon-sparkle {
+        position: relative;
+        background: linear-gradient(135deg, #065f46, #059669, #10b981, #34d399);
+        background-size: 300% 300%;
+        color: #ffffff;
+        border: none;
+        border-radius: 30px;
+        padding: 5px 16px 5px 5px; /* ลดขนาด Padding ลงให้ปุ่มเล็กลง */
+        font-size: 13px;
+        font-weight: 600;
+        letter-spacing: 0.3px;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        animation: bg-animation 6s ease infinite, pulse-glow 2.5s infinite;
+        transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        box-shadow: 0 4px 12px rgba(5, 150, 105, 0.25);
+    }
+
+    /* กล่องไอคอนวงกลมเล็กลง */
+    .btn-icon-sparkle .icon-wrapper {
+        position: relative;
+        width: 28px;
+        height: 28px;
+        background: rgba(255, 255, 255, 0.22);
+        backdrop-filter: blur(4px);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 12px;
+        color: #ffffff;
+        transition: transform 0.3s ease;
+    }
+
+    /* วงแหวนกระเพื่อมวิบวับขนาดเล็ก */
+    .ripple-ring {
+        position: absolute;
+        top: 0; left: 0; right: 0; bottom: 0;
+        border-radius: 50%;
+        border: 1.5px solid rgba(255, 255, 255, 0.6);
+        animation: ripple 2s infinite;
+    }
+
+    @keyframes ripple {
+        0% { transform: scale(1); opacity: 1; }
+        100% { transform: scale(1.35); opacity: 0; }
+    }
+
+    .btn-text {
+        padding-right: 4px;
+        text-shadow: 0 1px 2px rgba(0, 0, 0, 0.15);
+    }
+
+    /* เอฟเฟกต์เวลาเอาเมาส์ชี้ (Hover) */
+    .btn-icon-sparkle:hover {
+        transform: translateY(-2px) scale(1.02);
+        box-shadow: 0 6px 18px rgba(16, 185, 129, 0.45);
+        filter: brightness(1.1);
+    }
+
+    .btn-icon-sparkle:hover .icon-wrapper {
+        transform: rotate(90deg) scale(1.08);
+        background: rgba(255, 255, 255, 0.35);
+    }
+
+    .btn-icon-sparkle:active {
+        transform: translateY(1px) scale(0.98);
+    }
 </style>
     
 <div class="panel-group">
@@ -1063,14 +1172,18 @@
                     <td class="no-print" style="text-align: center;"><button class="btn-del" onclick="removeRow(this)">ลบ</button></td>
                 </tr>
             </tbody>
-            <tfoot class="no-print">
-                <tr>
-                    <td colspan="8" style="text-align: center; padding: 12px; border: 1px solid #cbd5e1; background: #ffffff;">
-                        <button class="btn-add" style="background: linear-gradient(135deg, #059669, #10b981); color: white; border: none; border-radius: 8px; padding: 8px 16px; font-weight: 600; cursor: pointer; box-shadow: none;" onclick="addRow()">+ เพิ่มรายการสินค้า</button>
-                    </td>
-                </tr>
-            </tfoot>
         </table>
+    </div>
+
+<!-- ปุ่มเพิ่มรายการแบบสัญลักษณ์/ไอคอนล้ำสมัย วิบวับ ซ่อนอัตโนมัติเวลาพิมพ์ -->
+    <div class="no-print" style="margin: 25px 0; text-align: center;">
+        <button class="btn-icon-sparkle" onclick="addRow()" title="เพิ่มรายการสินค้า">
+            <div class="icon-wrapper">
+                <i class="fa-solid fa-plus"></i>
+                <div class="ripple-ring"></div>
+            </div>
+            <span class="btn-text">เพิ่มรายการ</span>
+        </button>
     </div>
     
     <table class="footer-table" style="width: 100%; border-collapse: collapse;">
@@ -1346,6 +1459,11 @@ window.addEventListener('DOMContentLoaded', () => {
             <td class="no-print" style="text-align: center;"><button class="btn-del" onclick="removeRow(this)">ลบ</button></td>
         `;
         calculate();
+		// 📌 เพิ่มโค้ดส่วนนี้เพื่อสั่งให้ตารางเลื่อนลงมาแถวล่าสุดอัตโนมัติ
+        let wrapper = document.querySelector('.table-responsive-wrapper');
+        if (wrapper) {
+            wrapper.scrollTop = wrapper.scrollHeight;
+        }
     }
 
     function removeRow(btn) {
@@ -2530,13 +2648,18 @@ async function openEditProductModal(index) {
                 cancelButtonText: 'ยกเลิก',
                 
                 preConfirm: () => {
-                    return {
-                        sku: document.getElementById('swal-edit-sku').value.trim(),
-                        desc: document.getElementById('swal-edit-desc').value.trim(),
-                        unit: document.getElementById('swal-edit-unit').value.trim(),
-                        price: parseFloat(document.getElementById('swal-edit-price').value) || 0
-                    }
-                }
+    const sku = document.getElementById('swal-edit-sku').value.trim();
+    if (!sku) {
+        Swal.showValidationMessage('กรุณากรอกรหัส/รุ่นสินค้า');
+        return false;
+    }
+    return {
+        sku: sku,
+        desc: document.getElementById('swal-edit-desc').value.trim(),
+        unit: document.getElementById('swal-edit-unit').value.trim(),
+        price: parseFloat(document.getElementById('swal-edit-price').value) || 0
+    }
+}
             });
 
             // ถ้าผู้ใช้กดบันทึก
