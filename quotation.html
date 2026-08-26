@@ -1091,20 +1091,19 @@ function selectCustomer(selectElement) {
 }
 
 window.addEventListener('DOMContentLoaded', () => {
-    // 1. อ่านค่าพารามิเตอร์จาก URL (Query String)
     const urlParams = new URLSearchParams(window.location.search);
     const billNoFromURL = urlParams.get('billNo');
 
-    // 2. ถ้ามีเลขที่บิลส่งมา ให้เอาไปใส่ในช่องค้นหาบิลเดิม และสั่งดึงข้อมูลอัตโนมัติ
     if (billNoFromURL) {
-        let searchInput = document.getElementById('searchOldBillNo'); // เปลี่ยนไอดีตามช่องค้นหาของหน้า quotation
+        // 🔍 แก้ไขตรงนี้: เปลี่ยนไปหา ID ของช่อง " input ช่องค้นหาบิล " 
+        // (ให้ตรวจสอบ ID ของช่องกรอกเลขที่บิลสำหรับค้นหาในหน้า HTML ของคุณ เช่น id="searchBillNo" หรือ id="inputSearchBill")
+        let searchInput = document.getElementById('ชื่อไอดีช่องช่องค้นหาบิลของคุณ'); 
+        
         if (searchInput) {
             searchInput.value = billNoFromURL;
             
-            // เรียกฟังก์ชันค้นหาและโหลดข้อมูลบิลเดิมขึ้นมาแสดงทันที (ถ้ามีฟังก์ชันนี้อยู่ในหน้า quotation.html)
-            if (typeof loadDataByBillNo === 'function') {
-                loadDataByBillNo();
-            }
+            // สั่งให้ระบบกดปุ่มดึงรายการบิลอัตโนมัติ (ถ้ามีฟังก์ชันหรือกดคลิกปุ่ม)
+            // เช่น document.getElementById('btnSearch').click(); หรือชื่อฟังก์ชันค้นหาของคุณ
         }
     }
 });
