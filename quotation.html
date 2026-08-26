@@ -1090,6 +1090,27 @@ function selectCustomer(selectElement) {
     renderDocument();
 }
 
+window.addEventListener('DOMContentLoaded', () => {
+    // 1. อ่านค่าพารามิเตอร์จาก URL (Query String)
+    const urlParams = new URLSearchParams(window.location.search);
+    const billNoFromURL = urlParams.get('billNo');
+
+    // 2. ถ้ามีเลขที่บิลส่งมา ให้เอาไปใส่ในช่องค้นหาบิลเดิม และสั่งดึงข้อมูลอัตโนมัติ
+    if (billNoFromURL) {
+        let searchInput = document.getElementById('searchOldBillNo'); // เปลี่ยนไอดีตามช่องค้นหาของหน้า quotation
+        if (searchInput) {
+            searchInput.value = billNoFromURL;
+            
+            // เรียกฟังก์ชันค้นหาและโหลดข้อมูลบิลเดิมขึ้นมาแสดงทันที (ถ้ามีฟังก์ชันนี้อยู่ในหน้า quotation.html)
+            if (typeof loadDataByBillNo === 'function') {
+                loadDataByBillNo();
+            }
+        }
+    }
+});
+
+
+
 </script>
 
 </body>
