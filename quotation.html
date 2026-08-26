@@ -36,6 +36,46 @@
             print-color-adjust: exact;
         }
 
+        /* Toast Notification Styling */
+        #toast-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .toast-notification {
+            background: #ffffff;
+            color: var(--secondary-color);
+            padding: 12px 20px;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.05);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 13px;
+            font-weight: 600;
+            border-left: 5px solid var(--success-color);
+            animation: slideInRight 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), fadeOut 0.3s ease 2.7s forwards;
+            max-width: 350px;
+        }
+
+        .toast-notification.error {
+            border-left-color: var(--danger-color);
+        }
+
+        @keyframes slideInRight {
+            from { opacity: 0; transform: translateX(100%); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        @keyframes fadeOut {
+            to { opacity: 0; transform: translateY(-10px); }
+        }
+
         /* Sticky Action Toolbar (No Print) */
         .toolbar {
             position: sticky;
@@ -422,97 +462,85 @@
                 -webkit-print-color-adjust: exact;
                 print-color-adjust: exact;
             }
-            .toolbar, .no-print {
+            .toolbar, .no-print, #toast-container {
                 display: none !important;
             }
-            /* Container & Page Layout for Print */
-        .page-sheet {
-            max-width: 900px;
-            margin: 0 auto 20px auto;
-            background: #ffffff;
-            padding: 15px 20px; /* ลด padding บน-ล่าง จาก 40px เหลือ 24px */
-            box-shadow: var(--shadow-subtle);
-            border-radius: var(--radius-box);
-            position: relative;
-            border: 1px solid rgba(226, 232, 240, 0.8);
-        }
-
-        /* Header Section */
-        .header-section {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            border-bottom: 2px solid #f1f5f9;
-            padding-bottom: 6px;
-            margin-bottom: 6px;
-        }
-
-        /* Top Info Grid */
-        .top-info {
-            width: 100%;
-            margin-bottom: 6px; /* ลดระยะห่างลง */
-            border-collapse: collapse;
-        }
-
-        .customer-info-box, .no-date-box {
-            padding: 18px 10px; /* ลด padding ภายในกล่องข้อมูล */
-        }
-
-        /* Table Styling */
-        .table-responsive-wrapper {
-            margin-bottom: 6px; /* ลดระยะห่างตารางสินค้า */
-            border-radius: 10px;
-            overflow: hidden;
-            border: 1px solid var(--border-color);
-        }
-
-        .data-table th, .data-table td {
-            border: 1px solid var(--border-color);
-            padding: 3px 6px; /* ลดความสูงของช่องตารางลงเล็กน้อย */
-        }
-
-        /* Footer & Summary Table */
-        .footer-table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-bottom: 6px; /* ลดระยะห่างตารางสรุป */
-            border-radius: 10px;
-            overflow: hidden;
-            border: 1px solid var(--border-color);
-        }
-
-        .footer-table td {
-            border: 1px solid var(--border-color);
-            padding: 3px 8px;; /* ลด padding ลง */
-        }
-
-        /* Signature Section */
-        .signature-section {
-            display: flex;
-            justify-content: space-between;
-            margin-top: 10px; /* ลดระยะห่างด้านบนของลายเซ็น */
-            gap: 20px;
-            page-break-inside: avoid;
-        }
-
-        .sig-box {
-            flex: 1;
-            text-align: center;
-            border: 1px solid var(--border-color);
-            padding: 8px 10px; /* ลด padding กล่องลายเซ็น */
-            border-radius: 12px;
-            background-color: #f8fafc;
-        }
-
-        .sig-line {
-            border-bottom: 1.5px dotted #94a3b8;
-            margin: 15px 10px 4px 10px; /* ลดพื้นที่ว่างสำหรับเซ็นชื่อ */
+            .page-sheet {
+                max-width: 900px;
+                margin: 0 auto 20px auto;
+                background: #ffffff;
+                padding: 15px 20px;
+                box-shadow: var(--shadow-subtle);
+                border-radius: var(--radius-box);
+                position: relative;
+                border: 1px solid rgba(226, 232, 240, 0.8);
+            }
+            .header-section {
+                display: flex;
+                justify-content: space-between;
+                align-items: flex-start;
+                border-bottom: 2px solid #f1f5f9;
+                padding-bottom: 6px;
+                margin-bottom: 6px;
+            }
+            .top-info {
+                width: 100%;
+                margin-bottom: 6px;
+                border-collapse: collapse;
+            }
+            .customer-info-box, .no-date-box {
+                padding: 18px 10px;
+            }
+            .table-responsive-wrapper {
+                margin-bottom: 6px;
+                border-radius: 10px;
+                overflow: hidden;
+                border: 1px solid var(--border-color);
+            }
+            .data-table th, .data-table td {
+                border: 1px solid var(--border-color);
+                padding: 3px 6px;
+            }
+            .footer-table {
+                width: 100%;
+                border-collapse: collapse;
+                margin-bottom: 6px;
+                border-radius: 10px;
+                overflow: hidden;
+                border: 1px solid var(--border-color);
+            }
+            .footer-table td {
+                border: 1px solid var(--border-color);
+                padding: 3px 8px;
+            }
+            .signature-section {
+                display: flex;
+                justify-content: space-between;
+                margin-top: 10px;
+                gap: 20px;
+                page-break-inside: avoid;
+            }
+            .sig-box {
+                flex: 1;
+                text-align: center;
+                border: 1px solid var(--border-color);
+                padding: 8px 10px;
+                border-radius: 12px;
+                background-color: #f8fafc;
+            }
+            .sig-line {
+                border-bottom: 1.5px dotted #94a3b8;
+                margin: 15px 10px 4px 10px;
+            }
         }
     </style>
 </head>
 <body>
 
-<!-- แถบเครื่องมือควบคุมแบบลอยเด่น (Sticky Toolbar) พร้อมปุ่มกลับหน้า index.html -->
+<!-- พื้นที่แสดงแจ้งเตือน Toast Notification -->
+<div id="toast-container"></div>
+
+<!-- แถบเครื่องมือควบคุมแบบลอยเด่น (Sticky Toolbar) -->
 <div class="toolbar no-print">
     <div class="toolbar-actions" style="gap: 10px;">
         <a href="index.html" class="btn-action btn-secondary">🏠 หน้าแรก</a>
@@ -527,25 +555,40 @@
 <div id="print-pages-container"></div>
 
 <script>
-// ฟังก์ชันสำรองกัน Error กรณีที่ยังไม่ได้เขียนเชื่อมต่อระบบ Cloud จริง
-function initRealtimeMasterData() {
-    // สามารถใส่โค้ดเชื่อมต่อ Firebase ของคุณตรงนี้ในอนาคต
-    console.log("Realtime Master Data initialized.");
-}
-    // ปรับให้ดึงวันที่ปัจจุบันอัตโนมัติ (รูปแบบ DD/MM/YYYY)
+    // 📌 ฟังก์ชันสำหรับแสดง Notification (Toast) ลอยมุมขวาบน
+    function showToast(message, isError = false) {
+        const container = document.getElementById('toast-container');
+        if (!container) return;
+
+        const toast = document.createElement('div');
+        toast.className = `toast-notification ${isError ? 'error' : ''}`;
+        toast.innerHTML = `
+            <span style="font-size: 16px;">${isError ? '❌' : '✅'}</span>
+            <span>${message}</span>
+        `;
+
+        container.appendChild(toast);
+
+        // เอาออกจาก DOM หลังจากแอนิเมชันจบ (3 วินาที)
+        setTimeout(() => {
+            toast.remove();
+        }, 3000);
+    }
+
+    function initRealtimeMasterData() {
+        console.log("Realtime Master Data initialized.");
+    }
+
     const today = new Date();
     const day = String(today.getDate()).padStart(2, '0');
     const month = String(today.getMonth() + 1).padStart(2, '0');
     const year = today.getFullYear();
     const currentDateFormatted = `${day}/${month}/${year}`;
 
-    // สร้างเลขที่ใบเสนอราคาอัตโนมัติจากปีและเดือนปัจจุบัน (เช่น QT202606...)
-// 🔍 ดึงค่า Query Parameters จาก URL (ที่ส่งมาจากหน้า index.html)
     const urlParams = new URLSearchParams(window.location.search);
     const paramBillNo = urlParams.get('billNo');
     const paramBookNo = urlParams.get('bookNo');
 
-    // สร้างเลขที่ใบเสนอราคาอัตโนมัติสำรอง (กรณีที่ไม่มีการส่งค่ามา)
     const autoBillNo = paramBillNo || `QT${year}${month}001`;
 
     let docMeta = {
@@ -554,7 +597,7 @@ function initRealtimeMasterData() {
         quotSubject: "",
         quotEnclose: "-",
         bookNo: paramBookNo || "-",
-        billNo: autoBillNo,          // แสดงเลขที่บิลที่ดึงมาจาก index อัตโนมัติ
+        billNo: autoBillNo,          
         billDate: currentDateFormatted, 
         remarkText: "ราคานี้ยังไม่รวมภาษีมูลค่าเพิ่ม / ยืนราคา 30 วัน",
         discountRate: 0,
@@ -579,203 +622,201 @@ function initRealtimeMasterData() {
         { desc: "", model: "", qty: 1, unit: "", price: 0.00 }
     ];
 
-    // กำหนดให้แสดงรายการสินค้าหน้าละไม่เกิน 5 รายการ และบังคับแสดงตารางสรุปท้ายหน้าเสมอ
     const ITEMS_PER_PAGE = 10; 
 
-function renderDocument() {
-    const container = document.getElementById("print-pages-container");
-    container.innerHTML = "";
+    function renderDocument() {
+        const container = document.getElementById("print-pages-container");
+        container.innerHTML = "";
 
-    const totalPages = Math.ceil(itemsData.length / ITEMS_PER_PAGE) || 1;
+        const totalPages = Math.ceil(itemsData.length / ITEMS_PER_PAGE) || 1;
 
-    for (let pageIdx = 0; pageIdx < totalPages; pageIdx++) {
-        const startIdx = pageIdx * ITEMS_PER_PAGE;
-        const endIdx = Math.min(startIdx + ITEMS_PER_PAGE, itemsData.length);
-        const pageItems = itemsData.slice(startIdx, endIdx);
-        const isLastPage = (pageIdx === totalPages - 1);
+        for (let pageIdx = 0; pageIdx < totalPages; pageIdx++) {
+            const startIdx = pageIdx * ITEMS_PER_PAGE;
+            const endIdx = Math.min(startIdx + ITEMS_PER_PAGE, itemsData.length);
+            const pageItems = itemsData.slice(startIdx, endIdx);
+            const isLastPage = (pageIdx === totalPages - 1);
 
-        const pageDiv = document.createElement("div");
-        pageDiv.className = "page-sheet";
-        // เพิ่ม attribute ระบุหน้า เพื่อให้ฟังก์ชันคำนวณเข้าถึงแต่ละหน้าได้ถูกต้อง
-        pageDiv.setAttribute("data-page-index", pageIdx);
-        pageDiv.setAttribute("data-is-last", isLastPage ? "true" : "false");
+            const pageDiv = document.createElement("div");
+            pageDiv.className = "page-sheet";
+            pageDiv.setAttribute("data-page-index", pageIdx);
+            pageDiv.setAttribute("data-is-last", isLastPage ? "true" : "false");
 
-        let pageHTML = `
-            <div class="header-section">
-                <div class="header-left">
-                    <div class="logo-container">
-                        <img src="logo.png" alt="KL Logo" onerror="this.style.display='none'">
+            let pageHTML = `
+                <div class="header-section">
+                    <div class="header-left">
+                        <div class="logo-container">
+                            <img src="logo.png" alt="KL Logo" onerror="this.style.display='none'">
+                        </div>
+                        <div class="shop-info-box">
+                            <div class="company-name">บริษัท เค แอล สเตชั่นเนอรี่ จำกัด (สำนักงานใหญ่)</div>
+                            <div class="address-text">873, 875 ถนนสุขุมวิท 105 แขวงบางนาใต้ เขตบางนา กรุงเทพมหานคร 10260</div>
+                            <div class="address-text">โทร. 0-2748-6788 | เลขประจำตัวผู้เสียภาษี: 0105544005337</div>
+                        </div>
                     </div>
-                    <div class="shop-info-box">
-                        <div class="company-name">บริษัท เค แอล สเตชั่นเนอรี่ จำกัด (สำนักงานใหญ่)</div>
-                        <div class="address-text">873, 875 ถนนสุขุมวิท 105 แขวงบางนาใต้ เขตบางนา กรุงเทพมหานคร 10260</div>
-                        <div class="address-text">โทร. 0-2748-6788 | เลขประจำตัวผู้เสียภาษี: 0105544005337</div>
+                    <div class="title-box">
+                        <div class="title-main">ใบเสนอราคา</div>
+                        <div class="title-sub">QUOTATION</div>
+                        <div style="font-size: 11px; color: #64748b; margin-top: 4px; font-weight: 600;">หน้าที่ ${pageIdx + 1} / ${totalPages}</div>
                     </div>
                 </div>
-                <div class="title-box">
-                    <div class="title-main">ใบเสนอราคา</div>
-                    <div class="title-sub">QUOTATION</div>
-                    <div style="font-size: 11px; color: #64748b; margin-top: 4px; font-weight: 600;">หน้าที่ ${pageIdx + 1} / ${totalPages}</div>
-                </div>
-            </div>
 
-            <table class="top-info">
-                <tr>
-                    <td style="width: 58%;">
-                        <div class="customer-info-box">
-                            <div class="info-row no-print" style="margin-bottom: 10px;">
-                                <span class="info-label" style="color: var(--primary-color);">🔍 เลือกลูกค้า:</span>
-                                <select id="customerSelect" class="inline-input customerSelect" style="width: 180px; font-weight: 600;" onchange="selectCustomer(this)">
-							<option value="">-- เลือกลูกค้า --</option>
-							</select>
+                <table class="top-info">
+                    <tr>
+                        <td style="width: 58%;">
+                            <div class="customer-info-box">
+                                <div class="info-row no-print" style="margin-bottom: 10px;">
+                                    <span class="info-label" style="color: var(--primary-color);">🔍 เลือกลูกค้า:</span>
+                                    <select id="customerSelect" class="inline-input customerSelect" style="width: 180px; font-weight: 600;" onchange="selectCustomer(this)">
+                                        <option value="">-- เลือกลูกค้า --</option>
+                                    </select>
+                                </div>
+                                <div class="info-row">
+                                    <span class="info-label">นามลูกค้า (Attention):</span>
+                                    <input type="text" class="inline-input meta-field" data-field="custName" style="flex:1;" value="${docMeta.custName}" placeholder="ชื่อบริษัท/ลูกค้า...">
+                                </div>
+                                <div class="info-row" style="align-items: flex-start; margin-top: 6px;">
+                                    <span class="info-label">ที่อยู่ (Address):</span>
+                                    <textarea class="inline-textarea meta-field" data-field="custAddress" placeholder="ที่อยู่ลูกค้า...">${docMeta.custAddress}</textarea>
+                                </div>
+                                <div class="info-row" style="margin-top: 6px;">
+                                    <span class="info-label">เรื่อง (Subject):</span>
+                                    <input type="text" class="inline-input meta-field" data-field="quotSubject" style="flex:1;" value="${docMeta.quotSubject}" placeholder="หัวข้อเรื่อง...">
+                                </div>
+                                <div class="info-row" style="margin-top: 6px;">
+                                    <span class="info-label">สิ่งที่ส่งมาด้วย:</span>
+                                    <input type="text" class="inline-input meta-field" data-field="quotEnclose" style="flex:1;" value="${docMeta.quotEnclose}">
+                                </div>
                             </div>
-                            <div class="info-row">
-                                <span class="info-label">นามลูกค้า (Attention):</span>
-                                <input type="text" class="inline-input meta-field" data-field="custName" style="flex:1;" value="${docMeta.custName}" placeholder="ชื่อบริษัท/ลูกค้า...">
+                        </td>
+                        <td style="width: 42%; padding-left: 10px;">
+                            <div class="no-date-box">
+                                <div class="info-row no-print" style="margin-bottom: 8px;">
+                                    <span class="info-label" style="color: var(--primary-color); min-width: 90px;">🔍 ค้นหาบิล:</span>
+                                    <input type="text" id="searchOldBillNo" class="inline-input" style="width: 90px;" placeholder="เลขที่บิล">
+                                    <button class="btn-action" style="padding: 2px 6px; font-size: 10px;" onclick="loadDataByBillNo()">ดึงรายการบิล</button>
+                                </div>
+                                <div class="info-row">
+                                    <span class="info-label" style="min-width: 95px;">เล่มที่ (Book No.):</span>
+                                    <input type="text" class="inline-input meta-field" data-field="bookNo" style="flex:1;" value="${docMeta.bookNo}">
+                                </div>
+                                <div class="info-row" style="margin-top: 6px;">
+                                    <span class="info-label" style="min-width: 95px;">เลขที่ (No.):</span>
+                                    <input type="text" class="inline-input meta-field" data-field="billNo" style="flex:1; font-weight: 700; color: var(--primary-color);" value="${docMeta.billNo}">
+                                </div>
+                                <div class="info-row" style="margin-top: 6px;">
+                                    <span class="info-label" style="min-width: 95px;">วันที่ (Date):</span>
+                                    <input type="text" class="inline-input meta-field" data-field="billDate" style="flex:1;" value="${docMeta.billDate}">
+                                </div>
                             </div>
-                            <div class="info-row" style="align-items: flex-start; margin-top: 6px;">
-                                <span class="info-label">ที่อยู่ (Address):</span>
-                                <textarea class="inline-textarea meta-field" data-field="custAddress" placeholder="ที่อยู่ลูกค้า...">${docMeta.custAddress}</textarea>
-                            </div>
-                            <div class="info-row" style="margin-top: 6px;">
-                                <span class="info-label">เรื่อง (Subject):</span>
-                                <input type="text" class="inline-input meta-field" data-field="quotSubject" style="flex:1;" value="${docMeta.quotSubject}" placeholder="หัวข้อเรื่อง...">
-                            </div>
-                            <div class="info-row" style="margin-top: 6px;">
-                                <span class="info-label">สิ่งที่ส่งมาด้วย:</span>
-                                <input type="text" class="inline-input meta-field" data-field="quotEnclose" style="flex:1;" value="${docMeta.quotEnclose}">
-                            </div>
-                        </div>
-                    </td>
-                    <td style="width: 42%; padding-left: 10px;">
-                        <div class="no-date-box">
-                            <div class="info-row no-print" style="margin-bottom: 8px;">
-                                <span class="info-label" style="color: var(--primary-color); min-width: 90px;">🔍 ค้นหาบิล:</span>
-                                <input type="text" id="searchOldBillNo" class="inline-input" style="width: 90px;" placeholder="เลขที่บิล">
-                                <button class="btn-action" style="padding: 2px 6px; font-size: 10px;" onclick="loadDataByBillNo()">ดึงรายการบิล</button>
-                            </div>
-                            <div class="info-row">
-                                <span class="info-label" style="min-width: 95px;">เล่มที่ (Book No.):</span>
-                                <input type="text" class="inline-input meta-field" data-field="bookNo" style="flex:1;" value="${docMeta.bookNo}">
-                            </div>
-                            <div class="info-row" style="margin-top: 6px;">
-                                <span class="info-label" style="min-width: 95px;">เลขที่ (No.):</span>
-                                <input type="text" class="inline-input meta-field" data-field="billNo" style="flex:1; font-weight: 700; color: var(--primary-color);" value="${docMeta.billNo}">
-                            </div>
-                            <div class="info-row" style="margin-top: 6px;">
-                                <span class="info-label" style="min-width: 95px;">วันที่ (Date):</span>
-                                <input type="text" class="inline-input meta-field" data-field="billDate" style="flex:1;" value="${docMeta.billDate}">
-                            </div>
-                        </div>
-                    </td>
-                </tr>
-            </table>
-
-            <div class="table-responsive-wrapper">
-                <table class="data-table">
-                    <thead>
-                        <tr>
-                            <th style="width: 6%;">ลำดับ</th>
-                            <th style="width: 37%;">รายการสินค้า / รายละเอียด (Description)</th>
-                            <th style="width: 10%;">แบบรุ่น (Model)</th>
-                            <th style="width: 8%;">จำนวน (Qty)</th>
-                            <th style="width: 8%;">หน่วย (Unit)</th>
-                            <th style="width: 12%;">ราคา/หน่วย (Unit Price)</th>
-                            <th style="width: 13%;">จำนวนเงิน (Amount)</th>
-                            <th class="no-print" style="width: 6%;">จัดการ</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-        `;
-
-        if (pageItems.length === 0) {
-            pageHTML += `<tr><td colspan="8" style="text-align: center; color: #94a3b8; padding: 20px;">ไม่มีรายการสินค้าในหน้านี้</td></tr>`;
-        } else {
-            pageItems.forEach((item, idx) => {
-                const actualIndex = startIdx + idx;
-                pageHTML += `
-                    <tr class="item-row">
-                        <td style="text-align: center; font-weight: 600;">${actualIndex + 1}</td>
-                        <td><textarea class="item-desc" placeholder="ระบุชื่อสินค้าหรือรายละเอียด..." oninput="updateItemData(${actualIndex}, 'desc', this.value)">${item.desc}</textarea></td>
-                        <td><input type="text" class="sku-input" placeholder="-" value="${item.model}" oninput="updateItemData(${actualIndex}, 'model', this.value)"></td>
-                        <td><input type="text" class="qty" placeholder="1" value="${item.qty}" oninput="updateItemData(${actualIndex}, 'qty', this.value)"></td>
-                        <td><input type="text" class="unit-input" placeholder="ชิ้น" value="${item.unit}" oninput="updateItemData(${actualIndex}, 'unit', this.value)"></td>
-                        <td><input type="text" class="price" placeholder="0.00" value="${item.price.toFixed(2)}" oninput="updateItemData(${actualIndex}, 'price', this.value)"></td>
-                        <td class="amount" style="text-align: right; font-weight: 600;">${(item.qty * item.price).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
-                        <td class="no-print" style="text-align: center;"><button class="btn-del" onclick="removeRow(${actualIndex})">ลบ</button></td>
+                        </td>
                     </tr>
-                `;
-            });
+                </table>
+
+                <div class="table-responsive-wrapper">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th style="width: 6%;">ลำดับ</th>
+                                <th style="width: 37%;">รายการสินค้า / รายละเอียด (Description)</th>
+                                <th style="width: 10%;">แบบรุ่น (Model)</th>
+                                <th style="width: 8%;">จำนวน (Qty)</th>
+                                <th style="width: 8%;">หน่วย (Unit)</th>
+                                <th style="width: 12%;">ราคา/หน่วย (Unit Price)</th>
+                                <th style="width: 13%;">จำนวนเงิน (Amount)</th>
+                                <th class="no-print" style="width: 6%;">จัดการ</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+            `;
+
+            if (pageItems.length === 0) {
+                pageHTML += `<tr><td colspan="8" style="text-align: center; color: #94a3b8; padding: 20px;">ไม่มีรายการสินค้าในหน้านี้</td></tr>`;
+            } else {
+                pageItems.forEach((item, idx) => {
+                    const actualIndex = startIdx + idx;
+                    pageHTML += `
+                        <tr class="item-row">
+                            <td style="text-align: center; font-weight: 600;">${actualIndex + 1}</td>
+                            <td><textarea class="item-desc" placeholder="ระบุชื่อสินค้าหรือรายละเอียด..." oninput="updateItemData(${actualIndex}, 'desc', this.value)">${item.desc}</textarea></td>
+                            <td><input type="text" class="sku-input" placeholder="-" value="${item.model}" oninput="updateItemData(${actualIndex}, 'model', this.value)"></td>
+                            <td><input type="text" class="qty" placeholder="1" value="${item.qty}" oninput="updateItemData(${actualIndex}, 'qty', this.value)"></td>
+                            <td><input type="text" class="unit-input" placeholder="ชิ้น" value="${item.unit}" oninput="updateItemData(${actualIndex}, 'unit', this.value)"></td>
+                            <td><input type="text" class="price" placeholder="0.00" value="${item.price.toFixed(2)}" oninput="updateItemData(${actualIndex}, 'price', this.value)"></td>
+                            <td class="amount" style="text-align: right; font-weight: 600;">${(item.qty * item.price).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
+                            <td class="no-print" style="text-align: center;"><button class="btn-del" onclick="removeRow(${actualIndex})">ลบ</button></td>
+                        </tr>
+                    `;
+                });
+            }
+
+            pageHTML += `
+                        </tbody>
+                    </table>
+                </div>
+
+                <table class="footer-table">
+                    <tr>
+                        <td rowspan="5" style="width: 50%; vertical-align: middle; text-align: center; background-color: var(--bg-light);">
+                            <div style="font-size: 11px; color: #64748b; margin-bottom: 4px;">(จำนวนเงินรวมตัวอักษร)</div>
+                            <div class="textAmount" style="font-size: 14px; color: var(--primary-color); font-weight: 700;">ศูนย์บาทถ้วน</div>
+                        </td>
+                        <td class="footer-total-label" style="text-align: center;">รวมเงิน (Sub Total)</td>
+                        <td class="subTotal" style="width: 25%; text-align: right; font-weight: 600;">0.00</td>
+                    </tr>
+                    <tr>
+                        <td class="footer-total-label" style="text-align: center;">ส่วนลด (<input type="text" class="inline-input discountRate" style="width: 35px; text-align: center;" value="${docMeta.discountRate}" oninput="updateMeta('discountRate', this.value); calculateTotals()">%)</td>
+                        <td style="text-align: right;"><input type="text" class="inline-input discountAmount" style="width: 80px; text-align: right; font-weight: 700; color: var(--danger-color);" value="0.00" readonly></td>
+                    </tr>
+                    <tr>
+                        <td class="footer-total-label" style="color: var(--primary-color); text-align: center;">รวมราคาสินค้าสุทธิ (Net Total)</td>
+                        <td class="netTotal" style="font-weight: 600; text-align: right;">0.00</td>
+                    </tr>
+                    <tr>
+                        <td class="footer-total-label" style="text-align: center;">ภาษีมูลค่าเพิ่ม VAT 7%</td>
+                        <td class="vatAmount" style="text-align: right;">0.00</td>
+                    </tr>
+                    <tr>
+                        <td class="footer-total-label" style="background-color: var(--primary-light); color: var(--primary-color); font-weight: 700; text-align: center;">จำนวนเงินรวมทั้งสิ้น (Grand Total)</td>
+                        <td class="grandTotal" style="background-color: #c7d2fe; color: var(--primary-dark); font-size: 15px; text-align: right; font-weight: 700;">0.00</td>
+                    </tr>
+                </table>
+
+                <div style="margin-bottom: 15px; font-size: 12px; color: #475569;">
+                    <strong>หมายเหตุ :</strong> <input type="text" class="inline-input meta-field" data-field="remarkText" style="width: 82%;" placeholder="ระบุเงื่อนไขหรือหมายเหตุเพิ่มเติม (ถ้ามี)" value="${docMeta.remarkText}">
+                </div>
+
+                <div class="signature-section">
+                    <div class="sig-box">
+                        <div class="sig-line"></div>
+                        <input type="text" class="sig-name-input meta-field" data-field="sigCustomerName" placeholder="(พิมพ์ชื่อ-นามสกุล ลูกค้า)" value="${docMeta.sigCustomerName}">
+                        <div class="sig-text">ผู้อนุมัติสั่งซื้อ / ลูกค้า (Approved By)</div>
+                        <div class="sig-date">วันที่: <input type="text" class="sig-date-input meta-field" data-field="sigCustomerDate" placeholder="วว/ดด/ปปปป" value="${docMeta.sigCustomerDate}"></div>
+                    </div>
+                    <div class="sig-box">
+                        <div class="sig-line"></div>
+                        <input type="text" class="sig-name-input meta-field" data-field="sigSalesName" placeholder="(ชื่อผู้เสนอราคา)" value="${docMeta.sigSalesName}">
+                        <div class="sig-text">ผู้เสนอราคา (Sales Department)</div>
+                        <div class="sig-date">วันที่: <input type="text" class="sig-date-input meta-field" data-field="sigSalesDate" placeholder="วว/ดด/ปปปป" value="${docMeta.sigSalesDate}"></div>
+                    </div>
+                </div>
+            `;
+
+            pageDiv.innerHTML = pageHTML;
+            container.appendChild(pageDiv);
         }
 
-        pageHTML += `
-                    </tbody>
-                </table>
-            </div>
-
-            <table class="footer-table">
-                <tr>
-                    <td rowspan="5" style="width: 50%; vertical-align: middle; text-align: center; background-color: var(--bg-light);">
-                        <div style="font-size: 11px; color: #64748b; margin-bottom: 4px;">(จำนวนเงินรวมตัวอักษร)</div>
-                        <div class="textAmount" style="font-size: 14px; color: var(--primary-color); font-weight: 700;">ศูนย์บาทถ้วน</div>
-                    </td>
-                    <td class="footer-total-label" style="text-align: center;">รวมเงิน (Sub Total)</td>
-                    <td class="subTotal" style="width: 25%; text-align: right; font-weight: 600;">0.00</td>
-                </tr>
-                <tr>
-                    <td class="footer-total-label" style="text-align: center;">ส่วนลด (<input type="text" class="inline-input discountRate" style="width: 35px; text-align: center;" value="${docMeta.discountRate}" oninput="updateMeta('discountRate', this.value); calculateTotals()">%)</td>
-                    <td style="text-align: right;"><input type="text" class="inline-input discountAmount" style="width: 80px; text-align: right; font-weight: 700; color: var(--danger-color);" value="0.00" readonly></td>
-                </tr>
-                <tr>
-                    <td class="footer-total-label" style="color: var(--primary-color); text-align: center;">รวมราคาสินค้าสุทธิ (Net Total)</td>
-                    <td class="netTotal" style="font-weight: 600; text-align: right;">0.00</td>
-                </tr>
-                <tr>
-                    <td class="footer-total-label" style="text-align: center;">ภาษีมูลค่าเพิ่ม VAT 7%</td>
-                    <td class="vatAmount" style="text-align: right;">0.00</td>
-                </tr>
-                <tr>
-                    <td class="footer-total-label" style="background-color: var(--primary-light); color: var(--primary-color); font-weight: 700; text-align: center;">จำนวนเงินรวมทั้งสิ้น (Grand Total)</td>
-                    <td class="grandTotal" style="background-color: #c7d2fe; color: var(--primary-dark); font-size: 15px; text-align: right; font-weight: 700;">0.00</td>
-                </tr>
-            </table>
-
-            <div style="margin-bottom: 15px; font-size: 12px; color: #475569;">
-                <strong>หมายเหตุ :</strong> <input type="text" class="inline-input meta-field" data-field="remarkText" style="width: 82%;" placeholder="ระบุเงื่อนไขหรือหมายเหตุเพิ่มเติม (ถ้ามี)" value="${docMeta.remarkText}">
-            </div>
-
-            <div class="signature-section">
-                <div class="sig-box">
-                    <div class="sig-line"></div>
-                    <input type="text" class="sig-name-input meta-field" data-field="sigCustomerName" placeholder="(พิมพ์ชื่อ-นามสกุล ลูกค้า)" value="${docMeta.sigCustomerName}">
-                    <div class="sig-text">ผู้อนุมัติสั่งซื้อ / ลูกค้า (Approved By)</div>
-                    <div class="sig-date">วันที่: <input type="text" class="sig-date-input meta-field" data-field="sigCustomerDate" placeholder="วว/ดด/ปปปป" value="${docMeta.sigCustomerDate}"></div>
-                </div>
-                <div class="sig-box">
-                    <div class="sig-line"></div>
-                    <input type="text" class="sig-name-input meta-field" data-field="sigSalesName" placeholder="(ชื่อผู้เสนอราคา)" value="${docMeta.sigSalesName}">
-                    <div class="sig-text">ผู้เสนอราคา (Sales Department)</div>
-                    <div class="sig-date">วันที่: <input type="text" class="sig-date-input meta-field" data-field="sigSalesDate" placeholder="วว/ดด/ปปปป" value="${docMeta.sigSalesDate}"></div>
-                </div>
-            </div>
-        `;
-
-        pageDiv.innerHTML = pageHTML;
-        container.appendChild(pageDiv);
-    }
-
-    document.querySelectorAll('.meta-field').forEach(input => {
-        input.addEventListener('input', function() {
-            const field = this.getAttribute('data-field');
-            docMeta[field] = this.value;
-            document.querySelectorAll(`.meta-field[data-field="${field}"]`).forEach(el => {
-                if (el !== this) el.value = this.value;
+        document.querySelectorAll('.meta-field').forEach(input => {
+            input.addEventListener('input', function() {
+                const field = this.getAttribute('data-field');
+                docMeta[field] = this.value;
+                document.querySelectorAll(`.meta-field[data-field="${field}"]`).forEach(el => {
+                    if (el !== this) el.value = this.value;
+                });
             });
         });
-    });
 
-    calculateTotals();
-}
+        calculateTotals();
+    }
 
     function updateMeta(field, value) {
         docMeta[field] = value;
@@ -798,79 +839,74 @@ function renderDocument() {
         renderDocument();
     }
 
-function calculateTotals() {
-    let subTotal = 0;
+    function calculateTotals() {
+        let subTotal = 0;
 
-    itemsData.forEach((item) => {
-        const qty = parseFloat(String(item.qty).replace(/,/g, '')) || 0;
-        const price = parseFloat(String(item.price).replace(/,/g, '')) || 0;
-        subTotal += (qty * price);
-    });
+        itemsData.forEach((item) => {
+            const qty = parseFloat(String(item.qty).replace(/,/g, '')) || 0;
+            const price = parseFloat(String(item.price).replace(/,/g, '')) || 0;
+            subTotal += (qty * price);
+        });
 
-    let discountRate = parseFloat(docMeta.discountRate);
-    let discountAmount = 0;
+        let discountRate = parseFloat(docMeta.discountRate);
+        let discountAmount = 0;
 
-    if (isNaN(discountRate) || discountRate <= 0) {
-        discountRate = 0;
-        discountAmount = 0;
-    } else {
-        discountAmount = (subTotal * discountRate) / 100;
-    }
-
-    let netTotal = subTotal - discountAmount;
-    if (netTotal < 0) netTotal = 0;
-
-    let vatAmount = netTotal * 0.07;
-    let grandTotal = netTotal + vatAmount;
-    let thaiTextStr = arabicToThaiText(grandTotal);
-
-    // วนลูปจัดการแสดงผลแยกตามแต่ละหน้า (Page Sheet)
-    const pageSheets = document.querySelectorAll(".page-sheet");
-    const totalPages = pageSheets.length;
-
-    pageSheets.forEach((sheet) => {
-        const isLast = sheet.getAttribute("data-is-last") === "true";
-
-        // ถ้าเป็นหน้าสุดท้าย หรือมีหน้าเดียว ให้แสดงยอดเงินคำนวณจริง
-        // ถ้าไม่ใช่หน้าสุดท้าย (และมีหลายหน้า) ให้แสดงเป็น 0.00 ทั้งหมด
-        const displaySubTotal = (totalPages === 1 || isLast) ? subTotal.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : "0.00";
-        const displayDiscount = (totalPages === 1 || isLast) ? discountAmount.toFixed(2) : "0.00";
-        const displayNetTotal = (totalPages === 1 || isLast) ? netTotal.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : "0.00";
-        const displayVat     = (totalPages === 1 || isLast) ? vatAmount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : "0.00";
-        const displayGrand   = (totalPages === 1 || isLast) ? grandTotal.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : "0.00";
-        const displayThaiText = (totalPages === 1 || isLast) ? thaiTextStr : "ศูนย์บาทถ้วน";
-
-        // เซ็ตค่าลงใน Element เฉพาะของหน้านั้น ๆ
-        const subTotalEl = sheet.querySelector(".subTotal");
-        const discountRateEl = sheet.querySelector(".discountRate");
-        const discountAmountEl = sheet.querySelector(".discountAmount");
-        const netTotalEl = sheet.querySelector(".netTotal");
-        const vatAmountEl = sheet.querySelector(".vatAmount");
-        const grandTotalEl = sheet.querySelector(".grandTotal");
-        const textAmountEl = sheet.querySelector(".textAmount");
-
-        if (subTotalEl) subTotalEl.textContent = displaySubTotal;
-        if (discountRateEl) discountRateEl.value = discountRate;
-        if (discountAmountEl) discountAmountEl.value = displayDiscount;
-        if (netTotalEl) netTotalEl.textContent = displayNetTotal;
-        if (vatAmountEl) vatAmountEl.textContent = displayVat;
-        if (grandTotalEl) grandTotalEl.textContent = displayGrand;
-        if (textAmountEl) textAmountEl.textContent = displayThaiText;
-    });
-
-    // อัปเดตตารางรายการสินค้าแต่ละแถวตามปกติ
-    const rows = document.querySelectorAll(".item-row");
-    rows.forEach((row, idx) => {
-        if (itemsData[idx]) {
-            const q = parseFloat(String(itemsData[idx].qty).replace(/,/g, '')) || 0;
-            const p = parseFloat(String(itemsData[idx].price).replace(/,/g, '')) || 0;
-            const amtCell = row.querySelector(".amount");
-            if (amtCell) {
-                amtCell.textContent = (q * p).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-            }
+        if (isNaN(discountRate) || discountRate <= 0) {
+            discountRate = 0;
+            discountAmount = 0;
+        } else {
+            discountAmount = (subTotal * discountRate) / 100;
         }
-    });
-}
+
+        let netTotal = subTotal - discountAmount;
+        if (netTotal < 0) netTotal = 0;
+
+        let vatAmount = netTotal * 0.07;
+        let grandTotal = netTotal + vatAmount;
+        let thaiTextStr = arabicToThaiText(grandTotal);
+
+        const pageSheets = document.querySelectorAll(".page-sheet");
+        const totalPages = pageSheets.length;
+
+        pageSheets.forEach((sheet) => {
+            const isLast = sheet.getAttribute("data-is-last") === "true";
+
+            const displaySubTotal = (totalPages === 1 || isLast) ? subTotal.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : "0.00";
+            const displayDiscount = (totalPages === 1 || isLast) ? discountAmount.toFixed(2) : "0.00";
+            const displayNetTotal = (totalPages === 1 || isLast) ? netTotal.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : "0.00";
+            const displayVat     = (totalPages === 1 || isLast) ? vatAmount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : "0.00";
+            const displayGrand   = (totalPages === 1 || isLast) ? grandTotal.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : "0.00";
+            const displayThaiText = (totalPages === 1 || isLast) ? thaiTextStr : "ศูนย์บาทถ้วน";
+
+            const subTotalEl = sheet.querySelector(".subTotal");
+            const discountRateEl = sheet.querySelector(".discountRate");
+            const discountAmountEl = sheet.querySelector(".discountAmount");
+            const netTotalEl = sheet.querySelector(".netTotal");
+            const vatAmountEl = sheet.querySelector(".vatAmount");
+            const grandTotalEl = sheet.querySelector(".grandTotal");
+            const textAmountEl = sheet.querySelector(".textAmount");
+
+            if (subTotalEl) subTotalEl.textContent = displaySubTotal;
+            if (discountRateEl) discountRateEl.value = discountRate;
+            if (discountAmountEl) discountAmountEl.value = displayDiscount;
+            if (netTotalEl) netTotalEl.textContent = displayNetTotal;
+            if (vatAmountEl) vatAmountEl.textContent = displayVat;
+            if (grandTotalEl) grandTotalEl.textContent = displayGrand;
+            if (textAmountEl) textAmountEl.textContent = displayThaiText;
+        });
+
+        const rows = document.querySelectorAll(".item-row");
+        rows.forEach((row, idx) => {
+            if (itemsData[idx]) {
+                const q = parseFloat(String(itemsData[idx].qty).replace(/,/g, '')) || 0;
+                const p = parseFloat(String(itemsData[idx].price).replace(/,/g, '')) || 0;
+                const amtCell = row.querySelector(".amount");
+                if (amtCell) {
+                    amtCell.textContent = (q * p).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+                }
+            }
+        });
+    }
 
     function arabicToThaiText(amount) {
         if (amount === 0) return "ศูนย์บาทถ้วน";
@@ -913,141 +949,147 @@ function calculateTotals() {
         return result;
     }
 
-// สมมติว่าเก็บอาเรย์ลูกค้าไว้ในตัวแปรร่วม (Global Variable) เพื่อให้เรียกใช้งานง่าย
-let allCustomersData = []; 
+    let allCustomersData = []; 
 
-// นำฟังก์ชันอัปเดต Dropdown ของคุณมาปรับนิดหน่อยให้เก็บข้อมูลดิบไว้ด้วย
-function updateCustomerDropdownUI(customers) {
-    allCustomersData = customers; // เก็บข้อมูลทั้งหมดไว้ใช้งานต่อ
-    let select = document.getElementById('customerSelect');
-    if (!select) return;
+    function updateCustomerDropdownUI(customers) {
+        allCustomersData = customers; 
+        let select = document.getElementById('customerSelect');
+        if (!select) return;
 
-    let currentSelected = select.value;
-    select.innerHTML = '<option value="">-- เลือกลูกค้า/บริษัท --</option>';
+        let currentSelected = select.value;
+        select.innerHTML = '<option value="">-- เลือกลูกค้า/บริษัท --</option>';
 
-    customers.forEach((c) => {
-        let custName = '';
-        if (typeof c === 'string') {
-            custName = c;
-        } else if (c) {
-            custName = c.name || c.customerName || c.companyName || '';
+        customers.forEach((c) => {
+            let custName = '';
+            if (typeof c === 'string') {
+                custName = c;
+            } else if (c) {
+                custName = c.name || c.customerName || c.companyName || '';
+            }
+
+            if (custName) {
+                let opt = document.createElement('option');
+                opt.value = custName; 
+                opt.innerText = custName;
+                select.appendChild(opt);
+            }
+        });
+
+        if (currentSelected) {
+            select.value = currentSelected;
+        }
+    }
+
+    function loadCustomerDropdown() {
+        let localCustomers = JSON.parse(localStorage.getItem('saved_quot_customers') || '[]');
+        if (localCustomers.length > 0) {
+            updateCustomerDropdownUI(localCustomers);
+        }
+        initRealtimeMasterData();
+    }
+
+    async function autoLoadBillDataOnStartup(billNo, bookNo) {
+        try {
+            let searchInput = document.getElementById('searchOldBillNo');
+            if (searchInput) searchInput.value = billNo;
+
+            await loadDataByBillNo(billNo, true); // ส่งธงว่าเป็นโหลดอัตโนมัติ
+
+            if (bookNo) {
+                docMeta.bookNo = bookNo;
+                let bookInput = document.querySelector('.meta-field[data-field="bookNo"]');
+                if (bookInput) bookInput.value = bookNo;
+            }
+        } catch (error) {
+            console.warn("⚠️ ไม่สามารถโหลดข้อมูลอัตโนมัติได้:", error);
+        }
+    }
+
+    async function loadDataByBillNo(targetBillNo, isAuto = false) {
+        const bNo = (typeof targetBillNo === 'string' ? targetBillNo : null) || document.getElementById("searchOldBillNo")?.value || "";
+        const trimmedBNo = bNo.trim();
+
+        if (!trimmedBNo) {
+            showToast("กรุณากรอกเลขที่บิลที่ต้องการค้นหา", true);
+            return;
         }
 
-        if (custName) {
-            let opt = document.createElement('option');
-            opt.value = custName; // ใช้ชื่อเป็นค่า value
-            opt.innerText = custName;
-            select.appendChild(opt);
+        let foundBill = null;
+
+        try {
+            if (typeof firebase !== 'undefined' && firebase.apps && firebase.apps.length > 0) {
+                const db = firebase.firestore();
+                const docRef = await db.collection("quotations").doc(trimmedBNo).get();
+                if (docRef.exists) {
+                    foundBill = docRef.data();
+                }
+            }
+        } catch (error) {
+            console.warn("⚠️ ไม่สามารถดึงข้อมูลจาก Cloud ได้:", error);
         }
-    });
 
-    if (currentSelected) {
-        select.value = currentSelected;
-    }
-}
+        if (!foundBill) {
+            let savedBills = [];
+            const source1 = localStorage.getItem('saved_quotations');
+            const source2 = localStorage.getItem('saved_quot_purchases');
 
-// 3. ฟังก์ชันดึงรายชื่อลูกค้าแบบเดิม (ปรับให้เรียกใช้ระบบ Real-time)
-function loadCustomerDropdown() {
-    // ดึงจาก LocalStorage ขึ้นมาแสดงก่อนทันทีเพื่อความเร็ว
-    let localCustomers = JSON.parse(localStorage.getItem('saved_quot_customers') || '[]');
-    if (localCustomers.length > 0) {
-        updateCustomerDropdownUI(localCustomers);
-    }
-    
-    // เริ่มเปิดระบบ Real-time ฟังข้อมูลจาก Cloud
-    initRealtimeMasterData();
-}
+            if (source1) {
+                try { savedBills = savedBills.concat(JSON.parse(source1)); } catch(e){}
+            }
+            if (source2) {
+                try { savedBills = savedBills.concat(JSON.parse(source2)); } catch(e){}
+            }
 
- async function loadDataByBillNo() {
-    const bNo = document.getElementById("searchOldBillNo").value.trim();
-    if (!bNo) {
-        alert("กรุณากรอกเลขที่บิลที่ต้องการค้นหา");
-        return;
-    }
+            foundBill = savedBills.find(b => {
+                let currentBillNo = (b.billNo || b.quotationNo || '').toString().trim();
+                return currentBillNo === trimmedBNo;
+            });
+        }
 
-    let foundBill = null;
+        if (foundBill) {
+            docMeta.custName = foundBill.custName || foundBill.customerName || "";
+            docMeta.custAddress = foundBill.custAddress || foundBill.address || "";
+            docMeta.quotSubject = foundBill.quotSubject || foundBill.subject || "";
+            docMeta.quotEnclose = foundBill.quotEnclose || foundBill.enclose || "-";
+            docMeta.bookNo = foundBill.bookNo || "-";
+            docMeta.billNo = foundBill.billNo || foundBill.quotationNo || autoBillNo;
+            docMeta.billDate = foundBill.billDate || currentDateFormatted;
+            docMeta.discountRate = foundBill.discountRate || foundBill.discount || 0;
+            docMeta.remarkText = foundBill.remarkText || foundBill.remark || "";
 
-    // 1. ค้นหาจาก Firebase Firestore ก่อน (ถ้ามีการใช้งาน Firebase ในระบบ)
-    try {
-        if (typeof firebase !== 'undefined' && firebase.apps && firebase.apps.length > 0) {
-            const db = firebase.firestore();
-            // ลองค้นหาจาก collection 'quotations' หรือปรับชื่อตามโครงสร้างของคุณ
-            const docRef = await db.collection("quotations").doc(bNo).get();
-            if (docRef.exists) {
-                foundBill = docRef.data();
+            let rawItems = foundBill.items || foundBill.productList || foundBill.details || [];
+            if (rawItems && rawItems.length > 0) {
+                itemsData = rawItems.map(item => ({
+                    desc: item.desc || item.description || item.productName || "",
+                    model: item.model || item.sku || "-",
+                    qty: parseFloat(item.qty || item.quantity) || 1,
+                    unit: item.unit || "ชิ้น",
+                    price: parseFloat(item.price || item.unitPrice || item.unit_price || item.productPrice) || 0.00
+                }));
+            } else {
+                itemsData = [];
+            }
+
+            if (typeof renderDocument === 'function') {
+                renderDocument();
+            }
+            
+            // แสดง Toast แจ้งเตือนสำเร็จ
+            showToast(`ดึงข้อมูลใบเสนอราคาเลขที่ ${trimmedBNo} สำเร็จ!`);
+        } else {
+            if (!isAuto) {
+                showToast("ไม่พบข้อมูลเลขที่ใบเสนอราคานี้ในระบบ", true);
             }
         }
-    } catch (error) {
-        console.warn("⚠️ ไม่สามารถดึงข้อมูลจาก Cloud ได้, กำลังตรวจสอบในเครื่อง...", error);
     }
 
-    // 2. ถ้าไม่เจอใน Cloud ให้ค้นหาจาก LocalStorage ทั้ง 2 รูปแบบเดิมของคุณ
-    if (!foundBill) {
-        let savedBills = [];
-        const source1 = localStorage.getItem('saved_quotations');
-        const source2 = localStorage.getItem('saved_quot_purchases');
-
-        if (source1) {
-            try { savedBills = savedBills.concat(JSON.parse(source1)); } catch(e){}
-        }
-        if (source2) {
-            try { savedBills = savedBills.concat(JSON.parse(source2)); } catch(e){}
-        }
-
-        // ค้นหาบิลที่ตรงกับเลขที่กรอก (เทียบแบบไม่สนตัวพิมพ์เล็ก-ใหญ่ หรือช่องว่างส่วนเกิน)
-        foundBill = savedBills.find(b => {
-            let currentBillNo = (b.billNo || b.quotationNo || '').toString().trim();
-            return currentBillNo === bNo;
-        });
-    }
-
-    // 3. หากพบข้อมูล นำมาใส่ลงในตัวแปรและวาดหน้าจอใหม่
-    if (foundBill) {
-        // ดึงข้อมูลหัวบิลมาใส่ (รองรับชื่อฟิลด์ที่อาจแตกต่างกัน)
-        docMeta.custName = foundBill.custName || foundBill.customerName || "";
-        docMeta.custAddress = foundBill.custAddress || foundBill.address || "";
-        docMeta.quotSubject = foundBill.quotSubject || foundBill.subject || "";
-        docMeta.quotEnclose = foundBill.quotEnclose || foundBill.enclose || "-";
-        docMeta.bookNo = foundBill.bookNo || "-";
-        docMeta.billNo = foundBill.billNo || foundBill.quotationNo || autoBillNo;
-        docMeta.billDate = foundBill.billDate || currentDateFormatted;
-        docMeta.discountRate = foundBill.discountRate || foundBill.discount || 0;
-        docMeta.remarkText = foundBill.remarkText || foundBill.remark || "";
-
-        // ดึงรายการสินค้ามาแทนที่ itemsData (รองรับทุกชื่อฟิลด์ที่อาจเคยบันทึกไว้)
-        let rawItems = foundBill.items || foundBill.productList || foundBill.details || [];
-        if (rawItems && rawItems.length > 0) {
-            itemsData = rawItems.map(item => ({
-                desc: item.desc || item.description || item.productName || "",
-                model: item.model || item.sku || "-",
-                qty: parseFloat(item.qty || item.quantity) || 1,
-                unit: item.unit || "ชิ้น",
-                price: parseFloat(item.price || item.unitPrice || item.unit_price || item.productPrice) || 0.00
-            }));
-        } else {
-            itemsData = []; // ป้องกันกรณีบิลเก่าไม่มีสินค้าติดมา
-        }
-
-        // วาดหน้าจอใหม่และคำนวณยอดเงินทั้งหมด
-        if (typeof renderDocument === 'function') {
-            renderDocument();
-        }
-        
-        alert("ดึงข้อมูลใบเสนอราคาเลขที่: " + bNo + " สำเร็จ!");
-    } else {
-        alert("ไม่พบข้อมูลเลขที่ใบเสนอราคานี้ในระบบ กรุณาตรวจสอบความถูกต้องอีกครั้ง");
-    }
-}
-
-window.onload = function() {
-        // แก้ไขจาก calculate() เป็น calculateTotals() ที่มีอยู่จริงในระบบ
+    window.onload = function() {
         calculateTotals();
         loadCustomerDropdown();
-        renderDocument(); // เพิ่มการเรียกเรนเดอร์เอกสารเริ่มต้น
+        renderDocument(); 
         
         let dateField = document.getElementById('billDate');
         let sigSalesDate = document.getElementById('sigSalesDate');
-        let sigCustDate = document.getElementById('sigCustomerDate');
         let billNoField = document.getElementById('billNo');
         
         let d = new Date();
@@ -1059,7 +1101,6 @@ window.onload = function() {
         if(!dateField || !dateField.value) docMeta.billDate = currentDateStr;
         if(!sigSalesDate || !sigSalesDate.value) docMeta.sigSalesDate = currentDateStr;
 
-        // 📌 ดึงเลขที่บิลล่าสุดจาก LocalStorage มาแสดงอัตโนมัติ (ถ้าต้องการเปิดใช้งาน)
         if (billNoField && !billNoField.value) {
             let purchases = JSON.parse(localStorage.getItem('saved_quot_purchases') || '[]');
             if (purchases.length > 0) {
@@ -1073,67 +1114,56 @@ window.onload = function() {
         
         renderDocument();
     };
-	
-// ฟังก์ชันดึงข้อมูลลูกค้ามาแสดงในฟอร์มเมื่อเลือกจาก Dropdown
-function selectCustomer(selectElement) {
-    const selectedName = selectElement.value;
     
-    let foundCustomer = null;
-    if (typeof allCustomersData !== 'undefined' && Array.isArray(allCustomersData)) {
-        foundCustomer = allCustomersData.find(c => {
-            let cName = typeof c === 'string' ? c : (c.name || c.customerName || c.companyName || '');
-            return cName === selectedName;
-        });
-    }
-
-    let custNameValue = "";
-    let custAddressValue = "";
-    let custItems = null;
-
-    if (foundCustomer && typeof foundCustomer === 'object') {
-        custNameValue = foundCustomer.name || foundCustomer.customerName || foundCustomer.companyName || selectedName;
-        custAddressValue = foundCustomer.address || foundCustomer.custAddress || '';
-        // สมมติว่าในข้อมูลลูกค้ามีการผูกรายการสินค้าประจำไว้ เช่น c.items
-        custItems = foundCustomer.items || null;
-    } else {
-        custNameValue = selectedName;
-        custAddressValue = "";
-    }
-
-    // อัปเดตข้อมูลลูกค้า
-    docMeta.custName = custNameValue;
-    docMeta.custAddress = custAddressValue;
-
-    // ถ้าลูกค้ารายนี้มีรายการสินค้าผูกไว้ ให้ดึงมาแสดงแทนที่แถวว่าง
-    if (custItems && Array.isArray(custItems) && custItems.length > 0) {
-        itemsData = custItems;
-    }
-
-    // เรนเดอร์หน้าจอใหม่เพื่อให้ข้อมูลอัปเดตทั้งที่อยู่และรายการสินค้า
-    renderDocument();
-}
-
-window.addEventListener('DOMContentLoaded', () => {
-    const urlParams = new URLSearchParams(window.location.search);
-    const billNoFromURL = urlParams.get('billNo');
-
-    if (billNoFromURL) {
-        // แก้ไขให้ชี้ไปที่ ID ของช่องค้นหาบิลจริง (searchOldBillNo)
-        let searchInput = document.getElementById('searchOldBillNo'); 
+    function selectCustomer(selectElement) {
+        const selectedName = selectElement.value;
         
-        if (searchInput) {
-            searchInput.value = billNoFromURL;
-            
-            // สั่งให้เรียกฟังก์ชันค้นหาและดึงข้อมูลบิลขึ้นมาแสดงอัตโนมัติทันที
-            if (typeof loadDataByBillNo === 'function') {
-                loadDataByBillNo();
-            }
+        let foundCustomer = null;
+        if (typeof allCustomersData !== 'undefined' && Array.isArray(allCustomersData)) {
+            foundCustomer = allCustomersData.find(c => {
+                let cName = typeof c === 'string' ? c : (c.name || c.customerName || c.companyName || '');
+                return cName === selectedName;
+            });
         }
+
+        let custNameValue = "";
+        let custAddressValue = "";
+        let custItems = null;
+
+        if (foundCustomer && typeof foundCustomer === 'object') {
+            custNameValue = foundCustomer.name || foundCustomer.customerName || foundCustomer.companyName || selectedName;
+            custAddressValue = foundCustomer.address || foundCustomer.custAddress || '';
+            custItems = foundCustomer.items || null;
+        } else {
+            custNameValue = selectedName;
+            custAddressValue = "";
+        }
+
+        docMeta.custName = custNameValue;
+        docMeta.custAddress = custAddressValue;
+
+        if (custItems && Array.isArray(custItems) && custItems.length > 0) {
+            itemsData = custItems;
+        }
+
+        renderDocument();
     }
-});
 
+    window.addEventListener('DOMContentLoaded', () => {
+        const urlParams = new URLSearchParams(window.location.search);
+        const billNoParam = urlParams.get('billNo');
+        const bookNoParam = urlParams.get('bookNo');
 
+        if (billNoParam) {
+            const cleanBillNo = billNoParam.replace(/^:/, '').trim();
+            const cleanBookNo = bookNoParam ? bookNoParam.replace(/^:/, '').trim() : '';
 
+            let searchInput = document.getElementById('searchOldBillNo');
+            if (searchInput) searchInput.value = cleanBillNo;
+
+            autoLoadBillDataOnStartup(cleanBillNo, cleanBookNo);
+        }
+    });
 </script>
 
 </body>
