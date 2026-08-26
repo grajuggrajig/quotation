@@ -540,22 +540,28 @@ function initRealtimeMasterData() {
     const currentDateFormatted = `${day}/${month}/${year}`;
 
     // สร้างเลขที่ใบเสนอราคาอัตโนมัติจากปีและเดือนปัจจุบัน (เช่น QT202606...)
-    const autoBillNo = `QT${year}${month}001`;
+// 🔍 ดึงค่า Query Parameters จาก URL (ที่ส่งมาจากหน้า index.html)
+    const urlParams = new URLSearchParams(window.location.search);
+    const paramBillNo = urlParams.get('billNo');
+    const paramBookNo = urlParams.get('bookNo');
+
+    // สร้างเลขที่ใบเสนอราคาอัตโนมัติสำรอง (กรณีที่ไม่มีการส่งค่ามา)
+    const autoBillNo = paramBillNo || `QT${year}${month}001`;
 
     let docMeta = {
         custName: "",
         custAddress: "",
         quotSubject: "",
         quotEnclose: "-",
-        bookNo: "-",
-        billNo: autoBillNo,          // รันเลขที่อัตโนมัติ
-        billDate: currentDateFormatted, // วันที่ปัจจุบันอัตโนมัติ
+        bookNo: paramBookNo || "-",
+        billNo: autoBillNo,          // แสดงเลขที่บิลที่ดึงมาจาก index อัตโนมัติ
+        billDate: currentDateFormatted, 
         remarkText: "ราคานี้ยังไม่รวมภาษีมูลค่าเพิ่ม / ยืนราคา 30 วัน",
         discountRate: 0,
         sigCustomerName: "",
         sigCustomerDate: "",
         sigSalesName: "",
-        sigSalesDate: currentDateFormatted // วันที่เซ็นเอกสารใช้วันที่ปัจจุบันเช่นกัน
+        sigSalesDate: currentDateFormatted 
     };
 
     let itemsData = [
