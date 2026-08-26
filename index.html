@@ -1770,14 +1770,14 @@ async function executeSave(isNewBill) {
         }
         localStorage.setItem('saved_quot_purchases', JSON.stringify(purchases));
 
-        Swal.fire({
+Swal.fire({
             icon: 'success',
             title: isNewBill ? 'บันทึกเป็นบิลใหม่สำเร็จ!' : 'บันทึกข้อมูลสำเร็จ!',
             text: `เลขที่บิล: ${finalBillNo}`,
             timer: 2000,
             showConfirmButton: false
         }).then(() => {
-            // 📌 นำโค้ดของคุณมาวางไว้ตรงนี้ เพื่อให้เด้งไปหน้าใหม่หลังบันทึกเสร็จ
+            // 📌 ส่งค่า billNo และ bookNo ไปที่หน้า quotation.html ผ่าน URL Parameters
             let currentBillNo = document.getElementById('billNo').value;
             let currentBookNo = document.getElementById('bookNo').value;
             window.location.href = `quotation.html?billNo=${encodeURIComponent(currentBillNo)}&bookNo=${encodeURIComponent(currentBookNo)}`;
