@@ -1010,20 +1010,40 @@ if (rawItems && rawItems.length > 0) {
     }
 }
 
-    window.onload = function() {
+window.onload = function() {
+        // แก้ไขจาก calculate() เป็น calculateTotals() ที่มีอยู่จริงในระบบ
+        calculateTotals();
+        loadCustomerDropdown();
+        renderDocument(); // เพิ่มการเรียกเรนเดอร์เอกสารเริ่มต้น
+        
+        let dateField = document.getElementById('billDate');
+        let sigSalesDate = document.getElementById('sigSalesDate');
+        let sigCustDate = document.getElementById('sigCustomerDate');
+        let billNoField = document.getElementById('billNo');
+        
+        let d = new Date();
+        let day = String(d.getDate()).padStart(2, '0');
+        let month = String(d.getMonth() + 1).padStart(2, '0');
+        let year = d.getFullYear() + 543;
+        let currentDateStr = `${day}/${month}/${year}`;
+
+        if(!dateField || !dateField.value) docMeta.billDate = currentDateStr;
+        if(!sigSalesDate || !sigSalesDate.value) docMeta.sigSalesDate = currentDateStr;
+
+        // 📌 ดึงเลขที่บิลล่าสุดจาก LocalStorage มาแสดงอัตโนมัติ (ถ้าต้องการเปิดใช้งาน)
+        if (billNoField && !billNoField.value) {
+            let purchases = JSON.parse(localStorage.getItem('saved_quot_purchases') || '[]');
+            if (purchases.length > 0) {
+                let latestBill = purchases[purchases.length - 1];
+                if (latestBill && latestBill.billNo) {
+                    // billNoField.value = latestBill.billNo;
+                    // docMeta.billNo = latestBill.billNo;
+                }
+            }
+        }
+        
         renderDocument();
     };
-	
-	// โค้ดเดิม
-window.onload = function() {
-    renderDocument();
-};
-
-// ให้แก้เป็นแบบนี้:
-window.onload = function() {
-    renderDocument();
-    loadCustomerDropdown(); // เพิ่มบรรทัดนี้เพื่อให้โหลดรายชื่อลูกค้าทันทีที่เปิดหน้าเว็บ
-};
 	
 // ฟังก์ชันดึงข้อมูลลูกค้ามาแสดงในฟอร์มเมื่อเลือกจาก Dropdown
 function selectCustomer(selectElement) {
