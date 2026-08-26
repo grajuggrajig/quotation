@@ -2648,18 +2648,13 @@ async function openEditProductModal(index) {
                 cancelButtonText: 'ยกเลิก',
                 
                 preConfirm: () => {
-    const sku = document.getElementById('swal-edit-sku').value.trim();
-    if (!sku) {
-        Swal.showValidationMessage('กรุณากรอกรหัส/รุ่นสินค้า');
-        return false;
-    }
-    return {
-        sku: sku,
-        desc: document.getElementById('swal-edit-desc').value.trim(),
-        unit: document.getElementById('swal-edit-unit').value.trim(),
-        price: parseFloat(document.getElementById('swal-edit-price').value) || 0
-    }
-}
+                    return {
+                        sku: document.getElementById('swal-edit-sku').value.trim(),
+                        desc: document.getElementById('swal-edit-desc').value.trim(),
+                        unit: document.getElementById('swal-edit-unit').value.trim(),
+                        price: parseFloat(document.getElementById('swal-edit-price').value) || 0
+                    }
+                }
             });
 
             // ถ้าผู้ใช้กดบันทึก
