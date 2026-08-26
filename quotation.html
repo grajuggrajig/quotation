@@ -959,7 +959,6 @@ function loadCustomerDropdown() {
         return;
     }
 
-    // ค้นหาจาก Storage ทั้ง 2 รูปแบบที่เป็นไปได้ในระบบของคุณ
     let savedBills = [];
     const source1 = localStorage.getItem('saved_quotations');
     const source2 = localStorage.getItem('saved_quot_purchases');
@@ -971,14 +970,13 @@ function loadCustomerDropdown() {
         try { savedBills = savedBills.concat(JSON.parse(source2)); } catch(e){}
     }
 
-    // ค้นหาบิลที่ตรงกับเลขที่กรอก (เทียบแบบไม่สนตัวพิมพ์เล็ก-ใหญ่ หรือช่องว่างส่วนเกิน)
     const foundBill = savedBills.find(b => {
         let currentBillNo = (b.billNo || b.quotationNo || '').toString().trim();
         return currentBillNo === bNo;
     });
 
     if (foundBill) {
-        // 1. ดึงข้อมูลหัวบิลมาใส่ (รองรับชื่อฟิลด์ที่อาจแตกต่างกัน)
+        // 1. ดึงข้อมูลหัวบิลมาใส่
         docMeta.custName = foundBill.custName || foundBill.customerName || "";
         docMeta.custAddress = foundBill.custAddress || foundBill.address || "";
         docMeta.quotSubject = foundBill.quotSubject || foundBill.subject || "";
@@ -989,18 +987,25 @@ function loadCustomerDropdown() {
         docMeta.discountRate = foundBill.discountRate || foundBill.discount || 0;
         docMeta.remarkText = foundBill.remarkText || foundBill.remark || "";
 
-        // 2. ดึงรายการสินค้ามาแทนที่ itemsData (รองรับทุกชื่อฟิลด์ที่อาจเคยบันทึกไว้)
+        // 2. ดึงรายการสินค้าและดักจับชื่อฟิลด์ราคาให้ครบทุกรูปแบบที่เป็นไปได้
         let rawItems = foundBill.items || foundBill.productList || foundBill.details || [];
-if (rawItems && rawItems.length > 0) {
-    itemsData = rawItems.map(item => ({
-        desc: item.desc || item.description || item.productName || "",
-        model: item.model || item.sku || "-",
-        qty: parseFloat(item.qty || item.quantity) || 1,
-        unit: item.unit || "ชิ้น",
-        // 🔍 ปรับปรุงตรงนี้ให้ครอบคลุมทุกคีย์ชื่อราคาที่เป็นไปได้
-        price: parseFloat(item.price || item.unitPrice || item.unit_price || item.productPrice) || 0.00
-    }));
-}
+        if (rawItems && rawItems.length > 0) {
+            itemsData = rawItems.map(item => {
+                // ค้นหาค่าราคาจากทุกชื่อฟิลด์ที่เป็นไปได้ในบิลเก่า
+                let parsedPrice = parseFloat(item.price !== undefined ? item.price : (item.unitPrice !== undefined ? item.unitPrice : (item.unit_price !== undefined ? item.unit_price : (item.productPrice !== undefined ? item.productPrice : 0)))) || 0;
+                
+                // ค้นหาจำนวน
+                let parsedQty = parseFloat(item.qty !== undefined ? item.qty : (item.quantity !== undefined ? item.quantity : 1)) || 1;
+
+                return {
+                    desc: item.desc || item.description || item.productName || "",
+                    model: item.model || item.sku || "-",
+                    qty: parsedQty,
+                    unit: item.unit || "ชิ้น",
+                    price: parsedPrice
+                };
+            });
+        }
 
         // 3. วาดหน้าจอใหม่และคำนวณยอดเงินทั้งหมด
         renderDocument();
