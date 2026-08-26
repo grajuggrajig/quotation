@@ -540,15 +540,139 @@
 <!-- พื้นที่แสดงแจ้งเตือน Toast Notification -->
 <div id="toast-container"></div>
 
-<!-- แถบเครื่องมือควบคุมแบบลอยเด่น (Sticky Toolbar) -->
-<div class="toolbar no-print">
-    <div class="toolbar-actions" style="gap: 10px;">
-        <a href="index.html" class="btn-action btn-secondary">🏠 หน้าแรก</a>
-    </div>
-    <div class="toolbar-actions">
-        <button class="btn-action btn-success" onclick="addRow()">+ เพิ่มรายการสินค้า</button>
-        <button class="btn-action" onclick="window.print()">🖨️ พิมพ์เอกสาร / บันทึก PDF</button>
-    </div>
+<!-- แถบเครื่องมือควบคุมแบบลอยเด่น (Compact Glassmorphic Sticky Toolbar) -->
+<style>
+  .modern-toolbar {
+    position: sticky;
+    top: 15px;
+    z-index: 1000;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 16px; /* ลด padding ลงเพื่อให้แถบบางและกะทัดรัดขึ้น */
+    margin: 10px auto;
+    max-width: 90%;
+    background: rgba(255, 255, 255, 0.35); /* เพิ่มความโปร่งใสให้มองทะลุผ่านได้มากขึ้น */
+    backdrop-filter: blur(12px) saturate(180%); /* ลดความเบลอเล็กน้อยเพื่อให้เห็นฉากหลังชัดขึ้น */
+    -webkit-backdrop-filter: blur(12px) saturate(180%);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 99px;
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.08); /* ลดเงาให้ดูเบาตา ไม่เกะกะ */
+  }
+
+  .toolbar-group {
+    display: flex;
+    align-items: center;
+    gap: 10px; /* ลดช่องว่างระหว่างปุ่ม */
+  }
+
+  .icon-btn {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px; /* ลดขนาดปุ่มให้เล็กลงกำลังดี (จาก 56px เหลือ 40px) */
+    height: 40px;
+    border-radius: 50%;
+    border: none;
+    outline: none;
+    cursor: pointer;
+    text-decoration: none;
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 3px 6px -1px rgba(0, 0, 0, 0.08);
+  }
+
+  .icon-btn svg {
+    width: 20px; /* ปรับขนาดไอคอนให้พอดีกับปุ่ม */
+    height: 20px;
+    transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .icon-btn:hover {
+    transform: translateY(-3px) scale(1.05);
+    box-shadow: 0 8px 15px -2px rgba(0, 0, 0, 0.15);
+  }
+
+  .icon-btn:active {
+    transform: translateY(0) scale(0.95);
+  }
+
+  /* Tooltip บอกชื่อปุ่มเมื่อชี้ */
+  .icon-btn::after {
+    content: attr(data-tooltip);
+    position: absolute;
+    bottom: -35px;
+    left: 50%;
+    transform: translateX(-50%) scale(0.8);
+    opacity: 0;
+    pointer-events: none;
+    background: rgba(15, 23, 42, 0.85);
+    color: #fff;
+    font-size: 11px; /* ลดขนาดตัวอักษร tooltip เล็กน้อย */
+    font-weight: 500;
+    padding: 4px 8px;
+    border-radius: 6px;
+    white-space: nowrap;
+    transition: all 0.2s ease;
+    backdrop-filter: blur(4px);
+  }
+
+  .icon-btn:hover::after {
+    opacity: 1;
+    transform: translateX(-50%) scale(1);
+  }
+
+  /* Color Schemes - Vibrant & Bold (ปรับความโปร่งใสของสีปุ่มเล็กน้อยเพื่อให้กลมกลืน) */
+  .btn-home {
+    background: rgba(74, 20, 140, 0.85);
+    color: #ffffff;
+    border: 1px solid rgba(124, 77, 255, 0.4);
+  }
+  .btn-home:hover {
+    background: rgba(106, 27, 154, 0.95);
+  }
+
+  .btn-add {
+    background: rgba(233, 30, 99, 0.85);
+    color: #ffffff;
+    border: 1px solid rgba(255, 64, 129, 0.4);
+  }
+  .btn-add:hover {
+    background: rgba(240, 98, 146, 0.95);
+  }
+
+  .btn-print {
+    background: rgba(46, 125, 50, 0.85);
+    color: #ffffff;
+    border: 1px solid rgba(102, 187, 106, 0.4);
+  }
+  .btn-print:hover {
+    background: rgba(67, 160, 71, 0.95);
+  }
+</style>
+
+<div class="modern-toolbar no-print">
+  <div class="toolbar-group">
+    <a href="index.html" class="icon-btn btn-home" data-tooltip="หน้าแรก">
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12l8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25" />
+      </svg>
+    </a>
+  </div>
+  
+  <div class="toolbar-group">
+    <button class="icon-btn btn-add" onclick="addRow()" data-tooltip="เพิ่มรายการสินค้า">
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+      </svg>
+    </button>
+    
+    <button class="icon-btn btn-print" onclick="window.print()" data-tooltip="พิมพ์ / บันทึก PDF">
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M6.72 13.829c-.24.03-.48.062-.72.096m.72-.096a42.415 42.415 0 0110.56 0m-10.56 0L6.34 18m10.94-4.171c.24.03.48.062.72.096m-.72-.096L17.66 18m0 0l.229 2.523a1.125 1.125 0 01-1.12 1.227H7.231a1.125 1.125 0 01-1.12-1.227L6.34 18m11.318 0h1.091A2.25 2.25 0 0021 15.75V9.456c0-1.081-.768-2.015-1.837-2.175a48.055 48.055 0 00-19.163 0C1.837 7.441 1 8.375 1 9.456v6.294A2.25 2.25 0 003.25 18h1.091m16.5 0v-6.75A2.25 2.25 0 0018.591 9H5.409A2.25 2.25 0 003.15 11.25V18" />
+      </svg>
+    </button>
+  </div>
 </div>
 
 <!-- พื้นที่แสดงหน้าเอกสารทั้งหมด -->
