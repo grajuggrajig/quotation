@@ -1091,17 +1091,19 @@
 
     <div class="panel-divider"></div>
 
-    <div class="panel-group">
-        <div class="panel-group-label">⚙️ พิมพ์ & ออก</div>
-        <div class="panel-buttons">
-            <button class="icon-btn btn-print-ui" data-tip="พิมพ์ / บันทึก PDF" onclick="window.print()"><i class="fa-solid fa-print"></i></button>
-      <!--       <button class="icon-btn btn-close-ui" data-tip="ปิดโปรแกรม" onclick="closeAppWindow()"><i class="fa-solid fa-xmark"></i></button>  -->
-        </div>
-		
-	  <!--	<button class="icon-btn" style="background: linear-gradient(135deg, #10b981, #059669);" data-tip="ไปหน้า Quotation" onclick="openQuotation()">
-    <i class="fa-solid fa-arrow-right"></i>
-</button>  -->
+<div class="panel-group">
+    <div class="panel-group-label">⚙️ พิมพ์ & ออก</div>
+    <div class="panel-buttons">
+        <button class="icon-btn btn-print-ui" data-tip="พิมพ์ / บันทึก PDF" onclick="window.print()">
+            <i class="fa-solid fa-print"></i>
+        </button>
+        <button class="icon-btn" style="background: linear-gradient(135deg, #10b981, #059669);" data-tip="ไปหน้า Quotation" onclick="openQuotation()">
+            <!-- เลือกใช้ไอคอนด้านล่างนี้อันใดอันหนึ่งตามชอบครับ -->
+            <i class="fa-solid fa-file-lines"></i> <!-- รูปเอกสาร -->
+            <!-- หรือใช้ <i class="fa-solid fa-file-pdf"></i> รูปไฟล์ PDF -->
+        </button>
     </div>
+</div>
 </div>
 
 <div class="bill-container">
@@ -1776,11 +1778,11 @@ Swal.fire({
             text: `เลขที่บิล: ${finalBillNo}`,
             timer: 2000,
             showConfirmButton: false
-        }).then(() => {
+		// }).then(() => {
             // 📌 ส่งค่า billNo และ bookNo ไปที่หน้า quotation.html ผ่าน URL Parameters
-            let currentBillNo = document.getElementById('billNo').value;
-            let currentBookNo = document.getElementById('bookNo').value;
-            window.location.href = `quotation.html?billNo=${encodeURIComponent(currentBillNo)}&bookNo=${encodeURIComponent(currentBookNo)}`;
+            //let currentBillNo = document.getElementById('billNo').value;
+            //let currentBookNo = document.getElementById('bookNo').value;
+            //window.location.href = `quotation.html?billNo=${encodeURIComponent(currentBillNo)}&bookNo=${encodeURIComponent(currentBookNo)}`;
         });
 
     } catch (error) {
@@ -2783,15 +2785,33 @@ function openQuotation() {
     window.location.href = `quotation.html?billNo=${encodeURIComponent(currentBillNo)}&bookNo=${encodeURIComponent(currentBookNo)}`;
 }	
 	
-	
-function toggleBackupButtons() {
-    const backupGroup = document.getElementById('backupGroup');
-    // ตรวจสอบสถานะการแสดงผลปัจจุบัน
-    if (backupGroup.style.display === 'none' || backupGroup.style.display === '') {
-        backupGroup.style.setProperty('display', 'inline-flex', 'important');
-    } else {
-        backupGroup.style.setProperty('display', 'none', 'important');
+function openQuotation() {
+    let currentBillNo = document.getElementById('billNo').value.trim();
+    let currentBookNo = document.getElementById('bookNo').value.trim();
+    
+    // ตรวจสอบว่ามีเลขที่บิลหรือไม่ ถ้ายังไม่มีให้แจ้งเตือนก่อน
+    if (!currentBillNo) {
+        Swal.fire({
+            icon: 'warning',
+            title: 'ยังไม่ได้ระบุเลขที่บิล',
+            text: 'กรุณากรอกหรือสร้างเลขที่บิลก่อนเปิดหน้า Quotation',
+            confirmButtonText: 'ตกลง',
+            confirmButtonColor: '#0284c7'
+        });
+        return;
     }
+    
+    // ส่งค่าผ่าน URL Parameters ไปยังหน้า quotation.html
+    window.location.href = `quotation.html?billNo=${encodeURIComponent(currentBillNo)}&bookNo=${encodeURIComponent(currentBookNo)}`;
+}
+
+	
+function openQuotation() {
+    let currentBillNo = document.getElementById('billNo').value.trim();
+    let currentBookNo = document.getElementById('bookNo').value.trim();
+    
+    // ตรวจสอบว่ามีเลขที่บิลหรือยัง (ถ้าไม่มี สามารถปล่อยว่างหรือแจ้งเตือนได้ตามต้องการ)
+    window.location.href = `quotation.html?billNo=${encodeURIComponent(currentBillNo)}&bookNo=${encodeURIComponent(currentBookNo)}`;
 }
 
 document.addEventListener("DOMContentLoaded", function() {
