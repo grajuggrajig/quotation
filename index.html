@@ -2777,19 +2777,15 @@ async function openEditProductModal(index) {
         calculate();
     });
 	
-	
-function openQuotation() {
-    let currentBillNo = document.getElementById('billNo').value;
-    let currentBookNo = document.getElementById('bookNo').value;
-    
-    window.location.href = `quotation.html?billNo=${encodeURIComponent(currentBillNo)}&bookNo=${encodeURIComponent(currentBookNo)}`;
-}	
+
 	
 function openQuotation() {
     let currentBillNo = document.getElementById('billNo').value.trim();
-    let currentBookNo = document.getElementById('bookNo').value.trim();
+    let rawBookNo = document.getElementById('bookNo').value.trim();
     
-    // ตรวจสอบว่ามีเลขที่บิลหรือไม่ ถ้ายังไม่มีให้แจ้งเตือนก่อน
+    // ตัดเครื่องหมาย : ออก ป้องกันค่าเพี้ยน
+    let currentBookNo = rawBookNo.replace(/^:/, '').trim();
+    
     if (!currentBillNo) {
         Swal.fire({
             icon: 'warning',
@@ -2801,16 +2797,6 @@ function openQuotation() {
         return;
     }
     
-    // ส่งค่าผ่าน URL Parameters ไปยังหน้า quotation.html
-    window.location.href = `quotation.html?billNo=${encodeURIComponent(currentBillNo)}&bookNo=${encodeURIComponent(currentBookNo)}`;
-}
-
-	
-function openQuotation() {
-    let currentBillNo = document.getElementById('billNo').value.trim();
-    let currentBookNo = document.getElementById('bookNo').value.trim();
-    
-    // ตรวจสอบว่ามีเลขที่บิลหรือยัง (ถ้าไม่มี สามารถปล่อยว่างหรือแจ้งเตือนได้ตามต้องการ)
     window.location.href = `quotation.html?billNo=${encodeURIComponent(currentBillNo)}&bookNo=${encodeURIComponent(currentBookNo)}`;
 }
 
