@@ -1408,8 +1408,13 @@ window.addEventListener('DOMContentLoaded', () => {
     }
 });
 
-
-
+// นำโค้ดนี้มาวางไว้ตรงนี้
+window.matchMedia('print').addEventListener('change', function(mql) {
+    if (!mql.matches) {
+        // เมื่อหน้าต่างพิมพ์ถูกปิดลง (ไม่ว่าจะกดพิมพ์สำเร็จหรือกดยกเลิก) จะเปลี่ยนหน้าไปที่ index.html ทันที
+        window.location.href = 'index.html';
+    }
+});
 </script>
 
 </body>
