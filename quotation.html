@@ -1209,12 +1209,12 @@ if (foundBill) {
     docMeta.billNo = foundBill.billNo || foundBill.quotationNo || autoBillNo;
     
     // 📌 ดึงวันที่
-    docMeta.billDate = foundBill.billDate || currentDateFormatted;
+    docMeta.billDate = foundBill.billDate || foundBill.date || currentDateFormatted;
     
     docMeta.discountRate = foundBill.discountRate || foundBill.discount || 0;
     docMeta.remarkText = foundBill.remarkText || foundBill.remark || "";
     docMeta.sigSalesName = foundBill.sigSalesName || foundBill.salesName || sessionStorage.getItem('temp_sales_name') || "";
-    docMeta.sigSalesDate = foundBill.sigSalesDate || foundBill.salesDate || currentDateFormatted;
+    docMeta.sigSalesDate = foundBill.sigSalesDate || foundBill.salesDate || foundBill.billDate || currentDateFormatted;
     
     // 📌 ดึงข้อมูลสินค้า (Items) จากบิลเก่ามาแสดง
     if (foundBill.items && Array.isArray(foundBill.items)) {
