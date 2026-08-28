@@ -728,6 +728,7 @@
         sigCustomerName: "",
         sigCustomerDate: "",
         sigSalesName: "",
+		sigSalesName: paramSalesName || "",
         sigSalesDate: currentDateFormatted 
     };
 
@@ -1288,6 +1289,7 @@ window.addEventListener('DOMContentLoaded', () => {
     const billNoParam = urlParams.get('billNo');
     const bookNoParam = urlParams.get('bookNo');
     const autoPrint = urlParams.get('autoPrint'); // รับค่าคำสั่งพิมพ์อัตโนมัติจาก URL
+	const paramSalesName = urlParams.get('salesName'); // <-- รับค่าอัตโนมัติจาก URL
 
     if (billNoParam) {
         const cleanBillNo = billNoParam.replace(/^:/, '').trim();
