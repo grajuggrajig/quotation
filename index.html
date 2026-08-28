@@ -2786,6 +2786,11 @@ function openQuotation() {
     // ตัดเครื่องหมาย : ออก ป้องกันค่าเพี้ยน
     let currentBookNo = rawBookNo.replace(/^:/, '').trim();
     
+    // 1. ดึงค่าชื่อผู้เสนอราคาจากฟอร์มในหน้า index_4.html 
+    // (ปรับ id 'sigSalesName' ให้ตรงกับ id ของช่องกรอกชื่อผู้เสนอราคาในหน้า index ของคุณจริง ๆ ครับ)
+    let salesNameInput = document.getElementById('sigSalesName');
+    let currentSalesName = salesNameInput ? salesNameInput.value.trim() : '';
+    
     if (!currentBillNo) {
         Swal.fire({
             icon: 'warning',
@@ -2797,8 +2802,8 @@ function openQuotation() {
         return;
     }
     
-    // ส่งค่าพร้อมพารามิเตอร์สั่งพิมพ์อัตโนมัติ (&autoPrint=true)
-    window.location.href = `quotation.html?billNo=${encodeURIComponent(currentBillNo)}&bookNo=${encodeURIComponent(currentBookNo)}&autoPrint=true`;
+    // 2. เพิ่ม &salesName=... เข้าไปใน URL ที่จะส่งไปหน้า quotation.html
+    window.location.href = `quotation.html?billNo=${encodeURIComponent(currentBillNo)}&bookNo=${encodeURIComponent(currentBookNo)}&salesName=${encodeURIComponent(currentSalesName)}&autoPrint=true`;
 }
 
 document.addEventListener("DOMContentLoaded", function() {
