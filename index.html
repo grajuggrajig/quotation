@@ -1567,6 +1567,13 @@ window.onload = function() {
         return { qty: parsedQty, price: parsedPrice };
     }
 
+let isDataChanged = false;
+
+// จับตาดูการเปลี่ยนแปลงข้อมูลในฟอร์มทั้งหมด
+document.addEventListener('input', () => { isDataChanged = true; });
+document.addEventListener('change', () => { isDataChanged = true; });
+
+
 async function executeSave(isNewBill) {
     if (typeof firebase === 'undefined') {
         Swal.fire({
@@ -2791,6 +2798,18 @@ async function openEditProductModal(index) {
 
 	
 function openQuotation() {
+    // 🛑 ตรวจสอบว่ามีการแก้ไขข้อมูลค้างไว้และยังไม่ได้กดบันทึกหรือไม่
+    if (isDataChanged) {
+        Swal.fire({
+            icon: 'warning',
+            title: 'ยังไม่ได้บันทึกข้อมูล!',
+            text: 'กรุณากดปุ่ม "บันทึกข้อมูล" หรือ "บันทึกเป็นบิลใหม่" ก่อนทำการพิมพ์',
+            confirmButtonText: 'เข้าใจแล้ว',
+            confirmButtonColor: '#0284c7'
+        });
+        return; // สั่งหยุดการทำงานทันที ไม่ให้เปิดหน้าพิมพ์
+    }
+
     let currentBillNo = document.getElementById('billNo').value.trim();
     let rawBookNo = document.getElementById('bookNo').value.trim();
     
@@ -2812,7 +2831,7 @@ function openQuotation() {
         return;
     }
     
-    // ส่งค่าไปยังหน้า quotation.html (ปรับชื่อไฟล์ให้ตรงกับหน้าจริงของคุณ)
+    // ส่งค่าไปยังหน้า quotation.html
     window.location.href = `quotation.html?billNo=${encodeURIComponent(currentBillNo)}&bookNo=${encodeURIComponent(currentBookNo)}&salesName=${encodeURIComponent(currentSalesName)}&autoPrint=true`;
 }
 
