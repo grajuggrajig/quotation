@@ -709,9 +709,11 @@
     const year = today.getFullYear();
     const currentDateFormatted = `${day}/${month}/${year}`;
 
+// ดึงค่า URL Parameter เบื้องต้นสำหรับกำหนดค่าเริ่มต้น
     const urlParams = new URLSearchParams(window.location.search);
     const paramBillNo = urlParams.get('billNo');
     const paramBookNo = urlParams.get('bookNo');
+    const paramSalesName = urlParams.get('salesName'); // <-- ดึงค่าตรงนี้มาไว้ด้านบนได้เลยครับ
 
     const autoBillNo = paramBillNo || `QT${year}${month}001`;
 
@@ -727,8 +729,7 @@
         discountRate: 0,
         sigCustomerName: "",
         sigCustomerDate: "",
-        sigSalesName: "",
-		sigSalesName: paramSalesName || "",
+        sigSalesName: paramSalesName || "", // <-- ใส่ค้านี้ได้เลยโดยไม่ error
         sigSalesDate: currentDateFormatted 
     };
 
@@ -1289,7 +1290,7 @@ window.addEventListener('DOMContentLoaded', () => {
     const billNoParam = urlParams.get('billNo');
     const bookNoParam = urlParams.get('bookNo');
     const autoPrint = urlParams.get('autoPrint'); // รับค่าคำสั่งพิมพ์อัตโนมัติจาก URL
-	const paramSalesName = urlParams.get('salesName'); // <-- รับค่าอัตโนมัติจาก URL
+	
 
     if (billNoParam) {
         const cleanBillNo = billNoParam.replace(/^:/, '').trim();
