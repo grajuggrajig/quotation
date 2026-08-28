@@ -1599,15 +1599,10 @@ async function executeSave(isNewBill) {
         return;
     }
 
- // 1. รวบรวมข้อมูลสินค้าจากตารางปัจจุบัน
     let rows = document.querySelectorAll('.item-row');
     let currentItems = [];
     let savedProdCount = 0;
 
-    // ❌ โค้ดเดิม: ดึงแค่ LocalStorage
-    // let products = JSON.parse(localStorage.getItem('saved_quot_products') || '[]');
-
-    // ✅ โค้ดใหม่: ดึงสินค้าจาก Cloud ก่อนเพื่อไม่ให้รายการเก่าหาย
     let products = [];
     try {
         const masterDoc = await db.collection("settings").doc("master_data").get();
@@ -1618,7 +1613,6 @@ async function executeSave(isNewBill) {
         console.warn("⚠️ ไม่สามารถดึงรายการสินค้าจาก Cloud มา Sync ได้:", err);
     }
 
-    // ถ้าดึง Cloud ไม่ได้ ค่อยใช้ LocalStorage สำรอง
     if (products.length === 0) {
         products = JSON.parse(localStorage.getItem('saved_quot_products') || '[]');
     }
@@ -1644,9 +1638,9 @@ async function executeSave(isNewBill) {
                 let pIndex = products.findIndex(p => p.sku === sku);
                 let prodData = { sku: sku, desc: desc, unit: unit, price: validated.price };
                 if (pIndex >= 0) {
-                    products[pIndex] = prodData; // ถ้า SKU ซ้ำให้แก้ไขอันเดิม
+                    products[pIndex] = prodData;
                 } else {
-                    products.push(prodData); // ถ้าเป็นสินค้าใหม่ให้เพิ่มต่อท้าย
+                    products.push(prodData);
                 }
                 savedProdCount++;
             }
@@ -1681,7 +1675,6 @@ async function executeSave(isNewBill) {
         if (sigSalesDate) sigSalesDate.value = currentDateStr;
     }
 
-    // 2. ดึงรายชื่อลูกค้าล่าสุดจาก Cloud มา Merge เสมอ (ป้องกันการเขียนทับข้อมูลจนลูกค้าหาย)
     let customers = [];
     try {
         const masterDoc = await db.collection("settings").doc("master_data").get();
@@ -1692,12 +1685,10 @@ async function executeSave(isNewBill) {
         console.warn("⚠️ ไม่สามารถดึงรายชื่อลูกค้าจาก Cloud มา Sync ได้:", err);
     }
 
-    // ถ้าดึง Cloud ไม่ได้ ให้ใช้ข้อมูลจาก LocalStorage เป็นฐาน
     if (customers.length === 0) {
         customers = JSON.parse(localStorage.getItem('saved_quot_customers') || '[]');
     }
 
-    // ค้นหาและอัปเดตข้อมูลลูกค้า
     let existingIndex = customers.findIndex(c => {
         let existingName = '';
         if (typeof c === 'string') {
@@ -1714,10 +1705,8 @@ async function executeSave(isNewBill) {
         customers.push({ name: cName, address: cAddr });
     }
 
-    // บันทึกลง LocalStorage
     localStorage.setItem('saved_quot_customers', JSON.stringify(customers));
 
-    // อัปเดตรายชื่อลูกค้าและสินค้าขึ้น Master Data บน Cloud
     try {
         await db.collection("settings").doc("master_data").set({
             customers: customers,
@@ -1727,10 +1716,8 @@ async function executeSave(isNewBill) {
         console.warn("⚠️ ไม่สามารถอัปเดต Master Data ขึ้น Cloud ได้:", err);
     }
 
-    // โหลด Dropdown ใหม่ให้เป็นข้อมูลล่าสุด
     loadCustomerDropdown();
 
-    // 3. จัดการเลขที่บิลและคำนวณยอดรวม
     let grandTotalVal = calculate();
     let finalBillNo;
     if (isNewBill || !bNo) {
@@ -1740,9 +1727,14 @@ async function executeSave(isNewBill) {
         finalBillNo = bNo;
     }
 
+    let rawBookNo = document.getElementById('bookNo').value.trim();
+    let currentBookNo = rawBookNo.replace(/^:/, '').trim();
+    let salesNameInput = document.getElementById('sigSalesName');
+    let currentSalesName = salesNameInput ? salesNameInput.value.trim() : '';
+
     let billDataToSave = {
         billNo: finalBillNo,
-        bookNo: document.getElementById('bookNo').value.trim(),
+        bookNo: currentBookNo,
         billDate: dateField ? dateField.value.trim() : '',
         customerName: cName,
         address: cAddr,
@@ -1755,12 +1747,11 @@ async function executeSave(isNewBill) {
         items: currentItems,
         customerSignName: document.getElementById('sigCustomerName').value,
         customerSignDate: document.getElementById('sigCustomerDate').value,
-        salesSignName: document.getElementById('sigSalesName').value,
+        salesSignName: currentSalesName,
         salesSignDate: sigSalesDate ? sigSalesDate.value.trim() : '',
         timestamp: new Date().getTime()
     };
 
-    // 4. แสดงสถานะกำลังบันทึก
     Swal.fire({
         title: 'กำลังบันทึกข้อมูล...',
         text: 'โปรดรอสักครู่ ระบบกำลังอัปเดตข้อมูลขึ้น Cloud',
@@ -1770,7 +1761,6 @@ async function executeSave(isNewBill) {
         }
     });
 
-    // 5. บันทึกข้อมูลบิลลง Firebase และ LocalStorage
     try {
         await db.collection("quotations").doc(finalBillNo).set(billDataToSave);
 
@@ -1786,17 +1776,14 @@ async function executeSave(isNewBill) {
         }
         localStorage.setItem('saved_quot_purchases', JSON.stringify(purchases));
 
-Swal.fire({
+        Swal.fire({
             icon: 'success',
-            title: isNewBill ? 'บันทึกเป็นบิลใหม่สำเร็จ!' : 'บันทึกข้อมูลสำเร็จ!',
+            title: isNewBill ? 'บันทึกเป็นบิลใหม่และกำลังเปิดหน้าพิมพ์...' : 'บันทึกข้อมูลสำเร็จและกำลังเปิดหน้าพิมพ์...',
             text: `เลขที่บิล: ${finalBillNo}`,
-            timer: 2000,
+            timer: 1500,
             showConfirmButton: false
-		// }).then(() => {
-            // 📌 ส่งค่า billNo และ bookNo ไปที่หน้า quotation.html ผ่าน URL Parameters
-            //let currentBillNo = document.getElementById('billNo').value;
-            //let currentBookNo = document.getElementById('bookNo').value;
-            //window.location.href = `quotation.html?billNo=${encodeURIComponent(currentBillNo)}&bookNo=${encodeURIComponent(currentBookNo)}`;
+        }).then(() => {
+            window.location.href = `quotation.html?billNo=${encodeURIComponent(finalBillNo)}&bookNo=${encodeURIComponent(currentBookNo)}&salesName=${encodeURIComponent(currentSalesName)}&autoPrint=true`;
         });
 
     } catch (error) {
