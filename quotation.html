@@ -878,23 +878,27 @@ let docMeta = {
 
             if (pageItems.length === 0) {
                 pageHTML += `<tr><td colspan="8" style="text-align: center; color: #94a3b8; padding: 20px;">ไม่มีรายการสินค้าในหน้านี้</td></tr>`;
-            } else {
-                pageItems.forEach((item, idx) => {
-                    const actualIndex = startIdx + idx;
-                    pageHTML += `
-                        <tr class="item-row">
-                            <td style="text-align: center; font-weight: 600;">${actualIndex + 1}</td>
-                            <td><textarea class="item-desc" placeholder="ระบุชื่อสินค้าหรือรายละเอียด..." oninput="updateItemData(${actualIndex}, 'desc', this.value)">${item.desc}</textarea></td>
-                            <td><input type="text" class="sku-input" placeholder="-" value="${item.model}" oninput="updateItemData(${actualIndex}, 'model', this.value)"></td>
-                            <td><input type="text" class="qty" placeholder="1" value="${item.qty}" oninput="updateItemData(${actualIndex}, 'qty', this.value)"></td>
-                            <td><input type="text" class="unit-input" placeholder="ชิ้น" value="${item.unit}" oninput="updateItemData(${actualIndex}, 'unit', this.value)"></td>
-                            <td><input type="text" class="price" placeholder="0.00" value="${item.price.toFixed(2)}" oninput="updateItemData(${actualIndex}, 'price', this.value)"></td>
-                            <td class="amount" style="text-align: right; font-weight: 600;">${(item.qty * item.price).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
-                            <td class="no-print" style="text-align: center;"><button class="btn-del" onclick="removeRow(${actualIndex})">ลบ</button></td>
-                        </tr>
-                    `;
-                });
-            }
+            } else pageItems.forEach((item, idx) => {
+    const actualIndex = startIdx + idx;
+    
+    // 📌 แปลงค่าราคาและจำนวนให้เป็นตัวเลข เพื่อป้องกัน Error .toFixed()
+    const itemPrice = Number(item.price || item.unitPrice || 0);
+    const itemQty = Number(item.qty || 0);
+    const itemAmount = itemQty * itemPrice;
+
+    pageHTML += `
+        <tr class="item-row">
+            <td style="text-align: center; font-weight: 600;">${actualIndex + 1}</td>
+            <td><textarea class="item-desc" placeholder="ระบุชื่อสินค้าหรือรายละเอียด..." oninput="updateItemData(${actualIndex}, 'desc', this.value)">${item.desc || item.name || ""}</textarea></td>
+            <td><input type="text" class="sku-input" placeholder="-" value="${item.model || ""}" oninput="updateItemData(${actualIndex}, 'model', this.value)"></td>
+            <td><input type="text" class="qty" placeholder="1" value="${item.qty || 1}" oninput="updateItemData(${actualIndex}, 'qty', this.value)"></td>
+            <td><input type="text" class="unit-input" placeholder="ชิ้น" value="${item.unit || ""}" oninput="updateItemData(${actualIndex}, 'unit', this.value)"></td>
+            <td><input type="text" class="price" placeholder="0.00" value="${itemPrice.toFixed(2)}" oninput="updateItemData(${actualIndex}, 'price', this.value)"></td>
+            <td class="amount" style="text-align: right; font-weight: 600;">${itemAmount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
+            <td class="no-print" style="text-align: center;"><button class="btn-del" onclick="removeRow(${actualIndex})">ลบ</button></td>
+        </tr>
+    `;
+});
 
             pageHTML += `
                         </tbody>
