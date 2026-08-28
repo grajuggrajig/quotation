@@ -1317,12 +1317,13 @@ window.addEventListener('DOMContentLoaded', () => {
 });
 
 
-    window.onload = function() {
+window.onload = function() {
         calculate();
         loadCustomerDropdown();
+        
         let dateField = document.getElementById('billDate');
         let sigSalesDate = document.getElementById('sigSalesDate');
-        let sigCustDate = document.getElementById('sigCustomerDate');
+        let sigSalesNameInput = document.getElementById('sigSalesName'); // ช่องผู้เสนอราคา
         
         let d = new Date();
         let day = String(d.getDate()).padStart(2, '0');
@@ -1333,6 +1334,19 @@ window.addEventListener('DOMContentLoaded', () => {
         if(!dateField.value) dateField.value = currentDateStr;
         if(!sigSalesDate.value) sigSalesDate.value = currentDateStr;
         if(!sigCustDate.value) sigCustDate.value = "";
+
+        // 📌 เพิ่มส่วนนี้: ดึงชื่อผู้เสนอราคาที่เคยบันทึกไว้ล่าสุดมาแสดงอัตโนมัติ
+        let savedSalesName = localStorage.getItem('default_sales_name');
+        if (savedSalesName && sigSalesNameInput && !sigSalesNameInput.value) {
+            sigSalesNameInput.value = savedSalesName;
+        }
+
+        // ผูก Event ให้บันทึกชื่อผู้เสนอราคาทันทีที่มีการพิมพ์เปลี่ยนแปลง
+        if (sigSalesNameInput) {
+            sigSalesNameInput.addEventListener('input', function() {
+                localStorage.setItem('default_sales_name', this.value.trim());
+            });
+        }
     };
 
     function formatNumberInput(input) {
