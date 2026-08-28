@@ -2797,7 +2797,8 @@ function openQuotation() {
         return;
     }
     
-    window.location.href = `quotation.html?billNo=${encodeURIComponent(currentBillNo)}&bookNo=${encodeURIComponent(currentBookNo)}`;
+    // ส่งค่าพร้อมพารามิเตอร์สั่งพิมพ์อัตโนมัติ (&autoPrint=true)
+    window.location.href = `quotation.html?billNo=${encodeURIComponent(currentBillNo)}&bookNo=${encodeURIComponent(currentBookNo)}&autoPrint=true`;
 }
 
 document.addEventListener("DOMContentLoaded", function() {
