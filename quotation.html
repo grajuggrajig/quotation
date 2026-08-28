@@ -723,35 +723,35 @@
         console.log("Realtime Master Data initialized.");
     }
 
-    const today = new Date();
-    const day = String(today.getDate()).padStart(2, '0');
-    const month = String(today.getMonth() + 1).padStart(2, '0');
-    const year = today.getFullYear();
-    const currentDateFormatted = `${day}/${month}/${year}`;
+const urlParams = new URLSearchParams(window.location.search);
+const paramBillNo = urlParams.get('billNo');
+const paramBookNo = urlParams.get('bookNo');
+const paramSalesName = urlParams.get('salesName');
+const paramBillDate = urlParams.get('billDate');
 
-// ดึงค่า URL Parameter เบื้องต้นสำหรับกำหนดค่าเริ่มต้น
-    const urlParams = new URLSearchParams(window.location.search);
-    const paramBillNo = urlParams.get('billNo');
-    const paramBookNo = urlParams.get('bookNo');
-    const paramSalesName = urlParams.get('salesName'); // <-- ดึงค่าตรงนี้มาไว้ด้านบนได้เลยครับ
+const today = new Date();
+const day = String(today.getDate()).padStart(2, '0');
+const month = String(today.getMonth() + 1).padStart(2, '0');
+const year = today.getFullYear();
+const currentDateFormatted = `${day}/${month}/${year}`;
 
-    const autoBillNo = paramBillNo || `QT${year}${month}001`;
+const autoBillNo = paramBillNo || `QT${year}${month}001`;
 
-    let docMeta = {
-        custName: "",
-        custAddress: "",
-        quotSubject: "",
-        quotEnclose: "-",
-        bookNo: paramBookNo || "-",
-        billNo: autoBillNo,          
-        billDate: currentDateFormatted, 
-        remarkText: "ราคานี้ยังไม่รวมภาษีมูลค่าเพิ่ม / ยืนราคา 30 วัน",
-        discountRate: 0,
-        sigCustomerName: "",
-        sigCustomerDate: "",
-        sigSalesName: paramSalesName || "", // <-- ใส่ค้านี้ได้เลยโดยไม่ error
-        sigSalesDate: currentDateFormatted 
-    };
+let docMeta = {
+    custName: "",
+    custAddress: "",
+    quotSubject: "",
+    quotEnclose: "-",
+    bookNo: paramBookNo || "-",
+    billNo: autoBillNo,          
+    billDate: paramBillDate ? decodeURIComponent(paramBillDate) : currentDateFormatted,
+    remarkText: "ราคานี้ยังไม่รวมภาษีมูลค่าเพิ่ม / ยืนราคา 30 วัน",
+    discountRate: 0,
+    sigCustomerName: "",
+    sigCustomerDate: "",
+    sigSalesName: paramSalesName ? decodeURIComponent(paramSalesName) : "", 
+    sigSalesDate: currentDateFormatted
+};
 
     let itemsData = [
         { desc: "", model: "", qty: 1, unit: "", price: 0.00 },
@@ -1199,40 +1199,45 @@
             });
         }
 
-        if (foundBill) {
-            docMeta.custName = foundBill.custName || foundBill.customerName || "";
-            docMeta.custAddress = foundBill.custAddress || foundBill.address || "";
-            docMeta.quotSubject = foundBill.quotSubject || foundBill.subject || "";
-            docMeta.quotEnclose = foundBill.quotEnclose || foundBill.enclose || "-";
-            docMeta.bookNo = foundBill.bookNo || "-";
-            docMeta.billNo = foundBill.billNo || foundBill.quotationNo || autoBillNo;
-            docMeta.billDate = foundBill.billDate || currentDateFormatted;
-            docMeta.discountRate = foundBill.discountRate || foundBill.discount || 0;
-            docMeta.remarkText = foundBill.remarkText || foundBill.remark || "";
-			// เพิ่มบรรทัดนี้เพื่อดึงชื่อผู้เสนอราคา
-            docMeta.sigSalesName = foundBill.sigSalesName || foundBill.salesName || foundBill.saleman || foundBill.sales || sessionStorage.getItem('temp_sales_name') || "";
-            docMeta.sigSalesDate = foundBill.sigSalesDate || foundBill.salesDate || currentDateFormatted;
-			
-            let rawItems = foundBill.items || foundBill.productList || foundBill.details || [];
-            if (rawItems && rawItems.length > 0) {
-                itemsData = rawItems.map(item => ({
-                    desc: item.desc || item.description || item.productName || "",
-                    model: item.model || item.sku || "-",
-                    qty: parseFloat(item.qty || item.quantity) || 1,
-                    unit: item.unit || "ชิ้น",
-                    price: parseFloat(item.price || item.unitPrice || item.unit_price || item.productPrice) || 0.00
-                }));
-            } else {
-                itemsData = [];
-            }
+if (foundBill) {
+    docMeta.custName = foundBill.custName || foundBill.customerName || "";
+    docMeta.custAddress = foundBill.custAddress || foundBill.address || "";
+    docMeta.quotSubject = foundBill.quotSubject || foundBill.subject || "";
+    docMeta.quotEnclose = foundBill.quotEnclose || foundBill.enclose || "-";
+    docMeta.bookNo = foundBill.bookNo || "-";
+    docMeta.billNo = foundBill.billNo || foundBill.quotationNo || autoBillNo;
+    docMeta.billDate = foundBill.billDate || currentDateFormatted;
+    docMeta.discountRate = foundBill.discountRate || foundBill.discount || 0;
+    docMeta.remarkText = foundBill.remarkText || foundBill.remark || "";
+    docMeta.sigSalesName = foundBill.sigSalesName || foundBill.salesName || foundBill.saleman || foundBill.sales || sessionStorage.getItem('temp_sales_name') || "";
+    docMeta.sigSalesDate = foundBill.sigSalesDate || foundBill.salesDate || currentDateFormatted;
+    
+    let rawItems = foundBill.items || foundBill.productList || foundBill.details || [];
+    if (rawItems && rawItems.length > 0) {
+        itemsData = rawItems.map(item => ({
+            desc: item.desc || item.description || item.productName || "",
+            model: item.model || item.sku || "-",
+            qty: parseFloat(item.qty || item.quantity) || 1,
+            unit: item.unit || "ชิ้น",
+            price: parseFloat(item.price || item.unitPrice || item.unit_price || item.productPrice) || 0.00
+        }));
+    } else {
+        itemsData = [];
+    }
 
-            if (typeof renderDocument === 'function') {
-                renderDocument();
-            }
-            
-            // แสดง Toast แจ้งเตือนสำเร็จ
-            showToast(`ดึงข้อมูลใบเสนอราคาเลขที่ ${trimmedBNo} สำเร็จ!`);
-        } else {
+    if (typeof renderDocument === 'function') {
+        renderDocument();
+    }
+    
+    // อัปเดตค่าลงใน UI input หรือ elements บนหน้าจอ (ถ้ามี) เพื่อให้ช่องวันที่แสดงผลตรงกับข้อมูลเดิม
+    let dateInput = document.querySelector('.meta-field[data-field="billDate"]') || document.getElementById('billDate');
+    if (dateInput) {
+        dateInput.value = docMeta.billDate;
+    }
+
+    showToast(`ดึงข้อมูลใบเสนอราคาเลขที่ ${trimmedBNo} สำเร็จ!`);
+}
+		else {
             if (!isAuto) {
                 showToast("ไม่พบข้อมูลเลขที่ใบเสนอราคานี้ในระบบ", true);
             }
@@ -1271,6 +1276,37 @@
         renderDocument();
     };
     
+	
+// ฟังก์ชันช่วยแปลงวันที่ให้เป็น YYYY-MM-DD สำหรับ input type="date"
+    function formatToInputDate(dateStr) {
+        if (!dateStr) return "";
+        // ถ้าเป็นรูปแบบ ISO อยู่แล้ว (เช่น 2026-06-05T00:00:00.000Z) ตัดเอาเฉพาะ 10 ตัวแรก
+        if (dateStr.includes('T')) {
+            return dateStr.split('T')[0];
+        }
+        // ถ้าเป็นรูปแบบไทยหรือสากลแบบอื่น ลองแปลงด้วย Date object
+        let d = new Date(dateStr);
+        if (!isNaN(d.getTime())) {
+            let year = d.getFullYear();
+            let month = String(d.getMonth() + 1).padStart(2, '0');
+            let day = String(d.getDate()).padStart(2, '0');
+            return `${year}-${month}-${day}`;
+        }
+        return dateStr;
+    }
+
+    // อัปเดตค่าลงใน UI input พร้อมแปลง Format ให้ถูกต้อง
+    let dateInput = document.querySelector('.meta-field[data-field="billDate"]') || document.getElementById('billDate');
+    if (dateInput) {
+        dateInput.value = formatToInputDate(docMeta.billDate);
+    }
+
+    let sigDateInput = document.querySelector('.meta-field[data-field="sigSalesDate"]') || document.getElementById('sigSalesDate');
+    if (sigDateInput) {
+        sigDateInput.value = formatToInputDate(docMeta.sigSalesDate);
+    }	
+	
+	
     function selectCustomer(selectElement) {
         const selectedName = selectElement.value;
         
@@ -1356,6 +1392,9 @@ window.addEventListener('DOMContentLoaded', () => {
         }, 1200);
     }
 });
+
+
+
 </script>
 
 </body>
