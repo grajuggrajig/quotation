@@ -1208,7 +1208,7 @@ if (foundBill) {
     docMeta.bookNo = foundBill.bookNo || "-";
     docMeta.billNo = foundBill.billNo || foundBill.quotationNo || autoBillNo;
     
-    // 📌 จุดสำคัญ:ดึงวันที่จากบิลเก่ามาใส่ ถ้าไม่มีให้ใช้วันที่ปัจจุบัน
+    // 📌 ดึงวันที่
     docMeta.billDate = foundBill.billDate || currentDateFormatted;
     
     docMeta.discountRate = foundBill.discountRate || foundBill.discount || 0;
@@ -1216,16 +1216,27 @@ if (foundBill) {
     docMeta.sigSalesName = foundBill.sigSalesName || foundBill.salesName || sessionStorage.getItem('temp_sales_name') || "";
     docMeta.sigSalesDate = foundBill.sigSalesDate || foundBill.salesDate || currentDateFormatted;
     
-    // ... (ข้อมูลสินค้า itemsData ด้านล่าง) ...
+    // 📌 ดึงข้อมูลสินค้า (Items) จากบิลเก่ามาแสดง
+    if (foundBill.items && Array.isArray(foundBill.items)) {
+        itemsData = foundBill.items;
+    } else if (foundBill.itemsData && Array.isArray(foundBill.itemsData)) {
+        itemsData = foundBill.itemsData;
+    }
 
     if (typeof renderDocument === 'function') {
         renderDocument();
     }
     
-    // บังคับอัปเดตค่าวันที่ลงในช่อง Input บนหน้าจอทันที
+    // อัปเดตช่อง Input วันที่เอกสาร
     let dateInput = document.querySelector('.meta-field[data-field="billDate"]') || document.getElementById('billDate');
     if (dateInput) {
         dateInput.value = docMeta.billDate;
+    }
+
+    // อัปเดตช่อง Input วันที่ผู้เสนอราคา
+    let salesDateInput = document.querySelector('.meta-field[data-field="sigSalesDate"]') || document.getElementById('sigSalesDate');
+    if (salesDateInput) {
+        salesDateInput.value = docMeta.sigSalesDate;
     }
 
     showToast(`ดึงข้อมูลใบเสนอราคาเลขที่ ${trimmedBNo} สำเร็จ!`);
