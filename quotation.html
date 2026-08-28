@@ -750,7 +750,7 @@ let docMeta = {
     sigCustomerName: "",
     sigCustomerDate: "",
     sigSalesName: paramSalesName ? decodeURIComponent(paramSalesName) : "", 
-    sigSalesDate: currentDateFormatted
+    sigSalesDate: paramBillDate ? decodeURIComponent(paramBillDate) : currentDateFormatted // <-- แก้ไขตรงนี้ให้ใช้วันที่ตามบิลย้อนหลัง
 };
 
     let itemsData = [
@@ -1206,11 +1206,11 @@ if (foundBill) {
     docMeta.quotEnclose = foundBill.quotEnclose || foundBill.enclose || "-";
     docMeta.bookNo = foundBill.bookNo || "-";
     docMeta.billNo = foundBill.billNo || foundBill.quotationNo || autoBillNo;
-    docMeta.billDate = foundBill.billDate || currentDateFormatted;
+    docMeta.billDate = foundBill.billDate || foundBill.date || paramBillDate ? decodeURIComponent(paramBillDate) : currentDateFormatted;
     docMeta.discountRate = foundBill.discountRate || foundBill.discount || 0;
     docMeta.remarkText = foundBill.remarkText || foundBill.remark || "";
     docMeta.sigSalesName = foundBill.sigSalesName || foundBill.salesName || foundBill.saleman || foundBill.sales || sessionStorage.getItem('temp_sales_name') || "";
-    docMeta.sigSalesDate = foundBill.sigSalesDate || foundBill.salesDate || currentDateFormatted;
+    docMeta.sigSalesDate = foundBill.sigSalesDate || foundBill.salesDate || foundBill.billDate || currentDateFormatted;
     
     let rawItems = foundBill.items || foundBill.productList || foundBill.details || [];
     if (rawItems && rawItems.length > 0) {
@@ -1231,9 +1231,14 @@ if (foundBill) {
     
     // อัปเดตค่าลงใน UI input หรือ elements บนหน้าจอ (ถ้ามี) เพื่อให้ช่องวันที่แสดงผลตรงกับข้อมูลเดิม
     let dateInput = document.querySelector('.meta-field[data-field="billDate"]') || document.getElementById('billDate');
-    if (dateInput) {
-        dateInput.value = docMeta.billDate;
-    }
+if (dateInput) {
+    dateInput.value = docMeta.billDate;
+}
+
+let sigDateInput = document.querySelector('.meta-field[data-field="sigSalesDate"]') || document.getElementById('sigSalesDate');
+if (sigDateInput) {
+    sigDateInput.value = docMeta.sigSalesDate;
+}
 
     showToast(`ดึงข้อมูลใบเสนอราคาเลขที่ ${trimmedBNo} สำเร็จ!`);
 }
