@@ -531,37 +531,19 @@
 
     .signature-section {
         display: flex;
-        justify-content: flex-end; /* จัดให้เนื้อหาในกล่องชิดขวาอยู่แล้ว */
+        justify-content: flex-end;
         margin-top: 35px;
         padding-right: 0;
         width: 100%;
+        page-break-inside: avoid;
     }
 
     .sig-box {
         width: 100%;
         max-width: 300px;
         text-align: center;
-        margin-left: auto; /* ดันกล่องลายเซ็นไปทางขวาสุด */
+        margin-left: auto;
         margin-right: 0;
-    }
-
-    @media(min-width: 768px) {
-        .signature-section {
-            padding-right: 20px;
-        }
-    }
-
-    .sig-box {
-        width: 100%;
-        max-width: 300px;
-        text-align: center;
-        margin: 0 auto;
-    }
-
-    @media(min-width: 768px) {
-        .sig-box {
-            margin: 0 0 0 auto;
-        }
     }
 
     .sig-line {
@@ -586,20 +568,12 @@
         margin-bottom: 4px;
         color: #333;
     }
-.signature-section {
-            display: flex !important;
-            justify-content: flex-end !important;
-            padding-right: 0 !important;
-            width: 100% !important;
-            page-break-inside: avoid; /* ป้องกันการตัดหน้ากระดาษกลางลายเซ็น */
-        }
-        
-        .sig-box {
-            margin-left: auto !important;
-            margin-right: 0 !important;
-            float: right !important;
-        }
- 
+
+    /* สไตล์สำหรับการพิมพ์รวมหลายบิล */
+    #batchPrintContainer {
+        display: none;
+    }
+
     @media print { 
         @page { 
             size: A4 portrait; 
@@ -614,9 +588,34 @@
             print-color-adjust: exact !important; 
             font-size: 13px !important; 
         } 
-        .control-panel, .no-print, .search-product-btn, select#customerSelect { 
+        .control-panel, .no-print, .search-product-btn, select#customerSelect, .modal { 
             display: none !important; 
         } 
+        
+        /* ซ่อนบิลหลักตัวเดียวเมื่อสั่งพิมพ์แบบ Batch */
+        body.batch-printing .bill-container:not(#batchPrintContainer .bill-container) {
+            display: none !important;
+        }
+
+        /* แสดงผลบิลทั้งหมดในโหมด Batch Print และจัดหน้า A4 แยกหน้าให้อัตโนมัติ */
+        body.batch-printing #batchPrintContainer {
+            display: block !important;
+        }
+        body.batch-printing #batchPrintContainer .bill-container {
+            page-break-after: always;
+            break-after: page;
+            margin-bottom: 0 !important;
+            box-shadow: none !important;
+            border: none !important;
+            padding: 0 !important;
+            width: 100% !important;
+            max-width: 100% !important;
+        }
+        body.batch-printing #batchPrintContainer .bill-container:last-child {
+            page-break-after: avoid;
+            break-after: avoid;
+        }
+
         .bill-container { 
             width: 100% !important; 
             max-width: 100% !important; 
@@ -626,7 +625,6 @@
             margin: 0 !important;
         } 
 
-        /* บังคับให้โครงสร้างส่วนหัวตอนพิมพ์เรียงหน้ากระดาษแบบเดียวกับหน้าจอคอมพิวเตอร์ */
         .top-info tr {
             display: table-row !important;
         }
@@ -817,6 +815,9 @@
     </div>
 </div>
 
+<!-- คอนเทนเนอร์สำหรับพิมพ์รวมหลายบิลแบบอัตโนมัติ -->
+<div id="batchPrintContainer"></div>
+
 <!-- Modal ประวัติบิล -->
 <div id="historyModal" class="modal">
     <div class="modal-content-wide">
@@ -824,8 +825,9 @@
             <span id="historyModalTitle">📋 ประวัติการขายและใบเสร็จทั้งหมด (History Log)</span>
             <button class="close-btn" onclick="closeModal('historyModal')">&times;</button>
         </div>
-        <div style="margin-bottom: 12px;">
-            <input type="text" id="historySearchInput" style="width: 100%; padding: 8px 12px;" placeholder="🔍 ค้นหาจากชื่อลูกค้า, เลขที่บิล, วันที่ หรือยอดเงิน..." oninput="filterHistoryTable()">
+        <div style="margin-bottom: 12px; display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+            <input type="text" id="historySearchInput" style="flex-grow: 1; padding: 8px 12px;" placeholder="🔍 ค้นหาจากชื่อลูกค้า, เลขที่บิล, วันที่ หรือยอดเงิน..." oninput="filterHistoryTable()">
+            <button type="button" onclick="printSelectedBills()" style="background: linear-gradient(135deg, #6366f1, #818cf8); color: white; border: none; padding: 8px 16px; border-radius: 8px; cursor: pointer; font-weight: 600; white-space: nowrap;"><i class="fa-solid fa-print"></i> พิมพ์บิลที่เลือก (<span id="selectedCount">0</span>)</button>
         </div>
         <div id="historyTableContainer" style="max-height: 50vh; overflow-y: auto;"></div>
     </div>
@@ -980,6 +982,7 @@
 
 <script>
     let activeRowForSelection = null;
+    let selectedBillNos = new Set();
 
     window.addEventListener('firebase-ready', function() {
         loadAllDataFromFirebase();
@@ -1597,6 +1600,8 @@
     }
 
     function openHistoryModal() {
+        selectedBillNos.clear();
+        updateSelectedCountUI();
         renderHistoryTable();
         document.getElementById('historyModal').style.display = 'flex';
     }
@@ -1614,9 +1619,11 @@
             purchases = purchases.filter(p => p.billNo.toLowerCase().includes(lower) || p.customerName.toLowerCase().includes(lower));
         }
         
-        let html = `<table class="history-table"><thead><tr><th>วันที่</th><th>เลขที่บิล</th><th>ชื่อลูกค้า</th><th style="text-align:right;">ยอดรวม</th><th style="text-align:center; width: 120px;">จัดการ</th></tr></thead><tbody>`;
+        let html = `<table class="history-table"><thead><tr><th style="width: 40px; text-align:center;"><input type="checkbox" id="selectAllCheckbox" onchange="toggleSelectAll(this)"></th><th>วันที่</th><th>เลขที่บิล</th><th>ชื่อลูกค้า</th><th style="text-align:right;">ยอดรวม</th><th style="text-align:center; width: 120px;">จัดการ</th></tr></thead><tbody>`;
         purchases.forEach(p => {
+            let isChecked = selectedBillNos.has(p.billNo) ? 'checked' : '';
             html += `<tr>
+                <td style="text-align:center;"><input type="checkbox" class="bill-checkbox" value="${p.billNo}" ${isChecked} onchange="toggleSelectBill('${p.billNo}', this)"></td>
                 <td>${p.billDate}</td>
                 <td><strong>${p.billNo}</strong></td>
                 <td>${p.customerName}</td>
@@ -1629,6 +1636,34 @@
         });
         html += `</tbody></table>`;
         container.innerHTML = html;
+        updateSelectedCountUI();
+    }
+
+    function toggleSelectBill(billNo, checkbox) {
+        if (checkbox.checked) {
+            selectedBillNos.add(billNo);
+        } else {
+            selectedBillNos.delete(billNo);
+        }
+        updateSelectedCountUI();
+    }
+
+    function toggleSelectAll(selectAllCb) {
+        let checkboxes = document.querySelectorAll('.bill-checkbox');
+        checkboxes.forEach(cb => {
+            cb.checked = selectAllCb.checked;
+            if (selectAllCb.checked) {
+                selectedBillNos.add(cb.value);
+            } else {
+                selectedBillNos.delete(cb.value);
+            }
+        });
+        updateSelectedCountUI();
+    }
+
+    function updateSelectedCountUI() {
+        let countEl = document.getElementById('selectedCount');
+        if (countEl) countEl.innerText = selectedBillNos.size;
     }
 
     function filterHistoryTable() {
@@ -1659,11 +1694,140 @@
                 let purchases = JSON.parse(localStorage.getItem('saved_cashbill_purchases') || '[]');
                 purchases = purchases.filter(p => p.billNo !== billNo);
                 localStorage.setItem('saved_cashbill_purchases', JSON.stringify(purchases));
+                selectedBillNos.delete(billNo);
                 syncToFirebase();
                 renderHistoryTable(document.getElementById('historySearchInput').value);
                 Swal.fire({ icon: 'success', title: 'ลบบิลสำเร็จ', timer: 1000, showConfirmButton: false });
             }
         });
+    }
+
+    function printSelectedBills() {
+        if (selectedBillNos.size === 0) {
+            Swal.fire('ยังไม่ได้เลือกบิล', 'กรุณาติ๊กเลือกบิลที่ต้องการพิมพ์อย่างน้อย 1 รายการ', 'warning');
+            return;
+        }
+
+        let purchases = JSON.parse(localStorage.getItem('saved_cashbill_purchases') || '[]');
+        let selectedPurchases = purchases.filter(p => selectedBillNos.has(p.billNo));
+
+        let shopName = document.getElementById('shopName').value;
+        let shopAddress = document.getElementById('shopAddress').value;
+        let shopTax = document.getElementById('shopTax').value;
+
+        let batchContainer = document.getElementById('batchPrintContainer');
+        batchContainer.innerHTML = '';
+
+        selectedPurchases.forEach(p => {
+            let itemsHtml = '';
+            let totalAmount = 0;
+
+            if (p.items && p.items.length > 0) {
+                p.items.forEach((item, idx) => {
+                    let amt = (item.qty || 0) * (item.price || 0);
+                    totalAmount += amt;
+                    itemsHtml += `
+                        <tr>
+                            <td style="text-align: center; border: 1px solid #cbd5e1; padding: 5px 8px;">${idx + 1}</td>
+                            <td style="text-align: left; border: 1px solid #cbd5e1; padding: 5px 8px;">${item.desc || ''}</td>
+                            <td style="text-align: center; border: 1px solid #cbd5e1; padding: 5px 8px;">${item.qty || 0}</td>
+                            <td style="text-align: center; border: 1px solid #cbd5e1; padding: 5px 8px;">${item.unit || ''}</td>
+                            <td style="text-align: center; border: 1px solid #cbd5e1; padding: 5px 8px;">${(item.price || 0).toLocaleString('th-TH', {minimumFractionDigits: 2})}</td>
+                            <td style="text-align: right; border: 1px solid #cbd5e1; padding: 5px 8px; padding-right: 12px;">${amt.toLocaleString('th-TH', {minimumFractionDigits: 2})}</td>
+                        </tr>
+                    `;
+                });
+            }
+
+            let textAmt = convertNumberToThaiText(p.grandTotal || totalAmount);
+
+            let billHTML = `
+                <div class="bill-container" style="margin-bottom: 20px;">
+                    <div class="header-section">
+                        <div class="header-left">
+                            <div class="shop-info-box">
+                                <strong>ชื่อร้าน (Company Name): </strong>${shopName || '-'}<br>
+                                <strong>ที่อยู่ (Address): </strong>${shopAddress || '-'}<br>
+                                <strong>เลขประจำตัวผู้เสียภาษี(Tax ID): </strong>${shopTax || '-'}
+                            </div>
+                        </div>
+                        <div class="title-box">บิลเงินสด<br><span style="font-size: 12px; font-weight: 400; opacity: 0.9;">CASH BILL / RECEIPT</span></div>
+                    </div>
+                    
+                    <table class="top-info">
+                        <tr>
+                            <td class="customer-info" style="width: 55%; display: table-cell;">
+                                <strong>นามลูกค้า (Customer):</strong> ${p.customerName || '-'}<br>
+                                <strong>ที่อยู่ (Address):</strong> ${p.address || '-'}<br>
+                                <strong>เลขประจำตัวผู้เสียภาษี:</strong> ${p.tax || '-'}
+                            </td>
+                            <td style="padding-left: 10px; width: 45%; display: table-cell;">
+                                <div class="no-date-box" style="width: 100%;">
+                                    <strong>เล่มที่ (Book No.):</strong> ${p.bookNo || '-'}<br>
+                                    <strong>เลขที่ (No.):</strong> ${p.billNo || '-'}<br>
+                                    <strong>วันที่ (Date):</strong> ${p.billDate || '-'}
+                                </div>
+                            </td>
+                        </tr>
+                    </table>
+
+                    <div class="table-responsive">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th style="width: 5%; background: linear-gradient(135deg, #9333ea, #c084fc); color: #ffffff;">ลำดับ</th>
+                                    <th style="width: 47%; background: linear-gradient(135deg, #9333ea, #c084fc); color: #ffffff;">รายการสินค้า / รายละเอียด</th>
+                                    <th style="width: 8%; background: linear-gradient(135deg, #9333ea, #c084fc); color: #ffffff;">จำนวน</th>
+                                    <th style="width: 10%; background: linear-gradient(135deg, #9333ea, #c084fc); color: #ffffff;">หน่วย</th>
+                                    <th style="width: 13%; background: linear-gradient(135deg, #9333ea, #c084fc); color: #ffffff;">ราคาต่อหน่วย</th>
+                                    <th style="width: 13%; background: linear-gradient(135deg, #9333ea, #c084fc); color: #ffffff;">จำนวนเงิน</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${itemsHtml}
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <table class="footer-table" style="width: 100%; border-collapse: collapse;">
+                        <tr>
+                            <td rowspan="2" style="width: 50%; vertical-align: middle; text-align: center; background-color: #faf5ff; border-right: 1px solid #f3e8ff; padding: 10px;">
+                                <div style="font-size: 12px; color: #64748b; margin-bottom: 6px;">(จำนวนเงินตัวอักษร)</div>
+                                <div style="font-size: 15px; color: #9333ea; font-weight: 600;">${textAmt}</div>
+                            </td>
+                            <td class="footer-total-label" style="font-weight: 600; color: #475569; text-align: center; vertical-align: middle; padding: 10px;">
+                                รวมราคาสินค้า<br><span style="font-size: 11px; font-weight: 400; color: #64748b;">(Net Total)</span>
+                            </td>
+                            <td style="width: 25%; font-weight: 600; text-align: center; vertical-align: middle; border: 1px solid #f3e8ff; padding: 10px;">${(p.grandTotal || totalAmount).toLocaleString('th-TH', {minimumFractionDigits: 2})}</td>
+                        </tr>
+                        <tr>
+                            <td class="footer-total-label" style="background-color: #faf5ff; font-weight: 700; color: #475569; text-align: center; vertical-align: middle; padding: 10px;">
+                                จำนวนเงินรวมทั้งสิ้น<br>
+                                <span style="font-size: 11px; font-weight: 600; color: #9333ea;">(Grand Total)</span>
+                            </td>
+                            <td style="width: 25%; background-color: #faf5ff; color: #9333ea; font-size: 16px; text-align: center; vertical-align: middle; font-weight: 700; border: 1px solid #f3e8ff; padding: 10px;">${(p.grandTotal || totalAmount).toLocaleString('th-TH', {minimumFractionDigits: 2})}</td>
+                        </tr>
+                    </table>
+
+                    <div class="signature-section" style="display: flex; justify-content: flex-end; margin-top: 35px; width: 100%;">
+                        <div class="sig-box" style="width: 300px; text-align: center; margin-left: auto;">
+                            <div class="sig-line" style="border-bottom: 1px dashed #999; margin-bottom: 8px; height: 40px;"></div>
+                            <div style="font-size: 14px; margin-bottom: 4px;">${p.salesSignName || '(..................................................)'}</div>
+                            <div class="sig-text">ผู้รับเงิน / แคชเชียร์ (Cashier)</div>
+                            <div class="sig-date">วันที่: ${p.salesSignDate || '-'}</div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            batchContainer.innerHTML += billHTML;
+        });
+
+        closeModal('historyModal');
+
+        // สั่งพิมพ์รวมชุดโดยเปิดใช้งาน class สำหรับพิมพ์แบบ Batch
+        document.body.classList.add('batch-printing');
+        window.print();
+        document.body.classList.remove('batch-printing');
     }
 
     async function exportAllData() {
