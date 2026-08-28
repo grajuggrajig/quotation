@@ -1187,7 +1187,10 @@
             docMeta.billDate = foundBill.billDate || currentDateFormatted;
             docMeta.discountRate = foundBill.discountRate || foundBill.discount || 0;
             docMeta.remarkText = foundBill.remarkText || foundBill.remark || "";
-
+			// เพิ่มบรรทัดนี้เพื่อดึงชื่อผู้เสนอราคา
+            docMeta.sigSalesName = foundBill.sigSalesName || foundBill.salesName || foundBill.saleman || foundBill.sales || "";
+            docMeta.sigSalesDate = foundBill.sigSalesDate || foundBill.salesDate || currentDateFormatted;
+			
             let rawItems = foundBill.items || foundBill.productList || foundBill.details || [];
             if (rawItems && rawItems.length > 0) {
                 itemsData = rawItems.map(item => ({
