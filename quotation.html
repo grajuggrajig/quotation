@@ -744,13 +744,14 @@ let docMeta = {
     quotEnclose: "-",
     bookNo: paramBookNo || "-",
     billNo: autoBillNo,          
+    // เช็คว่าถ้ามี paramBillDate ให้ใช้ค่าที่ส่งมา ถ้าไม่มีค่อยใช้วันที่ปัจจุบัน
     billDate: paramBillDate ? decodeURIComponent(paramBillDate) : currentDateFormatted,
     remarkText: "ราคานี้ยังไม่รวมภาษีมูลค่าเพิ่ม / ยืนราคา 30 วัน",
     discountRate: 0,
     sigCustomerName: "",
     sigCustomerDate: "",
     sigSalesName: paramSalesName ? decodeURIComponent(paramSalesName) : "", 
-    sigSalesDate: paramBillDate ? decodeURIComponent(paramBillDate) : currentDateFormatted // <-- แก้ไขตรงนี้ให้ใช้วันที่ตามบิลย้อนหลัง
+    sigSalesDate: currentDateFormatted
 };
 
     let itemsData = [
@@ -1206,39 +1207,26 @@ if (foundBill) {
     docMeta.quotEnclose = foundBill.quotEnclose || foundBill.enclose || "-";
     docMeta.bookNo = foundBill.bookNo || "-";
     docMeta.billNo = foundBill.billNo || foundBill.quotationNo || autoBillNo;
-    docMeta.billDate = foundBill.billDate || foundBill.date || paramBillDate ? decodeURIComponent(paramBillDate) : currentDateFormatted;
+    
+    // 📌 จุดสำคัญ:ดึงวันที่จากบิลเก่ามาใส่ ถ้าไม่มีให้ใช้วันที่ปัจจุบัน
+    docMeta.billDate = foundBill.billDate || currentDateFormatted;
+    
     docMeta.discountRate = foundBill.discountRate || foundBill.discount || 0;
     docMeta.remarkText = foundBill.remarkText || foundBill.remark || "";
-    docMeta.sigSalesName = foundBill.sigSalesName || foundBill.salesName || foundBill.saleman || foundBill.sales || sessionStorage.getItem('temp_sales_name') || "";
-    docMeta.sigSalesDate = foundBill.sigSalesDate || foundBill.salesDate || foundBill.billDate || currentDateFormatted;
+    docMeta.sigSalesName = foundBill.sigSalesName || foundBill.salesName || sessionStorage.getItem('temp_sales_name') || "";
+    docMeta.sigSalesDate = foundBill.sigSalesDate || foundBill.salesDate || currentDateFormatted;
     
-    let rawItems = foundBill.items || foundBill.productList || foundBill.details || [];
-    if (rawItems && rawItems.length > 0) {
-        itemsData = rawItems.map(item => ({
-            desc: item.desc || item.description || item.productName || "",
-            model: item.model || item.sku || "-",
-            qty: parseFloat(item.qty || item.quantity) || 1,
-            unit: item.unit || "ชิ้น",
-            price: parseFloat(item.price || item.unitPrice || item.unit_price || item.productPrice) || 0.00
-        }));
-    } else {
-        itemsData = [];
-    }
+    // ... (ข้อมูลสินค้า itemsData ด้านล่าง) ...
 
     if (typeof renderDocument === 'function') {
         renderDocument();
     }
     
-    // อัปเดตค่าลงใน UI input หรือ elements บนหน้าจอ (ถ้ามี) เพื่อให้ช่องวันที่แสดงผลตรงกับข้อมูลเดิม
+    // บังคับอัปเดตค่าวันที่ลงในช่อง Input บนหน้าจอทันที
     let dateInput = document.querySelector('.meta-field[data-field="billDate"]') || document.getElementById('billDate');
-if (dateInput) {
-    dateInput.value = docMeta.billDate;
-}
-
-let sigDateInput = document.querySelector('.meta-field[data-field="sigSalesDate"]') || document.getElementById('sigSalesDate');
-if (sigDateInput) {
-    sigDateInput.value = docMeta.sigSalesDate;
-}
+    if (dateInput) {
+        dateInput.value = docMeta.billDate;
+    }
 
     showToast(`ดึงข้อมูลใบเสนอราคาเลขที่ ${trimmedBNo} สำเร็จ!`);
 }
@@ -1250,36 +1238,43 @@ if (sigDateInput) {
     }
 
     window.onload = function() {
-        calculateTotals();
-        loadCustomerDropdown();
-        renderDocument(); 
-        
-        let dateField = document.getElementById('billDate');
-        let sigSalesDate = document.getElementById('sigSalesDate');
-        let billNoField = document.getElementById('billNo');
-        
-        let d = new Date();
-        let day = String(d.getDate()).padStart(2, '0');
-        let month = String(d.getMonth() + 1).padStart(2, '0');
-        let year = d.getFullYear() + 543;
-        let currentDateStr = `${day}/${month}/${year}`;
+    calculateTotals();
+    loadCustomerDropdown();
+    renderDocument(); 
+    
+    let dateField = document.getElementById('billDate');
+    let sigSalesDate = document.getElementById('sigSalesDate');
+    let billNoField = document.getElementById('billNo');
+    
+    let d = new Date();
+    let day = String(d.getDate()).padStart(2, '0');
+    let month = String(d.getMonth() + 1).padStart(2, '0');
+    let year = d.getFullYear() + 543;
+    let currentDateStr = `${day}/${month}/${year}`;
 
+    // 🔍 เช็คว่ามี URL Parameter 'billNo' ส่งมาหรือไม่ เพื่อป้องกันการทับวันที่ของบิลเก่า
+    const urlParams = new URLSearchParams(window.location.search);
+    const hasBillNoParam = urlParams.has('billNo');
+
+    // ถ้าไม่มีการส่ง billNo มาทาง URL ถึงค่อยเซ็ตเป็นวันที่ปัจจุบัน
+    if (!hasBillNoParam) {
         if(!dateField || !dateField.value) docMeta.billDate = currentDateStr;
         if(!sigSalesDate || !sigSalesDate.value) docMeta.sigSalesDate = currentDateStr;
+    }
 
-        if (billNoField && !billNoField.value) {
-            let purchases = JSON.parse(localStorage.getItem('saved_quot_purchases') || '[]');
-            if (purchases.length > 0) {
-                let latestBill = purchases[purchases.length - 1];
-                if (latestBill && latestBill.billNo) {
-                     billNoField.value = latestBill.billNo;
-                     docMeta.billNo = latestBill.billNo;
-                }
+    if (billNoField && !billNoField.value) {
+        let purchases = JSON.parse(localStorage.getItem('saved_quot_purchases') || '[]');
+        if (purchases.length > 0) {
+            let latestBill = purchases[purchases.length - 1];
+            if (latestBill && latestBill.billNo) {
+                 billNoField.value = latestBill.billNo;
+                 docMeta.billNo = latestBill.billNo;
             }
         }
-        
-        renderDocument();
-    };
+    }
+    
+    renderDocument();
+};
     
 	
 // ฟังก์ชันช่วยแปลงวันที่ให้เป็น YYYY-MM-DD สำหรับ input type="date"
