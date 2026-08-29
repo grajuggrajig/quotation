@@ -1773,35 +1773,40 @@ async function executeSave(isNewBill) {
         products = JSON.parse(localStorage.getItem('saved_quot_products') || '[]');
     }
 
-    rows.forEach(row => {
-        let sku = row.querySelector('.sku-input').value.trim();
-        let desc = row.querySelector('.item-desc').value.trim();
-        let rawQty = row.querySelector('.qty').value;
-        let rawPrice = row.querySelector('.price').value;
-        let validated = validateRowData(rawQty, rawPrice);
-        let unit = row.querySelector('.unit-input').value.trim();
+rows.forEach(row => {
+    let sku = row.querySelector('.sku-input').value.trim();
+    let desc = row.querySelector('.item-desc').value.trim();
+    let rawQty = row.querySelector('.qty').value;
+    let rawPrice = row.querySelector('.price').value;
+    let validated = validateRowData(rawQty, rawPrice);
+    let unit = row.querySelector('.unit-input').value.trim();
 
-        if (sku || desc) {
-            currentItems.push({ 
-                sku: sku, 
-                desc: desc, 
-                qty: validated.qty, 
-                unit: unit, 
-                price: validated.price 
-            });
+    // ตรวจสอบว่ามีข้อมูลอย่างน้อย SKU หรือ รายละเอียดสินค้า
+    if (sku || desc) {
+        // 1. บันทึกข้อมูลสินค้าลงในรายการประจำบิล (เก็บค่า sku ไว้ถูกต้อง)
+        currentItems.push({ 
+            sku: sku, 
+            model: sku, // เผื่อกรณีฐานข้อมูลหรือโค้ดส่วนอื่นเรียกใช้คีย์ model
+            desc: desc, 
+            qty: validated.qty, 
+            unit: unit, 
+            price: validated.price 
+        });
+        
+        // 2. บันทึก/อัปเดต Master Data สินค้าอัตโนมัติหากมีทั้ง SKU และ Description
+        if (sku && desc) {
+            let pIndex = products.findIndex(p => p.sku === sku || p.model === sku);
+            let prodData = { sku: sku, model: sku, desc: desc, unit: unit, price: validated.price };
             
-            if (sku && desc) {
-                let pIndex = products.findIndex(p => p.sku === sku);
-                let prodData = { sku: sku, desc: desc, unit: unit, price: validated.price };
-                if (pIndex >= 0) {
-                    products[pIndex] = prodData;
-                } else {
-                    products.push(prodData);
-                }
-                savedProdCount++;
+            if (pIndex >= 0) {
+                products[pIndex] = prodData;
+            } else {
+                products.push(prodData);
             }
+            savedProdCount++;
         }
-    });
+    }
+});
 
     if (currentItems.length === 0 || (currentItems.length === 1 && !currentItems[0].desc)) {
         Swal.fire({
@@ -2483,7 +2488,7 @@ async function deleteHistoryBill(billNo) {
     });
 }
 
-    function fillPurchaseDataToDOM(data) {
+  function fillPurchaseDataToDOM(data) {
     if (!data) return;
 
     // 1. เติมข้อมูลส่วนหัวและข้อมูลลูกค้า
@@ -2516,16 +2521,20 @@ async function deleteHistoryBill(billNo) {
     let tbody = document.getElementById('billTable').getElementsByTagName('tbody')[0];
     tbody.innerHTML = ''; // ล้างตารางเดิมก่อน
 
-    let itemsToLoad = (data.items && data.items.length > 0) ? data.items : [{ sku: '', desc: '', qty: 0, unit: '', price: 0 }];
+    let itemsToLoad = (data.items && data.items.length > 0) ? data.items : [{ sku: '', model: '', desc: '', qty: 0, unit: '', price: 0 }];
 
     itemsToLoad.forEach((item, index) => {
         let newRow = tbody.insertRow();
         newRow.className = "item-row";
+        
+        // รองรับการดึงค่ารหัสรุ่นจากหลายคีย์ เพื่อป้องกันปัญหาบิลเก่าไม่แสดงผล
+        let modelValue = item.sku || item.model || item.code || item.productCode || item.itemCode || '';
+
         newRow.innerHTML = `
             <td class="row-num" style="text-align: center;">${index + 1}</td>
             <td class="desc-cell"><textarea class="item-desc" placeholder="ระบุรายละเอียดสินค้า" oninput="autoGrow(this)" onblur="fetchProductByDesc(this)">${item.desc || ''}</textarea></td>
             <td style="text-align: center;">
-                <input type="text" class="sku-input" placeholder="รุ่น" value="${item.sku || ''}" 
+                <input type="text" class="sku-input" placeholder="รุ่น" value="${modelValue}" 
                        onkeydown="if(event.key === 'Enter'){ fetchProductBySKU(this); this.blur(); }">
             </td>
             <td style="text-align: center;"><input type="text" class="qty" value="${item.qty !== undefined ? item.qty : 0}" inputmode="decimal" onfocus="if(this.value==='0')this.value='';" onblur="if(this.value==='')this.value='0';" oninput="formatNumberInput(this); calculate();"></td>
@@ -2535,7 +2544,6 @@ async function deleteHistoryBill(billNo) {
             <td class="no-print" style="text-align: center;"><button class="btn-del" onclick="removeRow(this)">ลบ</button></td>
         `;
         
-        // ขยายขนาด textarea ของรายละเอียดอัตโนมัติหากมีข้อความยาว
         let textarea = newRow.querySelector('.item-desc');
         if (textarea) {
             autoGrow(textarea);
