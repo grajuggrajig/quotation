@@ -1946,7 +1946,7 @@ rows.forEach(row => {
      //   }).then(() => {
      //       window.location.href = `quotation.html?billNo=${encodeURIComponent(finalBillNo)}&bookNo=${encodeURIComponent(currentBookNo)}&salesName=${encodeURIComponent(currentSalesName)}&autoPrint=true`;
         });
-
+		return;
     } catch (error) {
         console.error("❌ เกิดข้อผิดพลาดในการบันทึก Firebase: ", error);
         Swal.fire({
@@ -2971,7 +2971,6 @@ async function openQuotation() {
     }
 
     try {
-        // แสดง Loading แจ้งเตือนผู้ใช้เล็กน้อยว่ากำลังบันทึกข้อมูล
         Swal.fire({
             title: 'กำลังบันทึกข้อมูล...',
             text: 'กรุณารอสักครู่ ระบบกำลังเตรียมหน้าพิมพ์',
@@ -2981,10 +2980,9 @@ async function openQuotation() {
             }
         });
 
-        // 🛑 รอให้ executeSave บันทึกเสร็จจริง ๆ ก่อน (ต้องแน่ใจว่า executeSave รองรับ return Promise หรือเสร็จสิ้นแล้ว)
-        // หาก executeSave ของคุณเป็น async ให้ใส่ await นำหน้า
+        // 🛑 ส่ง false ไปด้วย เพื่อให้ executeSave เซฟอย่างเดียว ไม่เด้ง Popup เขียวซ้ำซ้อน
         if (typeof executeSave === 'function') {
-            await executeSave(false); 
+            await executeSave(false, false); 
         }
 
         let rawBookNo = document.getElementById('bookNo').value.trim();
@@ -2993,16 +2991,10 @@ async function openQuotation() {
         let salesNameInput = document.getElementById('sigSalesName');
         let currentSalesName = salesNameInput ? salesNameInput.value.trim() : '';
         
-        // ย้ายหน้าไปยัง quotation.html หลังจากบันทึกเสร็จ 100% แล้ว
         window.location.href = `quotation.html?billNo=${encodeURIComponent(currentBillNo)}&bookNo=${encodeURIComponent(currentBookNo)}&salesName=${encodeURIComponent(currentSalesName)}&autoPrint=true`;
 
     } catch (error) {
         console.error("Error before opening quotation:", error);
-        Swal.fire({
-            icon: 'error',
-            title: 'เกิดข้อผิดพลาด',
-            text: 'ไม่สามารถบันทึกข้อมูลก่อนพิมพ์ได้ กรุณาลองใหม่อีกครั้ง'
-        });
     }
 }
 
