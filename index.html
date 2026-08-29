@@ -2335,64 +2335,66 @@ async function deleteHistoryBill(billNo) {
 }
 
     function fillPurchaseDataToDOM(data) {
-    if(data.billNo) document.getElementById('billNo').value = data.billNo;
-    if(data.bookNo) document.getElementById('bookNo').value = data.bookNo;
-    if(data.billDate) document.getElementById('billDate').value = data.billDate;
-    if(data.customerName) document.getElementById('custName').value = data.customerName;
+    if (!data) return;
+
+    // 1. เติมข้อมูลส่วนหัวและข้อมูลลูกค้า
+    document.getElementById('billNo').value = data.billNo || '';
+    document.getElementById('bookNo').value = data.bookNo || '';
+    document.getElementById('billDate').value = data.billDate || '';
+    document.getElementById('custName').value = data.customerName || '';
     
     let addrArea = document.getElementById('custAddress');
-    if(data.address) {
-        addrArea.value = data.address;
-        autoGrow(addrArea);
-    }
-    if(data.subject) document.getElementById('quotSubject').value = data.subject;
-    if(data.enclosure) document.getElementById('quotEnclose').value = data.enclosure;
-    
-    document.getElementById('remarkText').value = data.remark !== undefined ? data.remark : "";
+    addrArea.value = data.address || '';
+    autoGrow(addrArea);
 
-    // ข้อมูลลูกค้า
-    if(data.customerSignName !== undefined) document.getElementById('sigCustomerName').value = data.customerSignName;
-    if(data.customerSignDate !== undefined) document.getElementById('sigCustomerDate').value = data.customerSignDate;
+    document.getElementById('quotSubject').value = data.subject || 'ขอเสนอราคาสินค้า/บริการ';
+    document.getElementById('quotEnclose').value = data.enclosure || '';
+    document.getElementById('remarkText').value = data.remark || '';
+
+    // 2. เติมข้อมูลส่วนลงนาม (รองรับตัวแปรหลายรูปแบบเพื่อความชัวร์)
+    document.getElementById('sigCustomerName').value = data.customerSignName || '';
+    document.getElementById('sigCustomerDate').value = data.customerSignDate || '';
     
-    // 🔍 **จุดดึงข้อมูลชื่อผู้เสนอราคา (รองรับทุกชื่อตัวแปรที่เป็นไปได้)**
-    let salesNameVal = "";
-    if (data.salesSignName !== undefined) {
-        salesNameVal = data.salesSignName;
-    } else if (data.salesName !== undefined) {
-        salesNameVal = data.salesName;
-    }
+    let salesNameVal = data.salesSignName !== undefined ? data.salesSignName : (data.salesName || '');
     document.getElementById('sigSalesName').value = salesNameVal;
+    document.getElementById('sigSalesDate').value = data.salesSignDate || data.billDate || '';
 
-    if(data.salesSignDate !== undefined) document.getElementById('sigSalesDate').value = data.salesSignDate;
-
+    // 3. เติมส่วนลด
     document.getElementById('discountRate').value = data.discountRate !== undefined ? data.discountRate : 0;
-    document.getElementById('discountAmount').value = data.discountAmount !== undefined ? data.discountAmount.toFixed(2) : "0.00";
+    document.getElementById('discountAmount').value = data.discountAmount !== undefined ? data.discountAmount.toFixed(2) : '0.00';
 
-    if(data.items && data.items.length > 0) {
-        let tbody = document.getElementById('billTable').getElementsByTagName('tbody')[0];
-        tbody.innerHTML = ''; 
+    // 4. เติมรายการสินค้าในตาราง (Item Rows)
+    let tbody = document.getElementById('billTable').getElementsByTagName('tbody')[0];
+    tbody.innerHTML = ''; // ล้างตารางเดิมก่อน
 
-        data.items.forEach((item, index) => {
-            let newRow = tbody.insertRow();
-            newRow.className = "item-row";
-            newRow.innerHTML = `
-                <td class="row-num" style="text-align: center;">${index + 1}</td>
-                <td class="desc-cell"><textarea class="item-desc" placeholder="ระบุรายละเอียดสินค้า" oninput="autoGrow(this)" onblur="fetchProductByDesc(this)">${item.desc || ''}</textarea></td>
-                <td style="text-align: center;">
-                    <input type="text" class="sku-input" value="${item.sku || ''}" placeholder="รหัส/รุ่น (กด Enter)" 
-                           onkeydown="if(event.key === 'Enter'){ fetchProductBySKU(this); this.blur(); }">
-                </td>
-                <td style="text-align: center;"><input type="text" class="qty" value="${item.qty || 0}" inputmode="decimal" onfocus="if(this.value==='0')this.value='';" onblur="if(this.value==='')this.value='0';" oninput="formatNumberInput(this); calculate();"></td>
-                <td style="text-align: center;"><input type="text" class="unit-input" value="${item.unit || ''}" placeholder="ชิ้น/อัน"></td>
-                <td style="text-align: center;"><input type="text" class="price" value="${item.price || 0}" inputmode="decimal" onfocus="if(this.value==='0')this.value='';" onblur="if(this.value==='')this.value='0';" oninput="formatNumberInput(this); calculate();"></td>
-                <td class="amount" style="text-align: right; padding-right: 12px;">0.00</td>
-                <td class="no-print" style="text-align: center;"><button class="btn-del" onclick="removeRow(this)">ลบ</button></td>
-            `;
-            let descArea = newRow.querySelector('.item-desc');
-            autoGrow(descArea);
-        });
-        calculate();
-    }
+    let itemsToLoad = (data.items && data.items.length > 0) ? data.items : [{ sku: '', desc: '', qty: 0, unit: '', price: 0 }];
+
+    itemsToLoad.forEach((item, index) => {
+        let newRow = tbody.insertRow();
+        newRow.className = "item-row";
+        newRow.innerHTML = `
+            <td class="row-num" style="text-align: center;">${index + 1}</td>
+            <td class="desc-cell"><textarea class="item-desc" placeholder="ระบุรายละเอียดสินค้า" oninput="autoGrow(this)" onblur="fetchProductByDesc(this)">${item.desc || ''}</textarea></td>
+            <td style="text-align: center;">
+                <input type="text" class="sku-input" placeholder="รุ่น" value="${item.sku || ''}" 
+                       onkeydown="if(event.key === 'Enter'){ fetchProductBySKU(this); this.blur(); }">
+            </td>
+            <td style="text-align: center;"><input type="text" class="qty" value="${item.qty !== undefined ? item.qty : 0}" inputmode="decimal" onfocus="if(this.value==='0')this.value='';" onblur="if(this.value==='')this.value='0';" oninput="formatNumberInput(this); calculate();"></td>
+            <td style="text-align: center;"><input type="text" class="unit-input" placeholder="ชิ้น/อัน" value="${item.unit || ''}"></td>
+            <td style="text-align: center;"><input type="text" class="price" value="${item.price !== undefined ? item.price : 0}" inputmode="decimal" onfocus="if(this.value==='0')this.value='';" onblur="if(this.value==='')this.value='0';" oninput="formatNumberInput(this); calculate();"></td>
+            <td class="amount" style="text-align: right; padding-right: 12px;">0.00</td>
+            <td class="no-print" style="text-align: center;"><button class="btn-del" onclick="removeRow(this)">ลบ</button></td>
+        `;
+        
+        // ขยายขนาด textarea ของรายละเอียดอัตโนมัติหากมีข้อความยาว
+        let textarea = newRow.querySelector('.item-desc');
+        if (textarea) {
+            autoGrow(textarea);
+        }
+    });
+
+    // 5. คำนวณยอดเงินรวมใหม่ทั้งหมดทันที
+    calculate();
 }
 
     function fetchProductBySKU(input) {
