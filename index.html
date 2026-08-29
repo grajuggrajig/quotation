@@ -1939,12 +1939,12 @@ rows.forEach(row => {
 
         Swal.fire({
             icon: 'success',
-            title: isNewBill ? 'บันทึกเป็นบิลใหม่และกำลังเปิดหน้าพิมพ์...' : 'บันทึกข้อมูลสำเร็จและกำลังเปิดหน้าพิมพ์...',
+            title: isNewBill ? 'บันทึกเป็นบิลใหม่สำเร็จ...' : 'บันทึกข้อมูลสำเร็จ...',
             text: `เลขที่บิล: ${finalBillNo}`,
             timer: 1500,
             showConfirmButton: false
-        }).then(() => {
-            window.location.href = `quotation.html?billNo=${encodeURIComponent(finalBillNo)}&bookNo=${encodeURIComponent(currentBookNo)}&salesName=${encodeURIComponent(currentSalesName)}&autoPrint=true`;
+     //   }).then(() => {
+     //       window.location.href = `quotation.html?billNo=${encodeURIComponent(finalBillNo)}&bookNo=${encodeURIComponent(currentBookNo)}&salesName=${encodeURIComponent(currentSalesName)}&autoPrint=true`;
         });
 
     } catch (error) {
