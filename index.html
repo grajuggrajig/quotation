@@ -1038,6 +1038,141 @@
     .btn-icon-sparkle:active {
         transform: translateY(1px) scale(0.98);
     }
+	
+	
+	/* --- เอฟเฟกต์ปุ่มบันทึกสุดล้ำสมัย --- */
+@keyframes save-pulse-glow {
+    0% { box-shadow: 0 0 0 0 rgba(124, 58, 237, 0.5), 0 4px 12px rgba(124, 58, 237, 0.3); }
+    70% { box-shadow: 0 0 0 8px rgba(124, 58, 237, 0), 0 6px 16px rgba(124, 58, 237, 0.4); }
+    100% { box-shadow: 0 0 0 0 rgba(124, 58, 237, 0), 0 4px 12px rgba(124, 58, 237, 0.3); }
+}
+
+@keyframes savenew-pulse-glow {
+    0% { box-shadow: 0 0 0 0 rgba(5, 150, 105, 0.5), 0 4px 12px rgba(5, 150, 105, 0.3); }
+    70% { box-shadow: 0 0 0 8px rgba(5, 150, 105, 0), 0 6px 16px rgba(5, 150, 105, 0.4); }
+    100% { box-shadow: 0 0 0 0 rgba(5, 150, 105, 0), 0 4px 12px rgba(5, 150, 105, 0.3); }
+}
+
+@keyframes bg-animation {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
+.btn-save-sparkle, .btn-savenew-sparkle {
+    width: 42px !important;
+    height: 42px !important;
+    border-radius: 50% !important;
+    border: none !important;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    position: relative;
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+/* ปุ่มบันทึกทับบิลเดิม (โทนสีม่วงหรูหรา) */
+.btn-save-sparkle {
+    background: linear-gradient(135deg, #6d28d9, #7c3aed, #a855f7, #c084fc);
+    background-size: 300% 300%;
+    animation: bg-animation 5s ease infinite, save-pulse-glow 2s infinite;
+}
+
+/* ปุ่มบันทึกเป็นบิลใหม่ (โทนสีเขียวสดใส) */
+.btn-savenew-sparkle {
+    background: linear-gradient(135deg, #047857, #059669, #10b981, #34d399);
+    background-size: 300% 300%;
+    animation: bg-animation 5s ease infinite, savenew-pulse-glow 2s infinite;
+}
+
+.btn-save-sparkle .icon-wrapper, .btn-savenew-sparkle .icon-wrapper {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+}
+
+/* วงแหวนกระเพื่อมวิบวับ */
+.ripple-ring {
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    border-radius: 50%;
+    border: 1.5px solid rgba(255, 255, 255, 0.7);
+    animation: ripple 2s infinite;
+}
+
+@keyframes ripple {
+    0% { transform: scale(1); opacity: 1; }
+    100% { transform: scale(1.35); opacity: 0; }
+}
+
+.btn-save-sparkle:hover, .btn-savenew-sparkle:hover {
+    transform: translateY(-2px) scale(1.08);
+    filter: brightness(1.15);
+}
+
+.btn-save-sparkle:active, .btn-savenew-sparkle:active {
+    transform: translateY(1px) scale(0.95);
+}
+	
+/* --- เอฟเฟกต์ปุ่มพิมพ์ / บันทึก PDF (โทนสีฟ้าสดใส) --- */
+@keyframes print-pulse-glow {
+    0% { box-shadow: 0 0 0 0 rgba(2, 132, 199, 0.5), 0 4px 12px rgba(2, 132, 199, 0.3); }
+    70% { box-shadow: 0 0 0 8px rgba(2, 132, 199, 0), 0 6px 16px rgba(2, 132, 199, 0.4); }
+    100% { box-shadow: 0 0 0 0 rgba(2, 132, 199, 0), 0 4px 12px rgba(2, 132, 199, 0.3); }
+}
+
+.btn-print-sparkle {
+    width: 42px !important;
+    height: 42px !important;
+    border-radius: 50% !important;
+    border: none !important;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    position: relative;
+    background: linear-gradient(135deg, #0284c7, #0369a1, #38bdf8, #7dd3fc);
+    background-size: 300% 300%;
+    animation: bg-animation 5s ease infinite, print-pulse-glow 2s infinite;
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.btn-print-sparkle .icon-wrapper {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+}
+
+/* วงแหวนกระเพื่อมเฉพาะปุ่มพิมพ์ */
+.ripple-ring-print {
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    border-radius: 50%;
+    border: 1.5px solid rgba(255, 255, 255, 0.7);
+    animation: ripple 2s infinite;
+}
+
+.btn-print-sparkle:hover {
+    transform: translateY(-2px) scale(1.08);
+    filter: brightness(1.15);
+}
+
+.btn-print-sparkle:active {
+    transform: translateY(1px) scale(0.95);
+}	
 </style>
     
 <div class="panel-group">
@@ -1070,9 +1205,24 @@
     <div class="panel-group-label">📝 จัดการเอกสาร</div>
     <div class="panel-buttons">
         <button class="icon-btn btn-clear-ui" data-tip="ล้างรายการเพื่อเริ่มใหม่" onclick="clearAllData()"><i class="fa-solid fa-arrow-rotate-left"></i></button>
-        <button class="icon-btn btn-save-ui" data-tip="บันทึกข้อมูล (ทับบิลเดิม)" onclick="saveCurrentData()"><i class="fa-solid fa-floppy-disk"></i></button>
-        <button class="icon-btn btn-savenew-ui" data-tip="บันทึกเป็นบิลใหม่" onclick="saveAsNewData()"><i class="fa-solid fa-file-circle-plus"></i></button>
-		        <a href="price_update.html" class="icon-btn" data-tip="ไปยังหน้าใบแจ้งปรับราคาสินค้า" style="background-color: #3b82f6; color: white; display: inline-flex; align-items: center; justify-content: center; text-decoration: none;">
+        
+        <!-- ปุ่มบันทึกข้อมูล (ทับบิลเดิม) ดีไซน์ใหม่ กระพริบวิบวับ -->
+        <button class="icon-btn btn-save-sparkle" data-tip="บันทึกข้อมูล (ทับบิลเดิม)" onclick="saveCurrentData()">
+            <div class="icon-wrapper">
+                <i class="fa-solid fa-floppy-disk"></i>
+                <div class="ripple-ring"></div>
+            </div>
+        </button>
+
+        <!-- ปุ่มบันทึกเป็นบิลใหม่ ดีไซน์ใหม่ กระพริบวิบวับ -->
+        <button class="icon-btn btn-savenew-sparkle" data-tip="บันทึกเป็นบิลใหม่" onclick="saveAsNewData()">
+            <div class="icon-wrapper">
+                <i class="fa-solid fa-file-circle-plus"></i>
+                <div class="ripple-ring"></div>
+            </div>
+        </button>
+
+        <a href="price_update.html" class="icon-btn" data-tip="ไปยังหน้าใบแจ้งปรับราคาสินค้า" style="background-color: #3b82f6; color: white; display: inline-flex; align-items: center; justify-content: center; text-decoration: none;">
             <i class="fa-solid fa-file-invoice-dollar"></i>
         </a>
     </div>
@@ -1094,13 +1244,12 @@
 <div class="panel-group">
     <div class="panel-group-label">⚙️ พิมพ์ & PDF</div>
     <div class="panel-buttons">
-      <!--   <button class="icon-btn btn-print-ui" data-tip="พิมพ์ / บันทึก PDF" onclick="window.print()">
-            <i class="fa-solid fa-print"></i>
-        </button>  -->
-        <button class="icon-btn" style="background: linear-gradient(135deg, #0284c7, #0369a1);" data-tip="พิมพ์ / บันทึก PDF" onclick="openQuotation()">
-            <!-- เลือกใช้ไอคอนด้านล่างนี้อันใดอันหนึ่งตามชอบครับ -->
-            <i class="fa-solid fa-print"></i> <!-- รูปเอกสาร -->
-            <!-- หรือใช้ <i class="fa-solid fa-file-pdf"></i> รูปไฟล์ PDF -->
+        <!-- ปุ่มพิมพ์ / บันทึก PDF ดีไซน์ใหม่ กระพริบวิบวับเข้าชุดกัน -->
+        <button class="icon-btn btn-print-sparkle" data-tip="พิมพ์ / บันทึก PDF" onclick="openQuotation()">
+            <div class="icon-wrapper">
+                <i class="fa-solid fa-print"></i>
+                <div class="ripple-ring-print"></div>
+            </div>
         </button>
     </div>
 </div>
