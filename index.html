@@ -1723,7 +1723,7 @@ document.addEventListener('input', () => { isDataChanged = true; });
 document.addEventListener('change', () => { isDataChanged = true; });
 
 
-async function executeSave(isNewBill) {
+async function executeSave(isNewBill, showSuccessAlert = true) {
     if (typeof firebase === 'undefined') {
         Swal.fire({
             icon: 'error',
@@ -1913,15 +1913,6 @@ rows.forEach(row => {
         timestamp: new Date().getTime()
     };
 
-    Swal.fire({
-        title: 'กำลังบันทึกข้อมูล...',
-        text: 'โปรดรอสักครู่ ระบบกำลังอัปเดตข้อมูลขึ้น Cloud',
-        allowOutsideClick: false,
-        didOpen: () => {
-            Swal.showLoading();
-        }
-    });
-
     try {
         await db.collection("quotations").doc(finalBillNo).set(billDataToSave);
 
@@ -1937,16 +1928,18 @@ rows.forEach(row => {
         }
         localStorage.setItem('saved_quot_purchases', JSON.stringify(purchases));
 
-        Swal.fire({
-            icon: 'success',
-            title: isNewBill ? 'บันทึกเป็นบิลใหม่สำเร็จ...' : 'บันทึกข้อมูลสำเร็จ...',
-            text: `เลขที่บิล: ${finalBillNo}`,
-            timer: 1500,
-            showConfirmButton: false
-     //   }).then(() => {
-     //       window.location.href = `quotation.html?billNo=${encodeURIComponent(finalBillNo)}&bookNo=${encodeURIComponent(currentBookNo)}&salesName=${encodeURIComponent(currentSalesName)}&autoPrint=true`;
-        });
-		return;
+        // 🛑 ใช้เงื่อนไขครอบ ตรงนี้จะทำงานก็ต่อเมื่อ showSuccessAlert เป็น true เท่านั้น
+        if (showSuccessAlert) {
+            Swal.fire({
+                icon: 'success',
+                title: isNewBill ? 'บันทึกเป็นบิลใหม่สำเร็จ' : 'บันทึกข้อมูลสำเร็จ',
+                text: `เลขที่บิล: ${finalBillNo}`,
+                timer: 1500,
+                showConfirmButton: false
+            });
+        }
+
+        return;
     } catch (error) {
         console.error("❌ เกิดข้อผิดพลาดในการบันทึก Firebase: ", error);
         Swal.fire({
@@ -2971,16 +2964,17 @@ async function openQuotation() {
     }
 
     try {
+        // 1. แสดง Loading แจ้งเตือนผู้ใช้
         Swal.fire({
-            title: 'กำลังบันทึกข้อมูล...',
-            text: 'กรุณารอสักครู่ ระบบกำลังเตรียมหน้าพิมพ์',
+            title: 'กรุณารอสักครู่...',
+            text: 'ระบบกำลังเตรียมหน้าพิมพ์',
             allowOutsideClick: false,
             didOpen: () => {
                 Swal.showLoading();
             }
         });
 
-        // 🛑 ส่ง false ไปด้วย เพื่อให้ executeSave เซฟอย่างเดียว ไม่เด้ง Popup เขียวซ้ำซ้อน
+        // 2. รอให้ executeSave บันทึกเสร็จ
         if (typeof executeSave === 'function') {
             await executeSave(false, false); 
         }
@@ -2991,13 +2985,21 @@ async function openQuotation() {
         let salesNameInput = document.getElementById('sigSalesName');
         let currentSalesName = salesNameInput ? salesNameInput.value.trim() : '';
         
+        // 🛑 3. หน่วงเวลาค้างไว้ 3 วินาที (3000 มิลลิวินาที) ก่อนเปลี่ยนหน้า
+        await new Promise(resolve => setTimeout(resolve, 2000));
+
+        // 4. ย้ายหน้าไปยัง quotation.html
         window.location.href = `quotation.html?billNo=${encodeURIComponent(currentBillNo)}&bookNo=${encodeURIComponent(currentBookNo)}&salesName=${encodeURIComponent(currentSalesName)}&autoPrint=true`;
 
     } catch (error) {
         console.error("Error before opening quotation:", error);
+        Swal.fire({
+            icon: 'error',
+            title: 'เกิดข้อผิดพลาด',
+            text: 'ไม่สามารถบันทึกข้อมูลก่อนพิมพ์ได้ กรุณาลองใหม่อีกครั้ง'
+        });
     }
 }
-
 
 document.addEventListener("DOMContentLoaded", function() {
         if (typeof firebase !== 'undefined' && firebase.database) {
