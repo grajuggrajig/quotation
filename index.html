@@ -2956,28 +2956,8 @@ async function openEditProductModal(index) {
 	
 
 	
-function openQuotation() {
-    // 🛑 ตรวจสอบว่ามีการแก้ไขข้อมูลค้างไว้และยังไม่ได้กดบันทึกหรือไม่
-    if (isDataChanged) {
-        Swal.fire({
-            icon: 'warning',
-            title: 'ยังไม่ได้บันทึกข้อมูล!',
-            text: 'กรุณากดปุ่ม "บันทึกข้อมูล" หรือ "บันทึกเป็นบิลใหม่" ก่อนทำการพิมพ์',
-            confirmButtonText: 'เข้าใจแล้ว',
-            confirmButtonColor: '#0284c7'
-        });
-        return; // สั่งหยุดการทำงานทันที ไม่ให้เปิดหน้าพิมพ์
-    }
-
+async function openQuotation() {
     let currentBillNo = document.getElementById('billNo').value.trim();
-    let rawBookNo = document.getElementById('bookNo').value.trim();
-    
-    // ตัดเครื่องหมาย : ออก ป้องกันค่าเพี้ยน
-    let currentBookNo = rawBookNo.replace(/^:/, '').trim();
-    
-    // ดึงค่าชื่อผู้เสนอราคาจากฟอร์ม
-    let salesNameInput = document.getElementById('sigSalesName');
-    let currentSalesName = salesNameInput ? salesNameInput.value.trim() : '';
     
     if (!currentBillNo) {
         Swal.fire({
@@ -2989,10 +2969,43 @@ function openQuotation() {
         });
         return;
     }
-    
-    // ส่งค่าไปยังหน้า quotation.html
-    window.location.href = `quotation.html?billNo=${encodeURIComponent(currentBillNo)}&bookNo=${encodeURIComponent(currentBookNo)}&salesName=${encodeURIComponent(currentSalesName)}&autoPrint=true`;
+
+    try {
+        // แสดง Loading แจ้งเตือนผู้ใช้เล็กน้อยว่ากำลังบันทึกข้อมูล
+        Swal.fire({
+            title: 'กำลังบันทึกข้อมูล...',
+            text: 'กรุณารอสักครู่ ระบบกำลังเตรียมหน้าพิมพ์',
+            allowOutsideClick: false,
+            didOpen: () => {
+                Swal.showLoading();
+            }
+        });
+
+        // 🛑 รอให้ executeSave บันทึกเสร็จจริง ๆ ก่อน (ต้องแน่ใจว่า executeSave รองรับ return Promise หรือเสร็จสิ้นแล้ว)
+        // หาก executeSave ของคุณเป็น async ให้ใส่ await นำหน้า
+        if (typeof executeSave === 'function') {
+            await executeSave(false); 
+        }
+
+        let rawBookNo = document.getElementById('bookNo').value.trim();
+        let currentBookNo = rawBookNo.replace(/^:/, '').trim();
+        
+        let salesNameInput = document.getElementById('sigSalesName');
+        let currentSalesName = salesNameInput ? salesNameInput.value.trim() : '';
+        
+        // ย้ายหน้าไปยัง quotation.html หลังจากบันทึกเสร็จ 100% แล้ว
+        window.location.href = `quotation.html?billNo=${encodeURIComponent(currentBillNo)}&bookNo=${encodeURIComponent(currentBookNo)}&salesName=${encodeURIComponent(currentSalesName)}&autoPrint=true`;
+
+    } catch (error) {
+        console.error("Error before opening quotation:", error);
+        Swal.fire({
+            icon: 'error',
+            title: 'เกิดข้อผิดพลาด',
+            text: 'ไม่สามารถบันทึกข้อมูลก่อนพิมพ์ได้ กรุณาลองใหม่อีกครั้ง'
+        });
+    }
 }
+
 
 document.addEventListener("DOMContentLoaded", function() {
         if (typeof firebase !== 'undefined' && firebase.database) {
