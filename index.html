@@ -2985,8 +2985,8 @@ async function openQuotation() {
         let salesNameInput = document.getElementById('sigSalesName');
         let currentSalesName = salesNameInput ? salesNameInput.value.trim() : '';
         
-        // 🛑 3. หน่วงเวลาค้างไว้ 3 วินาที (3000 มิลลิวินาที) ก่อนเปลี่ยนหน้า
-        await new Promise(resolve => setTimeout(resolve, 2000));
+        // 🛑 3. หน่วงเวลาค้างไว้ 1 วินาที (1000 มิลลิวินาที) ก่อนเปลี่ยนหน้า
+        await new Promise(resolve => setTimeout(resolve, 1000));
 
         // 4. ย้ายหน้าไปยัง quotation.html
         window.location.href = `quotation.html?billNo=${encodeURIComponent(currentBillNo)}&bookNo=${encodeURIComponent(currentBookNo)}&salesName=${encodeURIComponent(currentSalesName)}&autoPrint=true`;
