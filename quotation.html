@@ -272,24 +272,43 @@
             box-shadow: 0 2px 5px rgba(79, 70, 229, 0.08);
         }
 
-        .inline-textarea {
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-            outline: none;
-            font-family: inherit;
-            font-size: inherit;
-            padding: 6px 8px;
-            resize: none;
-            height: 45px;
-            width: 100%;
-            background: #fff;
-            transition: all 0.25s ease;
-        }
+/* 📌 แก้ไข CSS ของ .inline-textarea ให้รองรับการขยายความสูงอัตโนมัติ */
+.inline-textarea {
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    outline: none;
+    font-family: inherit;
+    font-size: inherit;
+    padding: 6px 8px;
+    resize: none; /* ปิดการลากขยายมุมขวาล่าง */
+    width: 100%;
+    background: #fff;
+    transition: all 0.25s ease;
+    
+    /* 🛑 [จุดที่ต้องแก้] ลบ height: 45px; และ overflow: hidden; ออก */
+    /* height: 45px; */
+    /* overflow: hidden; */
+    
+    /* ✅ [จุดที่ต้องเพิ่ม] เพิ่ม min-height เพื่อให้มีพื้นที่ขั้นต่ำ */
+    min-height: 45px; 
+    
+    /* ✅ [จุดที่ต้องเพิ่ม] บังคับให้ขยายความสูงอัตโนมัติเมื่อข้อความเยอะขึ้น */
+    height: auto; 
+    
+    /* ✅ [จุดที่ต้องเพิ่ม] ซ่อน scrollbar ตลอดเวลา */
+    overflow-y: hidden; 
+}
 
-        .inline-textarea:focus {
-            border-color: var(--primary-color);
-            box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.1);
-        }
+/* 📌 ปรับ CSS ตอนพิมพ์ให้สอดคล้องกัน */
+@media print {
+    .inline-textarea {
+        /* ✅ ซ่อน border ตอนพิมพ์ (ถ้าต้องการให้ดูเนียนเหมือนกระดาษ) */
+        border: none !important; 
+        padding: 2px 4px !important;
+        /* ✅ ให้ความสูงอัตโนมัติตอนพิมพ์ด้วย */
+        height: auto !important; 
+    }
+}
 
         /* Table Styling */
         .table-responsive-wrapper {
@@ -553,6 +572,8 @@
         text-align: center;
     }
 }
+
+
     </style>
 </head>
 <body>
@@ -669,6 +690,7 @@
   .btn-print:hover {
     background: rgba(67, 160, 71, 0.95);
   }
+  
 </style>
 
 <div class="modern-toolbar no-print">
@@ -1414,6 +1436,28 @@ window.addEventListener('DOMContentLoaded', () => {
       window.location.href = 'index.html';
     }
  });
+ 
+ function adjustTextareaHeight(ta) {
+        ta.style.height = 'auto'; // รีเซ็ตความสูง
+        ta.style.height = (ta.scrollHeight) + 'px'; // ปรับตามเนื้อหาจริง
+    }
+
+    // เมื่อโหลดหน้าเว็บเสร็จ
+    window.addEventListener('load', function() {
+        // ค้นหา textarea ทั้งหมดที่มี class meta-field
+        const textareas = document.querySelectorAll('textarea.meta-field');
+        textareas.forEach(ta => {
+            adjustTextareaHeight(ta);
+        });
+    });
+
+    // เมื่อมีการพิมพ์ข้อมูล
+    document.addEventListener('input', function(e) {
+        if (e.target && e.target.matches('textarea.inline-textarea')) {
+            adjustTextareaHeight(e.target);
+        }
+    });
+ 
 </script>
 
 </body>
