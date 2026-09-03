@@ -346,8 +346,21 @@
             font-family: inherit;
             font-size: inherit;
             background: transparent;
-            height: 22px;
-            overflow: hidden;
+            
+            /* ✅ ปรับความสูงและระยะตัดคำให้พอดีกับบรรทัด */
+            min-height: 22px;
+            height: auto;
+            overflow-y: hidden;
+            display: block;
+            line-height: 1.4;
+            padding: 2px 0;
+        }
+
+        @media print {
+            .item-desc {
+                height: auto !important;
+                border: none !important;
+            }
         }
 
         .sku-input, .qty, .price, .unit-input {
@@ -1443,8 +1456,8 @@ window.addEventListener('DOMContentLoaded', () => {
  });
  
  function adjustTextareaHeight(ta) {
-        ta.style.height = 'auto'; // รีเซ็ตความสูง
-        ta.style.height = (ta.scrollHeight) + 'px'; // ปรับตามเนื้อหาจริง
+        ta.style.height = 'auto'; // รีเซ็ตความสูงเพื่อคำนวณใหม่
+        ta.style.height = (ta.scrollHeight - 4) + 'px'; // ลบ Padding ส่วนเกินออกเพื่อให้พอดีเป๊ะ
     }
 
     // เมื่อโหลดหน้าเว็บเสร็จ
@@ -1456,12 +1469,23 @@ window.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    // เมื่อมีการพิมพ์ข้อมูล
+    // ปรับปรุง Event Listener ให้รองรับ .item-desc ด้วย
     document.addEventListener('input', function(e) {
-        if (e.target && e.target.matches('textarea.inline-textarea')) {
+        if (e.target && (e.target.matches('textarea.inline-textarea') || e.target.matches('textarea.item-desc'))) {
             adjustTextareaHeight(e.target);
         }
     });
+
+    // เพิ่มการเรียกใช้งานตอนเรนเดอร์เอกสารเสร็จ
+    const originalRenderDocument = renderDocument;
+    renderDocument = function() {
+        originalRenderDocument();
+        setTimeout(() => {
+            document.querySelectorAll('textarea.item-desc').forEach(ta => {
+                adjustTextareaHeight(ta);
+            });
+        }, 50);
+    };
  
 </script>
 
