@@ -2872,7 +2872,16 @@ async function openEditProductModal(index) {
     }
 }
 
-
+function toggleBackupButtons() {
+    let backupGroup = document.getElementById('backupGroup');
+    if (backupGroup) {
+        if (backupGroup.style.display === 'none' || backupGroup.style.display === '') {
+            backupGroup.style.display = 'flex';
+        } else {
+            backupGroup.style.display = 'none';
+        }
+    }
+}
     
     function convertNumberToThaiText(number) {
         if (isNaN(number)) return "";
