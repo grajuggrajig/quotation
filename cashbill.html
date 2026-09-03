@@ -994,7 +994,19 @@
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
     import { getDatabase, ref, set, get, child, remove } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
 
+    const firebaseConfig = {
+      apiKey: "AIzaSyCVSMxiWYT4ArS7j7o7bTVIaP1YEfWI3R0",
+      authDomain: "cashbill-8cded.firebaseapp.com",
+      databaseURL: "https://cashbill-8cded-default-rtdb.asia-southeast1.firebasedatabase.app",
+      projectId: "cashbill-8cded",
+      storageBucket: "cashbill-8cded.firebasestorage.app",
+      messagingSenderId: "825564131477",
+      appId: "1:825564131477:web:7624662fa5abd58875eb9c",
+      measurementId: "G-V3FFPK5B7P"
+    };
 
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
 
     window.fbDb = db;
     window.fbRef = ref;
