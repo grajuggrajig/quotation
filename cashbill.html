@@ -1474,55 +1474,62 @@
     function saveAsNewData() { executeSave(true); }
 
     function executeSave(isNewBill) {
-        let cName = document.getElementById('custName').value.trim();
-        let bNoInput = document.getElementById('billNo');
-        let bNo = bNoInput.value.trim();
+    let cName = document.getElementById('custName').value.trim();
+    let bNoInput = document.getElementById('billNo');
+    let bNo = bNoInput.value.trim();
 
-        if (!cName) {
-            Swal.fire('กรุณากรอกชื่อลูกค้า', 'โปรดระบุชื่อลูกค้าก่อนบันทึก', 'warning');
-            return;
-        }
-
-        let rows = document.querySelectorAll('.item-row');
-        let currentItems = [];
-        rows.forEach(row => {
-            let desc = row.querySelector('.item-desc').value.trim();
-            let qty = parseFloat(row.querySelector('.qty').value) || 0;
-            let unit = row.querySelector('.unit-input').value.trim();
-            let price = parseFloat(row.querySelector('.price').value) || 0;
-            if (desc) currentItems.push({ desc, qty, unit, price });
-        });
-
-        if (currentItems.length === 0) {
-            Swal.fire('ไม่มีรายการสินค้า', 'กรุณากรอกข้อมูลสินค้าอย่างน้อย 1 รายการ', 'warning');
-            return;
-        }
-
-        let grandTotalVal = calculate();
-        let purchases = JSON.parse(localStorage.getItem('saved_cashbill_purchases') || '[]');
-        let finalBillNo = (isNewBill || !bNo) ? 'CS' + new Date().getTime() : bNo;
-        bNoInput.value = finalBillNo;
-
-        if (!isNewBill) purchases = purchases.filter(p => p.billNo !== finalBillNo);
-
-        purchases.push({
-            billNo: finalBillNo,
-            bookNo: document.getElementById('bookNo').value.trim(),
-            billDate: document.getElementById('billDate').value.trim(),
-            customerName: cName,
-            address: document.getElementById('custAddress').value.trim(),
-            tax: document.getElementById('custTax').value.trim(),
-            grandTotal: grandTotalVal,
-            items: currentItems,
-            salesSignName: document.getElementById('sigSalesName').value,
-            salesSignDate: document.getElementById('sigSalesDate').value,
-            timestamp: new Date().getTime()
-        });
-
-        localStorage.setItem('saved_cashbill_purchases', JSON.stringify(purchases));
-        syncToFirebase();
-        Swal.fire({ icon: 'success', title: 'บันทึกสำเร็จ!', text: `เลขที่บิล: ${finalBillNo}`, timer: 1500, showConfirmButton: false });
+    if (!cName) {
+        Swal.fire('กรุณากรอกชื่อลูกค้า', 'โปรดระบุชื่อลูกค้าก่อนบันทึก', 'warning');
+        return;
     }
+
+    let rows = document.querySelectorAll('.item-row');
+    let currentItems = [];
+    rows.forEach(row => {
+        let desc = row.querySelector('.item-desc').value.trim();
+        let qty = parseFloat(row.querySelector('.qty').value) || 0;
+        let unit = row.querySelector('.unit-input').value.trim();
+        let price = parseFloat(row.querySelector('.price').value) || 0;
+        if (desc) currentItems.push({ desc, qty, unit, price });
+    });
+
+    if (currentItems.length === 0) {
+        Swal.fire('ไม่มีรายการสินค้า', 'กรุณากรอกข้อมูลสินค้าอย่างน้อย 1 รายการ', 'warning');
+        return;
+    }
+
+    let grandTotalVal = calculate();
+    let purchases = JSON.parse(localStorage.getItem('saved_cashbill_purchases') || '[]');
+    let finalBillNo = (isNewBill || !bNo) ? 'CS' + new Date().getTime() : bNo;
+    bNoInput.value = finalBillNo;
+
+    if (!isNewBill) purchases = purchases.filter(p => p.billNo !== finalBillNo);
+
+    purchases.push({
+        billNo: finalBillNo,
+        bookNo: document.getElementById('bookNo').value.trim(),
+        billDate: document.getElementById('billDate').value.trim(),
+        
+        // ** เพิ่มการบันทึกข้อมูลร้านค้า **
+        shopName: document.getElementById('shopName').value.trim(),
+        shopAddress: document.getElementById('shopAddress').value.trim(),
+        shopTax: document.getElementById('shopTax').value.trim(),
+
+        // ข้อมูลลูกค้า
+        customerName: cName,
+        address: document.getElementById('custAddress').value.trim(),
+        tax: document.getElementById('custTax').value.trim(),
+        grandTotal: grandTotalVal,
+        items: currentItems,
+        salesSignName: document.getElementById('sigSalesName').value,
+        salesSignDate: document.getElementById('sigSalesDate').value,
+        timestamp: new Date().getTime()
+    });
+
+    localStorage.setItem('saved_cashbill_purchases', JSON.stringify(purchases));
+    syncToFirebase();
+    Swal.fire({ icon: 'success', title: 'บันทึกสำเร็จ!', text: `เลขที่บิล: ${finalBillNo}`, timer: 1500, showConfirmButton: false });
+}
 
     function loadCustomerDropdown() {
         let select = document.getElementById('customerSelect');
@@ -1536,19 +1543,6 @@
         });
     }
 
-    function selectCustomer(select) {
-        let selectedName = select.value;
-        if (selectedName === "") return;
-        let customers = JSON.parse(localStorage.getItem('saved_cashbill_customers') || '[]');
-        let c = customers.find(item => item.name === selectedName);
-        if (c) {
-            document.getElementById('custName').value = c.name;
-            let addrArea = document.getElementById('custAddress');
-            addrArea.value = c.address || '';
-            autoGrow(addrArea);
-            document.getElementById('custTax').value = c.tax || '';
-        }
-    }
 
     function loadDataByBillNo() {
         let searchNo = document.getElementById('searchOldBillNo').value.trim();
@@ -1562,14 +1556,54 @@
         }
     }
 
+    function selectCustomer(select) {
+        let selectedName = select.value;
+        let custNameInput = document.getElementById('custName');
+        let addrArea = document.getElementById('custAddress');
+        let taxInput = document.getElementById('custTax');
+        
+        if (selectedName === "") {
+            custNameInput.value = "";
+            addrArea.value = "";
+            autoGrow(addrArea);
+            taxInput.value = "";
+            return;
+        }
+
+        let customers = JSON.parse(localStorage.getItem('saved_cashbill_customers') || '[]');
+        let c = customers.find(item => item.name === selectedName);
+        if (c) {
+            custNameInput.value = c.name || '';
+            addrArea.value = c.address || '';
+            autoGrow(addrArea);
+            taxInput.value = c.tax || '';
+        } else {
+            custNameInput.value = selectedName;
+            addrArea.value = '';
+            autoGrow(addrArea);
+            taxInput.value = '';
+        }
+    }
+
     function fillPurchaseDataToDOM(data) {
         if(data.billNo) document.getElementById('billNo').value = data.billNo;
         if(data.bookNo) document.getElementById('bookNo').value = data.bookNo;
         if(data.billDate) document.getElementById('billDate').value = data.billDate;
-        if(data.customerName) document.getElementById('custName').value = data.customerName;
+        
+        // ข้อมูลร้านค้า (เคลียร์เป็นค่าว่างทันทีหากไม่มีข้อมูลในบิลนั้น)
+        document.getElementById('shopName').value = data.shopName || '';
+        let shopAddrArea = document.getElementById('shopAddress');
+        shopAddrArea.value = data.shopAddress || '';
+        autoGrow(shopAddrArea);
+        document.getElementById('shopTax').value = data.shopTax || '';
+
+        // ข้อมูลลูกค้า (เคลียร์เป็นค่าว่างทันทีหากไม่มีข้อมูลในบิลนั้น)
+        document.getElementById('custName').value = data.customerName || '';
         let addrArea = document.getElementById('custAddress');
-        if(data.address) { addrArea.value = data.address; autoGrow(addrArea); }
-        if(data.tax) document.getElementById('custTax').value = data.tax;
+        addrArea.value = data.address || '';
+        autoGrow(addrArea);
+        document.getElementById('custTax').value = data.tax || '';
+
         if(data.salesSignName) document.getElementById('sigSalesName').value = data.salesSignName;
         if(data.salesSignDate) document.getElementById('sigSalesDate').value = data.salesSignDate;
 
@@ -1703,132 +1737,84 @@
     }
 
     function printSelectedBills() {
-        if (selectedBillNos.size === 0) {
-            Swal.fire('ยังไม่ได้เลือกบิล', 'กรุณาติ๊กเลือกบิลที่ต้องการพิมพ์อย่างน้อย 1 รายการ', 'warning');
-            return;
+    if (selectedBillNos.size === 0) {
+        Swal.fire('ยังไม่ได้เลือกบิล', 'กรุณาติ๊กเลือกบิลที่ต้องการพิมพ์อย่างน้อย 1 รายการ', 'warning');
+        return;
+    }
+
+    let purchases = JSON.parse(localStorage.getItem('saved_cashbill_purchases') || '[]');
+    let selectedPurchases = purchases.filter(p => selectedBillNos.has(p.billNo));
+
+    let batchContainer = document.getElementById('batchPrintContainer');
+    batchContainer.innerHTML = '';
+
+    selectedPurchases.forEach(p => {
+        let itemsHtml = '';
+        let totalAmount = 0;
+
+        if (p.items && p.items.length > 0) {
+            p.items.forEach((item, idx) => {
+                let amt = (item.qty || 0) * (item.price || 0);
+                totalAmount += amt;
+                itemsHtml += `
+                    <tr>
+                        <td style="text-align: center; border: 1px solid #cbd5e1; padding: 5px 8px;">${idx + 1}</td>
+                        <td style="text-align: left; border: 1px solid #cbd5e1; padding: 5px 8px;">${item.desc || ''}</td>
+                        <td style="text-align: center; border: 1px solid #cbd5e1; padding: 5px 8px;">${item.qty || 0}</td>
+                        <td style="text-align: center; border: 1px solid #cbd5e1; padding: 5px 8px;">${item.unit || ''}</td>
+                        <td style="text-align: center; border: 1px solid #cbd5e1; padding: 5px 8px;">${(item.price || 0).toLocaleString('th-TH', {minimumFractionDigits: 2})}</td>
+                        <td style="text-align: right; border: 1px solid #cbd5e1; padding: 5px 8px; padding-right: 12px;">${amt.toLocaleString('th-TH', {minimumFractionDigits: 2})}</td>
+                    </tr>
+                `;
+            });
         }
 
-        let purchases = JSON.parse(localStorage.getItem('saved_cashbill_purchases') || '[]');
-        let selectedPurchases = purchases.filter(p => selectedBillNos.has(p.billNo));
+        let textAmt = convertNumberToThaiText(p.grandTotal || totalAmount);
+        
+        // ดึงข้อมูลร้านจากข้อมูลที่บันทึกในบิลนั้นๆ หรือถ้าไม่มีให้ใช้ค่าปัจจุบันหน้าจอ
+        let sName = p.shopName !== undefined ? p.shopName : document.getElementById('shopName').value;
+        let sAddr = p.shopAddress !== undefined ? p.shopAddress : document.getElementById('shopAddress').value;
+        let sTax = p.shopTax !== undefined ? p.shopTax : document.getElementById('shopTax').value;
 
-        let shopName = document.getElementById('shopName').value;
-        let shopAddress = document.getElementById('shopAddress').value;
-        let shopTax = document.getElementById('shopTax').value;
-
-        let batchContainer = document.getElementById('batchPrintContainer');
-        batchContainer.innerHTML = '';
-
-        selectedPurchases.forEach(p => {
-            let itemsHtml = '';
-            let totalAmount = 0;
-
-            if (p.items && p.items.length > 0) {
-                p.items.forEach((item, idx) => {
-                    let amt = (item.qty || 0) * (item.price || 0);
-                    totalAmount += amt;
-                    itemsHtml += `
-                        <tr>
-                            <td style="text-align: center; border: 1px solid #cbd5e1; padding: 5px 8px;">${idx + 1}</td>
-                            <td style="text-align: left; border: 1px solid #cbd5e1; padding: 5px 8px;">${item.desc || ''}</td>
-                            <td style="text-align: center; border: 1px solid #cbd5e1; padding: 5px 8px;">${item.qty || 0}</td>
-                            <td style="text-align: center; border: 1px solid #cbd5e1; padding: 5px 8px;">${item.unit || ''}</td>
-                            <td style="text-align: center; border: 1px solid #cbd5e1; padding: 5px 8px;">${(item.price || 0).toLocaleString('th-TH', {minimumFractionDigits: 2})}</td>
-                            <td style="text-align: right; border: 1px solid #cbd5e1; padding: 5px 8px; padding-right: 12px;">${amt.toLocaleString('th-TH', {minimumFractionDigits: 2})}</td>
-                        </tr>
-                    `;
-                });
-            }
-
-            let textAmt = convertNumberToThaiText(p.grandTotal || totalAmount);
-
-            let billHTML = `
-                <div class="bill-container" style="margin-bottom: 20px;">
-                    <div class="header-section">
-                        <div class="header-left">
-                            <div class="shop-info-box">
-                                <strong>ชื่อร้าน (Company Name): </strong>${shopName || '-'}<br>
-                                <strong>ที่อยู่ (Address): </strong>${shopAddress || '-'}<br>
-                                <strong>เลขประจำตัวผู้เสียภาษี(Tax ID): </strong>${shopTax || '-'}
-                            </div>
-                        </div>
-                        <div class="title-box">บิลเงินสด<br><span style="font-size: 12px; font-weight: 400; opacity: 0.9;">CASH BILL / RECEIPT</span></div>
-                    </div>
-                    
-                    <table class="top-info">
-                        <tr>
-                            <td class="customer-info" style="width: 55%; display: table-cell;">
-                                <strong>นามลูกค้า (Customer):</strong> ${p.customerName || '-'}<br>
-                                <strong>ที่อยู่ (Address):</strong> ${p.address || '-'}<br>
-                                <strong>เลขประจำตัวผู้เสียภาษี:</strong> ${p.tax || '-'}
-                            </td>
-                            <td style="padding-left: 10px; width: 45%; display: table-cell;">
-                                <div class="no-date-box" style="width: 100%;">
-                                    <strong>เล่มที่ (Book No.):</strong> ${p.bookNo || '-'}<br>
-                                    <strong>เลขที่ (No.):</strong> ${p.billNo || '-'}<br>
-                                    <strong>วันที่ (Date):</strong> ${p.billDate || '-'}
-                                </div>
-                            </td>
-                        </tr>
-                    </table>
-
-                    <div class="table-responsive">
-                        <table class="data-table">
-                            <thead>
-                                <tr>
-                                    <th style="width: 5%; background: linear-gradient(135deg, #9333ea, #c084fc); color: #ffffff;">ลำดับ</th>
-                                    <th style="width: 47%; background: linear-gradient(135deg, #9333ea, #c084fc); color: #ffffff;">รายการสินค้า / รายละเอียด</th>
-                                    <th style="width: 8%; background: linear-gradient(135deg, #9333ea, #c084fc); color: #ffffff;">จำนวน</th>
-                                    <th style="width: 10%; background: linear-gradient(135deg, #9333ea, #c084fc); color: #ffffff;">หน่วย</th>
-                                    <th style="width: 13%; background: linear-gradient(135deg, #9333ea, #c084fc); color: #ffffff;">ราคาต่อหน่วย</th>
-                                    <th style="width: 13%; background: linear-gradient(135deg, #9333ea, #c084fc); color: #ffffff;">จำนวนเงิน</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                ${itemsHtml}
-                            </tbody>
-                        </table>
-                    </div>
-                    
-                    <table class="footer-table" style="width: 100%; border-collapse: collapse;">
-                        <tr>
-                            <td rowspan="2" style="width: 50%; vertical-align: middle; text-align: center; background-color: #faf5ff; border-right: 1px solid #f3e8ff; padding: 10px;">
-                                <div style="font-size: 12px; color: #64748b; margin-bottom: 6px;">(จำนวนเงินตัวอักษร)</div>
-                                <div style="font-size: 15px; color: #9333ea; font-weight: 600;">${textAmt}</div>
-                            </td>
-                            <td class="footer-total-label" style="font-weight: 600; color: #475569; text-align: center; vertical-align: middle; padding: 10px;">
-                                รวมราคาสินค้า<br><span style="font-size: 11px; font-weight: 400; color: #64748b;">(Net Total)</span>
-                            </td>
-                            <td style="width: 25%; font-weight: 600; text-align: center; vertical-align: middle; border: 1px solid #f3e8ff; padding: 10px;">${(p.grandTotal || totalAmount).toLocaleString('th-TH', {minimumFractionDigits: 2})}</td>
-                        </tr>
-                        <tr>
-                            <td class="footer-total-label" style="background-color: #faf5ff; font-weight: 700; color: #475569; text-align: center; vertical-align: middle; padding: 10px;">
-                                จำนวนเงินรวมทั้งสิ้น<br>
-                                <span style="font-size: 11px; font-weight: 600; color: #9333ea;">(Grand Total)</span>
-                            </td>
-                            <td style="width: 25%; background-color: #faf5ff; color: #9333ea; font-size: 16px; text-align: center; vertical-align: middle; font-weight: 700; border: 1px solid #f3e8ff; padding: 10px;">${(p.grandTotal || totalAmount).toLocaleString('th-TH', {minimumFractionDigits: 2})}</td>
-                        </tr>
-                    </table>
-
-                    <div class="signature-section" style="display: flex; justify-content: flex-end; margin-top: 35px; width: 100%;">
-                        <div class="sig-box" style="width: 300px; text-align: center; margin-left: auto;">
-                            <div class="sig-line" style="border-bottom: 1px dashed #999; margin-bottom: 8px; height: 40px;"></div>
-                            <div style="font-size: 14px; margin-bottom: 4px;">${p.salesSignName || '(..................................................)'}</div>
-                            <div class="sig-text">ผู้รับเงิน / แคชเชียร์ (Cashier)</div>
-                            <div class="sig-date">วันที่: ${p.salesSignDate || '-'}</div>
+        let billHTML = `
+            <div class="bill-container" style="margin-bottom: 20px;">
+                <div class="header-section">
+                    <div class="header-left">
+                        <div class="shop-info-box">
+                            <strong>ชื่อร้าน (Company Name): </strong>${sName || '-'}<br>
+                            <strong>ที่อยู่ (Address): </strong>${sAddr || '-'}<br>
+                            <strong>เลขประจำตัวผู้เสียภาษี(Tax ID): </strong>${sTax || '-'}
                         </div>
                     </div>
+                    <div class="title-box">บิลเงินสด<br><span style="font-size: 12px; font-weight: 400; opacity: 0.9;">CASH BILL / RECEIPT</span></div>
                 </div>
-            `;
-            batchContainer.innerHTML += billHTML;
-        });
+                
+                <table class="top-info">
+                    <tr>
+                        <td class="customer-info" style="width: 55%; display: table-cell;">
+                            <strong>นามลูกค้า (Customer):</strong> ${p.customerName || '-'}<br>
+                            <strong>ที่อยู่ (Address):</strong> ${p.address || '-'}<br>
+                            <strong>เลขประจำตัวผู้เสียภาษี:</strong> ${p.tax || '-'}
+                        </td>
+                        <td style="padding-left: 10px; width: 45%; display: table-cell;">
+                            <div class="no-date-box" style="width: 100%;">
+                                <strong>เล่มที่ (Book No.):</strong> ${p.bookNo || '-'}<br>
+                                <strong>เลขที่ (No.):</strong> ${p.billNo || '-'}<br>
+                                <strong>วันที่ (Date):</strong> ${p.billDate || '-'}
+                            </div>
+                        </td>
+                    </tr>
+                </table>
+                ...
+        `;
+        batchContainer.innerHTML += billHTML;
+    });
 
-        closeModal('historyModal');
-
-        // สั่งพิมพ์รวมชุดโดยเปิดใช้งาน class สำหรับพิมพ์แบบ Batch
-        document.body.classList.add('batch-printing');
-        window.print();
-        document.body.classList.remove('batch-printing');
-    }
+    closeModal('historyModal');
+    document.body.classList.add('batch-printing');
+    window.print();
+    document.body.classList.remove('batch-printing');
+}
 
     async function exportAllData() {
         const allData = {
