@@ -1467,37 +1467,41 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 window.onload = function() {
-        calculate();
-        loadCustomerDropdown();
-        
-        let dateField = document.getElementById('billDate');
-        let sigSalesDate = document.getElementById('sigSalesDate');
-        let sigSalesNameInput = document.getElementById('sigSalesName'); // ช่องผู้เสนอราคา
-        
-        let d = new Date();
-        let day = String(d.getDate()).padStart(2, '0');
-        let month = String(d.getMonth() + 1).padStart(2, '0');
-        let year = d.getFullYear() + 543;
-        let currentDateStr = `${day}/${month}/${year}`;
+    calculate();
+    loadCustomerDropdown();
+    
+    let dateField = document.getElementById('billDate');
+    let sigSalesDate = document.getElementById('sigSalesDate');
+    let sigSalesNameInput = document.getElementById('sigSalesName');
+    
+    // แก้ไขตรงนี้: เปลี่ยนจาก sigCustDate เป็น sigCustomerDate
+    let sigCustomerDate = document.getElementById('sigCustomerDate'); 
+    
+    let d = new Date();
+    let day = String(d.getDate()).padStart(2, '0');
+    let month = String(d.getMonth() + 1).padStart(2, '0');
+    let year = d.getFullYear() + 543;
+    let currentDateStr = `${day}/${month}/${year}`;
 
-        if(!dateField.value) dateField.value = currentDateStr;
-        if(!sigSalesDate.value) sigSalesDate.value = currentDateStr;
-        if(!sigCustDate.value) sigCustDate.value = "";
+    if(!dateField.value) dateField.value = currentDateStr;
+    if(!sigSalesDate.value) sigSalesDate.value = currentDateStr;
+    
+    // ป้องกัน Error กรณีไม่พบ element
+    if(sigCustomerDate && !sigCustomerDate.value) {
+        sigCustomerDate.value = ""; 
+    }
 
-        // 📌 เพิ่มส่วนนี้: ดึงชื่อผู้เสนอราคาที่เคยบันทึกไว้ล่าสุดมาแสดงอัตโนมัติ
-        let savedSalesName = localStorage.getItem('default_sales_name');
-        if (savedSalesName && sigSalesNameInput && !sigSalesNameInput.value) {
-            sigSalesNameInput.value = savedSalesName;
-        }
+    let savedSalesName = localStorage.getItem('default_sales_name');
+    if (savedSalesName && sigSalesNameInput && !sigSalesNameInput.value) {
+        sigSalesNameInput.value = savedSalesName;
+    }
 
-        // ผูก Event ให้บันทึกชื่อผู้เสนอราคาทันทีที่มีการพิมพ์เปลี่ยนแปลง
-        if (sigSalesNameInput) {
-            sigSalesNameInput.addEventListener('input', function() {
-                localStorage.setItem('default_sales_name', this.value.trim());
-            });
-        }
-    };
-
+    if (sigSalesNameInput) {
+        sigSalesNameInput.addEventListener('input', function() {
+            localStorage.setItem('default_sales_name', this.value.trim());
+        });
+    }
+};
     function formatNumberInput(input) {
         let value = input.value;
         value = value.replace(/[^0-9.]/g, '');
