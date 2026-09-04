@@ -3070,5 +3070,48 @@ document.addEventListener("DOMContentLoaded", function() {
 window.onbeforeprint = preparePrint;
 	
 </script>
+<script>
+    // ตรวจสอบว่า Firebase ทำงานอยู่หรือไม่
+    document.addEventListener("DOMContentLoaded", function () {
+        if (typeof firebase === "undefined") {
+            console.error("Firebase library not loaded.");
+            return;
+        }
+
+        const db = firebase.database();
+        
+        // Path สำหรับเก็บข้อมูลเครื่องที่กำลังออนไลน์ใน Firebase Realtime Database
+        const connectionsRef = db.ref("active_users/connections");
+        const countRef = db.ref("active_users/count");
+
+        // สร้าง ID เฉพาะสำหรับแท็บ/เบราว์เซอร์นี้
+        const myConnectionRef = connectionsRef.push();
+
+        // ตรวจสอบสถานะการเชื่อมต่อกับ Firebase
+        db.ref(".info/connected").on("value", function (snap) {
+            if (snap.val() === true) {
+                // เมื่อขาดการเชื่อมต่อ (ปิดเว็บ, ปิดเครื่อง, เน็ตหลุด) ให้ลบข้อมูลของเครื่องนี้ออกทันที
+                myConnectionRef.onDisconnect().remove().then(function() {
+                    // บันทึกสถานะว่าเครื่องนี้กำลังออนไลน์อยู่
+                    myConnectionRef.set(true);
+                });
+            }
+        });
+
+        // ดึงจำนวนเครื่องที่ออนไลน์จริงมาแสดงผลบนหน้าจออัตโนมัติ
+        connectionsRef.on("value", function (snap) {
+            const activeCount = snap.numChildren(); // นับจำนวนโหนดทั้งหมดที่เชื่อมต่ออยู่จริง
+            
+            // อัปเดตตัวเลขแสดงผลที่หน้าจอ HTML
+            const countElement = document.getElementById("activeUsersCount");
+            if (countElement) {
+                countElement.innerText = activeCount > 0 ? activeCount : 1;
+            }
+            
+            // (ทางเลือก) อัปเดตตัวเลขรวมเก็บไว้ในฐานข้อมูลด้วย
+            countRef.set(activeCount > 0 ? activeCount : 1);
+        });
+    });
+</script>
 </body>
 </html>
