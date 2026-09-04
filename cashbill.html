@@ -1541,7 +1541,14 @@
         let finalBillNo = (isNewBill || !bNo) ? 'CS' + new Date().getTime() : bNo;
         bNoInput.value = finalBillNo;
 
-        if (!isNewBill) purchases = purchases.filter(p => p.billNo !== finalBillNo);
+        let originalTimestamp = new Date().getTime();
+        let existingBillIndex = purchases.findIndex(p => p.billNo === finalBillNo);
+
+        if (!isNewBill && existingBillIndex !== -1) {
+            // หากเป็นการบันทึกทับ ให้ดึง timestamp เดิมมาใช้ และลบรายการเก่าออก
+            originalTimestamp = purchases[existingBillIndex].timestamp;
+            purchases.splice(existingBillIndex, 1);
+        }
 
         purchases.push({
             billNo: finalBillNo,
@@ -1557,9 +1564,9 @@
             items: currentItems,
             salesSignName: document.getElementById('sigSalesName').value,
             salesSignDate: document.getElementById('sigSalesDate').value,
-            timestamp: new Date().getTime()
+            timestamp: originalTimestamp, // คงเวลาเดิมไว้เพื่อให้ตำแหน่งไม่เปลี่ยน
+            updatedAt: new Date().getTime() // บันทึกเวลาที่แก้ไขล่าสุดเผื่อต้องการใช้งาน
         });
-
         localStorage.setItem('saved_cashbill_purchases', JSON.stringify(purchases));
         syncToFirebase();
         Swal.fire({ icon: 'success', title: 'บันทึกสำเร็จ!', text: `เลขที่บิล: ${finalBillNo}`, timer: 1500, showConfirmButton: false });
