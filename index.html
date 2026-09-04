@@ -3076,46 +3076,50 @@ window.onbeforeprint = preparePrint;
 </script>
 <script>
     // ตรวจสอบว่า Firebase ทำงานอยู่หรือไม่
-    document.addEventListener("DOMContentLoaded", function () {
-        if (typeof firebase === "undefined") {
-            console.error("Firebase library not loaded.");
-            return;
+document.addEventListener("DOMContentLoaded", function () {
+    if (typeof firebase === "undefined") {
+        console.error("Firebase library not loaded.");
+        return;
+    }
+
+    const db = firebase.database();
+    const connectionsRef = db.ref("active_users/connections");
+    const countRef = db.ref("active_users/count");
+
+    // ป้องกันการนับเบิ้ลเมื่อเปลี่ยนหน้า โดยใช้ sessionStorage 
+    // เพื่อจำ Key ของ Connection เดิมในแท็บนี้ไว้ใช้งานต่อ
+    let connectionKey = sessionStorage.getItem("firebase_connection_key");
+    let myConnectionRef;
+
+    if (connectionKey) {
+        myConnectionRef = connectionsRef.child(connectionKey);
+    } else {
+        myConnectionRef = connectionsRef.push();
+        sessionStorage.setItem("firebase_connection_key", myConnectionRef.key);
+    }
+
+    // ตรวจสอบสถานะการเชื่อมต่อกับ Firebase
+    db.ref(".info/connected").on("value", function (snap) {
+        if (snap.val() === true) {
+            // เมื่อขาดการเชื่อมต่อ (ปิดเว็บ, ปิดแท็บ) ให้ลบข้อมูลเฉพาะ Key นี้ออก
+            myConnectionRef.onDisconnect().remove().then(function() {
+                myConnectionRef.set(true);
+            });
         }
-
-        const db = firebase.database();
-        
-        // Path สำหรับเก็บข้อมูลเครื่องที่กำลังออนไลน์ใน Firebase Realtime Database
-        const connectionsRef = db.ref("active_users/connections");
-        const countRef = db.ref("active_users/count");
-
-        // สร้าง ID เฉพาะสำหรับแท็บ/เบราว์เซอร์นี้
-        const myConnectionRef = connectionsRef.push();
-
-        // ตรวจสอบสถานะการเชื่อมต่อกับ Firebase
-        db.ref(".info/connected").on("value", function (snap) {
-            if (snap.val() === true) {
-                // เมื่อขาดการเชื่อมต่อ (ปิดเว็บ, ปิดเครื่อง, เน็ตหลุด) ให้ลบข้อมูลของเครื่องนี้ออกทันที
-                myConnectionRef.onDisconnect().remove().then(function() {
-                    // บันทึกสถานะว่าเครื่องนี้กำลังออนไลน์อยู่
-                    myConnectionRef.set(true);
-                });
-            }
-        });
-
-        // ดึงจำนวนเครื่องที่ออนไลน์จริงมาแสดงผลบนหน้าจออัตโนมัติ
-        connectionsRef.on("value", function (snap) {
-            const activeCount = snap.numChildren(); // นับจำนวนโหนดทั้งหมดที่เชื่อมต่ออยู่จริง
-            
-            // อัปเดตตัวเลขแสดงผลที่หน้าจอ HTML
-            const countElement = document.getElementById("activeUsersCount");
-            if (countElement) {
-                countElement.innerText = activeCount > 0 ? activeCount : 1;
-            }
-            
-            // (ทางเลือก) อัปเดตตัวเลขรวมเก็บไว้ในฐานข้อมูลด้วย
-            countRef.set(activeCount > 0 ? activeCount : 1);
-        });
     });
+
+    // ดึงจำนวนเครื่องที่ออนไลน์จริงมาแสดงผล
+    connectionsRef.on("value", function (snap) {
+        const activeCount = snap.numChildren();
+        
+        const countElement = document.getElementById("activeUsersCount");
+        if (countElement) {
+            countElement.innerText = activeCount > 0 ? activeCount : 1;
+        }
+        
+        countRef.set(activeCount > 0 ? activeCount : 1);
+    });
+});
 </script>
 </body>
 </html>
