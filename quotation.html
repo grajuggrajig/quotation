@@ -220,7 +220,13 @@
             vertical-align: top;
             padding: 6px;
         }
-
+		/* 📌 ปรับสัดส่วนให้ฝั่งซ้ายกว้างขึ้นเพื่อรองรับที่อยู่ยาวๆ */
+        .top-info td:first-child {
+            width: 62% !important;
+        }
+        .top-info td:last-child {
+            width: 38% !important;
+        }
         .customer-info-box {
             background: #f8fafc;
             border: 1px solid var(--border-color);
@@ -236,7 +242,14 @@
             border-radius: 12px;
             box-shadow: inset 0 2px 4px rgba(79, 70, 229, 0.02);
         }
-
+		/* ตรวจสอบให้แน่ใจว่า .customer-info-box และช่อง textarea ด้านในมีคุณสมบัตินี้ครับ */
+.customer-info-box .inline-textarea {
+    width: 100%;
+    box-sizing: border-box; /* ป้องกันไม่ให้ padding ดันให้กล่องกว้างเกิน 100% */
+    word-break: break-word !important;
+    overflow-wrap: break-word !important;
+    white-space: pre-wrap !important;
+}
         .info-row {
             margin-bottom: 8px;
             display: flex;
@@ -297,6 +310,10 @@
     
     /* ✅ [จุดที่ต้องเพิ่ม] ซ่อน scrollbar ตลอดเวลา */
     overflow-y: hidden; 
+	/* ✅ เพิ่มคำสั่งบังคับตัดคำป้องกันข้อความล้น */
+    word-break: break-word !important;
+    overflow-wrap: break-word !important;
+    white-space: pre-wrap !important;
 }
 
 /* 📌 ปรับ CSS ตอนพิมพ์ให้สอดคล้องกัน */
@@ -727,7 +744,24 @@
   .btn-print:hover {
     background: rgba(67, 160, 71, 0.95);
   }
-  
+  /* ปรับสัดส่วนตารางข้อมูลด้านบนให้ฝั่งซ้ายกว้างขึ้นเพื่อรองรับชื่อยาวๆ */
+.top-info td:first-child {
+    width: 68% !important;
+}
+.top-info td:last-child {
+    width: 32% !important;
+}
+
+/* ตั้งค่าให้ textarea และช่องกรอกข้อมูลตัดคำอัตโนมัติเมื่อพิมพ์ */
+@media print {
+    .inline-textarea, .inline-input, textarea.meta-field {
+        white-space: pre-wrap !important;
+        word-break: break-word !important;
+        overflow-wrap: break-word !important;
+        width: 100% !important;
+        height: auto !important;
+    }
+}
 </style>
 
 <div class="modern-toolbar no-print">
@@ -876,10 +910,10 @@ let docMeta = {
                                         <option value="">-- เลือกลูกค้า --</option>
                                     </select>
                                 </div>
-                                <div class="info-row">
-                                    <span class="info-label">นามลูกค้า (Attention):</span>
-                                    <input type="text" class="inline-input meta-field" data-field="custName" style="flex:1;" value="${docMeta.custName}" placeholder="ชื่อบริษัท/ลูกค้า...">
-                                </div>
+                                <div class="info-row" style="align-items: flex-start; margin-top: 6px;">
+    <span class="info-label">นามลูกค้า (Attention):</span>
+    <textarea class="inline-textarea meta-field" data-field="custName" placeholder="ชื่อบริษัท/ลูกค้า..." style="min-height: 32px;">${docMeta.custName}</textarea>
+</div>
                                 <div class="info-row" style="align-items: flex-start; margin-top: 6px;">
                                     <span class="info-label">ที่อยู่ (Address):</span>
                                     <textarea class="inline-textarea meta-field" data-field="custAddress" placeholder="ที่อยู่ลูกค้า...">${docMeta.custAddress}</textarea>
