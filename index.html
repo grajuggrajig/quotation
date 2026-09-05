@@ -1179,6 +1179,15 @@
 .btn-print-sparkle:active {
     transform: translateY(1px) scale(0.95);
 }	
+.hidden-section {
+    display: none !important;
+}
+
+#toggleAddressTaxBtn:hover {
+    background: linear-gradient(135deg, #e0f2fe, #bae6fd) !important;
+    border-color: #7dd3fc !important;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.08);
+}
 </style>
     
 <div class="panel-group">
@@ -1279,25 +1288,39 @@
     
     <table class="top-info">
         <tr>
-                       <td class="customer-info">
-    <div class="no-print" style="margin-bottom: 6px;">
+  <td class="customer-info">
+    <div style="margin-bottom: 6px;">
         <strong style="color: #0284c7; font-weight: 700;">🔍 เลือก/ค้นหาลูกค้า:</strong> 
+    </div>
+    <div class="no-print" style="margin-bottom: 6px;">
         <select id="customerSelect" class="inline-input no-print" style="width: 100%; font-weight: 600; color: #0369a1; border-bottom-color: #0284c7; margin-top: 4px;" onchange="selectCustomer(this)">
             <option value="">-- เลือกลูกค้า --</option>
         </select>
     </div>
+    
     <div style="margin-bottom: 6px;">
         <strong style="display: block; margin-bottom: 2px;">นามลูกค้า (Attention):</strong> 
-        <input type="text" id="custName" class="inline-input cust-name-input" placeholder="ชื่อบริษัท/ลูกค้า">
+        <input type="text" id="custName" class="inline-input cust-name-input" placeholder="ชื่อบริษัท/ลูกค้า...">
     </div>
-    <div style="margin-bottom: 6px;">
-        <strong style="display: block; margin-bottom: 2px;">ที่อยู่ (Address):</strong> 
-        <textarea id="custAddress" class="inline-textarea" style="width: 100%;" placeholder="ที่อยู่ลูกค้า..." oninput="autoGrow(this)"></textarea>
+
+    <!-- ปุ่มกดดีไซน์ทันสมัย น่ากด -->
+    <div class="no-print" style="margin: 8px 0; display: flex; justify-content: flex-end;">
+        <button type="button" id="toggleAddressTaxBtn" onclick="toggleAddressTax()" style="background: linear-gradient(135deg, #f0f9ff, #e0f2fe); border: 1px solid #bae6fd; color: #0284c7; border-radius: 20px; padding: 6px 14px; font-size: 12px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; box-shadow: 0 1px 2px rgba(0,0,0,0.05); transition: all 0.2s ease;">
+            <i class="fa-solid fa-chevron-down"></i> แสดงที่อยู่/ภาษี
+        </button>
     </div>
-    <!-- ช่องกรอกเลขที่ผู้เสียภาษีลูกค้าที่เพิ่มเข้ามาใหม่ -->
-    <div style="margin-bottom: 6px;">
-        <strong>เลขประจำตัวผู้เสียภาษี (Tax ID):</strong> <input type="text" id="custTaxId" class="inline-input" style="width: calc(100% - 150px);" placeholder="เลขประจำตัวผู้เสียภาษี 13 หลัก">
+
+    <!-- ส่วนที่ถูกซ่อนไว้เป็นค่าเริ่มต้น (เพิ่ม class="hidden-section") -->
+    <div id="addressTaxDetails" class="hidden-section">
+        <div style="margin-bottom: 6px;">
+            <strong style="display: block; margin-bottom: 2px;">ที่อยู่ (Address):</strong> 
+            <textarea id="custAddress" class="inline-textarea" style="width: 100%;" placeholder="ที่อยู่ลูกค้า..." oninput="autoGrow(this)"></textarea>
+        </div>
+        <div style="margin-bottom: 6px;">
+            <strong>เลขประจำตัวผู้เสียภาษี (Tax ID):</strong> <input type="text" id="custTaxId" class="inline-input" style="width: calc(100% - 150px);" placeholder="เลขประจำตัวผู้เสียภาษี 13 หลัก">
+        </div>
     </div>
+
     <div style="margin-bottom: 6px;">
         <strong>เรื่อง (Subject):</strong> <input type="text" id="quotSubject" class="inline-input" style="width: calc(100% - 50px);" value="ขอเสนอราคาสินค้า/บริการ">
     </div>
@@ -2392,6 +2415,7 @@ window.addEventListener('DOMContentLoaded', () => {
             title: 'ดึงข้อมูลลูกค้าสำเร็จ'
         });
     }
+	autoShowAddressTaxIfDataExists();
 }
 
     function loadDataByBillNo() {
@@ -3167,6 +3191,46 @@ document.addEventListener("DOMContentLoaded", function() {
         }
     });
 	
+	// ฟังก์ชันสำหรับกดปุ่มสลับซ่อน/แสดงที่อยู่และภาษี
+function toggleAddressTax() {
+    let details = document.getElementById('addressTaxDetails');
+    let btn = document.getElementById('toggleAddressTaxBtn');
+    if (details.classList.contains('hidden-section')) {
+        details.classList.remove('hidden-section');
+        btn.innerHTML = '<i class="fa-solid fa-chevron-up"></i> ซ่อนที่อยู่/ภาษี';
+    } else {
+        details.classList.add('hidden-section');
+        btn.innerHTML = '<i class="fa-solid fa-chevron-down"></i> แสดงที่อยู่/ภาษี';
+    }
+}
+
+// ฟังก์ชันตรวจสอบและกางออกอัตโนมัติหากมีข้อมูล
+function autoShowAddressTaxIfDataExists() {
+    let address = document.getElementById('custAddress').value.trim();
+    let taxId = document.getElementById('custTaxId').value.trim();
+    let details = document.getElementById('addressTaxDetails');
+    let btn = document.getElementById('toggleAddressTaxBtn');
+
+    if ((address !== "" || taxId !== "") && details.classList.contains('hidden-section')) {
+        details.classList.remove('hidden-section');
+        if (btn) {
+            btn.innerHTML = '<i class="fa-solid fa-chevron-up"></i> ซ่อนที่อยู่/ภาษี';
+        }
+    }
+}
+
+function autoShowAddressTaxIfDataExists() {
+    let addr = document.getElementById('custAddress').value.trim();
+    let taxId = document.getElementById('custTaxId').value.trim();
+    let detailsBox = document.getElementById('addressTaxDetails');
+    let btn = document.getElementById('toggleAddressTaxBtn');
+
+    if ((addr !== "" || taxId !== "") && detailsBox.classList.contains('hidden-section')) {
+        detailsBox.classList.remove('hidden-section');
+        btn.innerHTML = '<i class="fa-solid fa-chevron-up"></i> ซ่อนที่อยู่/ภาษี';
+    }
+}
+
 	function preparePrint() {
     // 1. ลบแถวข้อความเก่าออกก่อนทุกครั้งเพื่อป้องกันการเบิ้ลซ้ำ
     document.querySelectorAll('.auto-continued-row').forEach(el => el.remove());
