@@ -230,7 +230,7 @@
         .customer-info-box {
             background: #f8fafc;
             border: 1px solid var(--border-color);
-            padding: 14px;
+            padding: 10px;
             border-radius: 12px;
             box-shadow: inset 0 2px 4px rgba(0,0,0,0.01);
         }
@@ -506,7 +506,7 @@
         @media print {
             @page {
                 size: A4;
-                margin: 8mm; /* ลดขอบกระดาษสำหรับการพิมพ์ */
+                margin: 5mm; /* ลดขอบกระดาษสำหรับการพิมพ์ */
             }
             body {
                 background-color: #ffffff;
@@ -524,7 +524,7 @@
                 width: 100% !important;
                 margin: 0 auto !important;
                 background: #ffffff;
-                padding: 10px 15px !important; /* ลด padding ด้านใน */
+                padding: 8px 14px !important; /* ลด padding ด้านใน */
                 box-shadow: none !important;
                 border-radius: 0 !important;
                 border: none !important;
@@ -536,7 +536,7 @@
                 align-items: flex-start;
                 border-bottom: 1.5px solid #f1f5f9;
                 padding-bottom: 4px;
-                margin-bottom: 6px;
+                margin-bottom: 4px;
             }
             .logo-container img {
                 width: 55px !important; /* ย่อขนาดโลโก้ลงตอนพิมพ์ */
@@ -817,6 +817,7 @@
     }
 
 const urlParams = new URLSearchParams(window.location.search);
+const paramTaxNo = urlParams.get('taxNo'); // 📌 เพิ่มการรับค่าเลขผู้เสียภาษี
 const paramBillNo = urlParams.get('billNo');
 const paramBookNo = urlParams.get('bookNo');
 const paramSalesName = urlParams.get('salesName');
@@ -833,11 +834,11 @@ const autoBillNo = paramBillNo || `QT${year}${month}001`;
 let docMeta = {
     custName: "",
     custAddress: "",
+    custTaxNo: paramTaxNo ? decodeURIComponent(paramTaxNo) : "", // 📌 นำค่ามาใส่ในตัวแปรเก็บข้อมูล
     quotSubject: "",
     quotEnclose: "-",
     bookNo: paramBookNo || "-",
     billNo: autoBillNo,          
-    // เช็คว่าถ้ามี paramBillDate ให้ใช้ค่าที่ส่งมา ถ้าไม่มีค่อยใช้วันที่ปัจจุบัน
     billDate: paramBillDate ? decodeURIComponent(paramBillDate) : currentDateFormatted,
     remarkText: "ราคานี้ยังไม่รวมภาษีมูลค่าเพิ่ม / ยืนราคา 30 วัน",
     discountRate: 0,
@@ -904,28 +905,39 @@ let docMeta = {
                     <tr>
                         <td style="width: 58%;">
                             <div class="customer-info-box">
+							
                                 <div class="info-row no-print" style="margin-bottom: 10px;">
                                     <span class="info-label" style="color: var(--primary-color);">🔍 เลือกลูกค้า:</span>
                                     <select id="customerSelect" class="inline-input customerSelect" style="width: 180px; font-weight: 600;" onchange="selectCustomer(this)">
                                         <option value="">-- เลือกลูกค้า --</option>
                                     </select>
                                 </div>
+								
                                 <div class="info-row" style="align-items: flex-start; margin-top: 6px;">
-    <span class="info-label">นามลูกค้า (Attention):</span>
-    <textarea class="inline-textarea meta-field" data-field="custName" placeholder="ชื่อบริษัท/ลูกค้า..." style="min-height: 32px;">${docMeta.custName}</textarea>
-</div>
+									<span class="info-label">นามลูกค้า (Attention):</span>
+									<textarea class="inline-textarea meta-field" data-field="custName" placeholder="ชื่อบริษัท/ลูกค้า..." style="min-height: 32px;">${docMeta.custName}</textarea>
+								</div>
+								
                                 <div class="info-row" style="align-items: flex-start; margin-top: 6px;">
                                     <span class="info-label">ที่อยู่ (Address):</span>
                                     <textarea class="inline-textarea meta-field" data-field="custAddress" placeholder="ที่อยู่ลูกค้า...">${docMeta.custAddress}</textarea>
                                 </div>
+								
+								<div class="info-row" style="margin-top: 6px;">
+									<span class="info-label">เลขผู้เสียภาษี:</span>
+									<input type="text" class="inline-input meta-field" data-field="custTaxNo" style="flex:1;" value="${docMeta.custTaxNo}" placeholder="เลขประจำตัวผู้เสียภาษี...">
+									</div>
+								
                                 <div class="info-row" style="margin-top: 6px;">
                                     <span class="info-label">เรื่อง (Subject):</span>
                                     <input type="text" class="inline-input meta-field" data-field="quotSubject" style="flex:1;" value="${docMeta.quotSubject}" placeholder="หัวข้อเรื่อง...">
                                 </div>
+								
                                 <div class="info-row" style="margin-top: 6px;">
                                     <span class="info-label">สิ่งที่ส่งมาด้วย:</span>
                                     <input type="text" class="inline-input meta-field" data-field="quotEnclose" style="flex:1;" value="${docMeta.quotEnclose}">
                                 </div>
+								
                             </div>
                         </td>
                         <td style="width: 42%; padding-left: 10px;">
@@ -1300,6 +1312,7 @@ let docMeta = {
 if (foundBill) {
     docMeta.custName = foundBill.custName || foundBill.customerName || "";
     docMeta.custAddress = foundBill.custAddress || foundBill.address || "";
+	docMeta.custTaxNo = foundBill.custTaxNo || foundBill.customerTaxNo || foundBill.taxNo || foundBill.tax || "";
     docMeta.quotSubject = foundBill.quotSubject || foundBill.subject || "";
     docMeta.quotEnclose = foundBill.quotEnclose || foundBill.enclose || "-";
     docMeta.bookNo = foundBill.bookNo || "-";
@@ -1416,38 +1429,42 @@ if (foundBill) {
 	
 	
     function selectCustomer(selectElement) {
-        const selectedName = selectElement.value;
-        
-        let foundCustomer = null;
-        if (typeof allCustomersData !== 'undefined' && Array.isArray(allCustomersData)) {
-            foundCustomer = allCustomersData.find(c => {
-                let cName = typeof c === 'string' ? c : (c.name || c.customerName || c.companyName || '');
-                return cName === selectedName;
-            });
-        }
-
-        let custNameValue = "";
-        let custAddressValue = "";
-        let custItems = null;
-
-        if (foundCustomer && typeof foundCustomer === 'object') {
-            custNameValue = foundCustomer.name || foundCustomer.customerName || foundCustomer.companyName || selectedName;
-            custAddressValue = foundCustomer.address || foundCustomer.custAddress || '';
-            custItems = foundCustomer.items || null;
-        } else {
-            custNameValue = selectedName;
-            custAddressValue = "";
-        }
-
-        docMeta.custName = custNameValue;
-        docMeta.custAddress = custAddressValue;
-
-        if (custItems && Array.isArray(custItems) && custItems.length > 0) {
-            itemsData = custItems;
-        }
-
-        renderDocument();
+    const selectedName = selectElement.value;
+    
+    let foundCustomer = null;
+    if (typeof allCustomersData !== 'undefined' && Array.isArray(allCustomersData)) {
+        foundCustomer = allCustomersData.find(c => {
+            let cName = typeof c === 'string' ? c : (c.name || c.customerName || c.companyName || '');
+            return cName === selectedName;
+        });
     }
+
+    let custNameValue = "";
+    let custAddressValue = "";
+    let custTaxNoValue = ""; // 📌 เพิ่มตัวแปรเก็บเลขผู้เสียภาษี
+    let custItems = null;
+
+    if (foundCustomer && typeof foundCustomer === 'object') {
+        custNameValue = foundCustomer.name || foundCustomer.customerName || foundCustomer.companyName || selectedName;
+        custAddressValue = foundCustomer.address || foundCustomer.custAddress || '';
+        custTaxNoValue = foundCustomer.taxNo || foundCustomer.customerTaxNo || foundCustomer.tax || ''; // 📌 รองรับชื่อคีย์ที่หลากหลาย
+        custItems = foundCustomer.items || null;
+    } else {
+        custNameValue = selectedName;
+        custAddressValue = "";
+        custTaxNoValue = "";
+    }
+
+    docMeta.custName = custNameValue;
+    docMeta.custAddress = custAddressValue;
+    docMeta.custTaxNo = custTaxNoValue; // 📌 อัปเดตค่าลงใน state หลัก
+
+    if (custItems && Array.isArray(custItems) && custItems.length > 0) {
+        itemsData = custItems;
+    }
+
+    renderDocument();
+}
 
 window.addEventListener('DOMContentLoaded', () => {
     const urlParams = new URLSearchParams(window.location.search);
