@@ -230,7 +230,7 @@
         .customer-info-box {
             background: #f8fafc;
             border: 1px solid var(--border-color);
-            padding: 10px;
+            padding: 6px 10px !important;
             border-radius: 12px;
             box-shadow: inset 0 2px 4px rgba(0,0,0,0.01);
         }
@@ -251,7 +251,7 @@
     white-space: pre-wrap !important;
 }
         .info-row {
-            margin-bottom: 8px;
+            margin-bottom: 4px;
             display: flex;
             align-items: baseline;
         }
@@ -262,8 +262,8 @@
         .info-label {
             font-weight: 600;
             color: #475569;
-            min-width: 130px;
-            font-size: 12px;
+            min-width: 110px;
+            font-size: 11.5px;
         }
 
         .inline-input {
@@ -292,7 +292,7 @@
     outline: none;
     font-family: inherit;
     font-size: inherit;
-    padding: 6px 8px;
+    padding: 3px 6px;
     resize: none; /* ปิดการลากขยายมุมขวาล่าง */
     width: 100%;
     background: #fff;
@@ -303,7 +303,7 @@
     /* overflow: hidden; */
     
     /* ✅ [จุดที่ต้องเพิ่ม] เพิ่ม min-height เพื่อให้มีพื้นที่ขั้นต่ำ */
-    min-height: 45px; 
+    min-height: 28px; 
     
     /* ✅ [จุดที่ต้องเพิ่ม] บังคับให้ขยายความสูงอัตโนมัติเมื่อข้อความเยอะขึ้น */
     height: auto; 
@@ -344,6 +344,7 @@
         .data-table th, .data-table td {
             border: 1px solid var(--border-color);
             padding: 8px 10px;
+			vertical-align: middle !important;
         }
 
         .data-table th {
@@ -363,6 +364,20 @@
             font-family: inherit;
             font-size: inherit;
             background: transparent;
+			
+			/* 📌 ตั้งค่ารองรับการขึ้นบรรทัดใหม่และจัดกึ่งกลางแนวตั้ง */
+            display: flex;
+            align-items: center; /* ช่วยจัดให้อยู่กึ่งกลางแนวตั้งกรณีบรรทัดเดียว */
+            line-height: 1.4;
+            padding: 0;
+            margin: 0;
+            height: auto;
+            min-height: 22px;
+            overflow-y: hidden;
+            box-sizing: border-box;
+            word-break: break-word !important;
+            overflow-wrap: break-word !important;
+            white-space: pre-wrap !important;
             
             /* ✅ ปรับความสูงและระยะตัดคำให้พอดีกับบรรทัด */
             min-height: 22px;
@@ -372,11 +387,31 @@
             line-height: 1.4;
             padding: 2px 0;
         }
-
+			/* 📌 ปรับการจัดวางให้อยู่กึ่งกลางแนวตั้งและตัดคำอัตโนมัติ */
+            display: block;
+            box-sizing: border-box;
+            line-height: 1.4;
+            padding: 0;
+            margin: 0;
+            min-height: 22px;
+            height: auto;
+            overflow-y: hidden;
+            word-break: break-word !important;
+            overflow-wrap: break-word !important;
+            white-space: pre-wrap !important;
+        }
         @media print {
+            .data-table th, .data-table td {
+                border: 1px solid var(--border-color);
+                padding: 2px 5px !important;
+                vertical-align: middle !important;
+            }
             .item-desc {
                 height: auto !important;
                 border: none !important;
+                background: transparent !important;
+                display: flex;
+                align-items: center;
             }
         }
 
@@ -1526,27 +1561,28 @@ window.addEventListener('DOMContentLoaded', () => {
  });
  
  function adjustTextareaHeight(ta) {
+        if (!ta) return;
         ta.style.height = 'auto'; // รีเซ็ตความสูงเพื่อคำนวณใหม่
-        ta.style.height = (ta.scrollHeight - 4) + 'px'; // ลบ Padding ส่วนเกินออกเพื่อให้พอดีเป๊ะ
+        // ให้ความสูงเท่ากับ scrollHeight เพื่อรองรับข้อความหลายบรรทัดที่เพิ่มขึ้นอัตโนมัติ
+        ta.style.height = ta.scrollHeight + 'px'; 
     }
 
-    // เมื่อโหลดหน้าเว็บเสร็จ
+    // เมื่อโหลดหน้าเว็บเสร็จ ค้นหา textarea ทั้ง meta-field, inline-textarea และ item-desc
     window.addEventListener('load', function() {
-        // ค้นหา textarea ทั้งหมดที่มี class meta-field
-        const textareas = document.querySelectorAll('textarea.meta-field');
+        const textareas = document.querySelectorAll('textarea.meta-field, textarea.inline-textarea, textarea.item-desc');
         textareas.forEach(ta => {
             adjustTextareaHeight(ta);
         });
     });
 
-    // ปรับปรุง Event Listener ให้รองรับ .item-desc ด้วย
+    // ปรับปรุง Event Listener ให้รองรับการพิมพ์ข้อความแบบเรียลไทม์
     document.addEventListener('input', function(e) {
-        if (e.target && (e.target.matches('textarea.inline-textarea') || e.target.matches('textarea.item-desc'))) {
+        if (e.target && (e.target.matches('textarea.inline-textarea') || e.target.matches('textarea.item-desc') || e.target.matches('textarea.meta-field'))) {
             adjustTextareaHeight(e.target);
         }
     });
 
-    // เพิ่มการเรียกใช้งานตอนเรนเดอร์เอกสารเสร็จ
+    // เพิ่มการเรียกใช้งานตอนเรนเดอร์เอกสารเสร็จ เพื่อปรับขนาด textarea ของรายการสินค้าทั้งหมด
     const originalRenderDocument = renderDocument;
     renderDocument = function() {
         originalRenderDocument();
@@ -1555,7 +1591,7 @@ window.addEventListener('DOMContentLoaded', () => {
                 adjustTextareaHeight(ta);
             });
         }, 50);
-    };
+    };;
  
 </script>
 
