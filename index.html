@@ -1279,7 +1279,7 @@
     
     <table class="top-info">
         <tr>
-            <td class="customer-info">
+                       <td class="customer-info">
     <div class="no-print" style="margin-bottom: 6px;">
         <strong style="color: #0284c7; font-weight: 700;">🔍 เลือก/ค้นหาลูกค้า:</strong> 
         <select id="customerSelect" class="inline-input no-print" style="width: 100%; font-weight: 600; color: #0369a1; border-bottom-color: #0284c7; margin-top: 4px;" onchange="selectCustomer(this)">
@@ -1293,6 +1293,10 @@
     <div style="margin-bottom: 6px;">
         <strong style="display: block; margin-bottom: 2px;">ที่อยู่ (Address):</strong> 
         <textarea id="custAddress" class="inline-textarea" style="width: 100%;" placeholder="ที่อยู่ลูกค้า..." oninput="autoGrow(this)"></textarea>
+    </div>
+    <!-- ช่องกรอกเลขที่ผู้เสียภาษีลูกค้าที่เพิ่มเข้ามาใหม่ -->
+    <div style="margin-bottom: 6px;">
+        <strong>เลขประจำตัวผู้เสียภาษี (Tax ID):</strong> <input type="text" id="custTaxId" class="inline-input" style="width: calc(100% - 150px);" placeholder="เลขประจำตัวผู้เสียภาษี 13 หลัก">
     </div>
     <div style="margin-bottom: 6px;">
         <strong>เรื่อง (Subject):</strong> <input type="text" id="quotSubject" class="inline-input" style="width: calc(100% - 50px);" value="ขอเสนอราคาสินค้า/บริการ">
@@ -1763,6 +1767,7 @@ async function executeSave(isNewBill, showSuccessAlert = true) {
 
     let cName = document.getElementById('custName').value.trim();
     let cAddr = document.getElementById('custAddress').value.trim();
+	let cTaxId = document.getElementById('custTaxId') ? document.getElementById('custTaxId').value.trim() : '';
     let bNoInput = document.getElementById('billNo');
     let bNo = bNoInput.value.trim();
 
@@ -1880,9 +1885,9 @@ async function executeSave(isNewBill, showSuccessAlert = true) {
     });
 
     if (existingIndex >= 0) {
-        customers[existingIndex] = { name: cName, address: cAddr };
+        customers[existingIndex] = { name: cName, address: cAddr, taxId: cTaxId };
     } else {
-        customers.push({ name: cName, address: cAddr });
+        customers.push({ name: cName, address: cAddr, taxId: cTaxId });
     }
 
     localStorage.setItem('saved_quot_customers', JSON.stringify(customers));
@@ -1929,6 +1934,7 @@ async function executeSave(isNewBill, showSuccessAlert = true) {
         billDate: dateField ? dateField.value.trim() : '',
         customerName: cName,
         address: cAddr,
+		customerTaxId: cTaxId,
         subject: document.getElementById('quotSubject').value,
         enclosure: document.getElementById('quotEnclose').value,
         remark: document.getElementById('remarkText').value,
@@ -2180,16 +2186,24 @@ function updateCustomerDropdownUI(customers) {
 
     customers.forEach((c) => {
         let custName = '';
+        let custAddr = '';
+        let custTaxId = '';
+
         if (typeof c === 'string') {
             custName = c;
         } else if (c) {
             custName = c.name || c.customerName || c.companyName || '';
+            custAddr = c.address || '';
+            custTaxId = c.taxId || '';
         }
 
         if (custName) {
             let opt = document.createElement('option');
             opt.value = custName;
             opt.innerText = custName;
+            // เก็บข้อมูลที่อยู่และเลขประจำตัวผู้เสียภาษีไว้ใน dataset เพื่อให้ดึงมาใช้งานง่าย
+            opt.dataset.address = custAddr;
+            opt.dataset.taxId = custTaxId;
             select.appendChild(opt);
         }
     });
@@ -2197,6 +2211,39 @@ function updateCustomerDropdownUI(customers) {
     // คืนค่าที่เคยเลือกไว้
     if (currentSelected) {
         select.value = currentSelected;
+    }
+
+    // เพิ่ม Event Listener สำหรับดึงข้อมูลที่อยู่และเลขผู้เสียภาษีมาแปะอัตโนมัติเมื่อเลือกชื่อลูกค้า (ป้องกันการผูกซ้ำซ้อน)
+    if (!select.dataset.hasChangeListener) {
+        select.dataset.hasChangeListener = "true";
+        select.addEventListener('change', function() {
+            let selectedOpt = this.options[this.selectedIndex];
+            if (selectedOpt && selectedOpt.value) {
+                let addr = selectedOpt.dataset.address || '';
+                let taxId = selectedOpt.dataset.taxId || '';
+
+                // เติมข้อมูลลงช่องที่อยู่
+                let addrArea = document.getElementById('custAddress');
+                if (addrArea) {
+                    addrArea.value = addr;
+                    if (typeof autoGrow === 'function') {
+                        autoGrow(addrArea);
+                    }
+                }
+
+                // เติมข้อมูลลงช่องเลขประจำตัวผู้เสียภาษีอัตโนมัติ
+                let taxInput = document.getElementById('custTaxId');
+                if (taxInput) {
+                    taxInput.value = taxId;
+                }
+            } else {
+                // หากเลือกค่าว่าง ให้เคลียร์ช่องข้อมูลออก
+                let addrArea = document.getElementById('custAddress');
+                if (addrArea) { addrArea.value = ''; if (typeof autoGrow === 'function') autoGrow(addrArea); }
+                let taxInput = document.getElementById('custTaxId');
+                if (taxInput) { taxInput.value = ''; }
+            }
+        });
     }
 }
 
@@ -2230,42 +2277,98 @@ window.addEventListener('DOMContentLoaded', () => {
     }
 });
 
-    async function selectCustomer(select) {
-    let selectedName = select.value;
-    if (selectedName === "") return;
-    
-    let c = null;
+ async function selectCustomer(select) {
+    let selectedName = '';
+    let selectElement = document.getElementById('customerSelect');
 
-    // 1. ลองค้นหาจาก Firebase Cloud ก่อน (เพื่อความชัวร์ว่าได้ข้อมูลล่าสุดตรงกันทุกเครื่อง)
-    try {
-        if (typeof firebase !== 'undefined') {
-            if (!firebase.apps.length) {
-                firebase.initializeApp(firebaseConfig);
+    if (select) {
+        if (typeof select === 'object') {
+            if (select.value !== undefined) {
+                selectedName = select.value;
+            } else if (select.tagName === 'SELECT') {
+                selectElement = select;
+                selectedName = select.value;
             }
-            const db = firebase.firestore();
-            const doc = await db.collection("settings").doc("master_data").get();
-            if (doc.exists && doc.data().customers) {
-                let cloudCustomers = doc.data().customers;
-                c = cloudCustomers.find(item => item.name === selectedName);
+        } else {
+            selectedName = select;
+        }
+    }
+
+    if (!selectedName || selectedName === "") {
+        let addrArea = document.getElementById('custAddress');
+        if (addrArea) { 
+            addrArea.value = ''; 
+            if (typeof autoGrow === 'function') autoGrow(addrArea); 
+        }
+        let taxInput = document.getElementById('custTaxId');
+        if (taxInput) { taxInput.value = ''; }
+        let nameInput = document.getElementById('custName');
+        if (nameInput) { nameInput.value = ''; }
+        return;
+    }
+
+    let address = '';
+    let taxId = '';
+
+    // 1. ดึงจาก dataset ของ option ใน dropdown
+    if (selectElement && selectElement.selectedIndex !== -1) {
+        let selectedOpt = selectElement.options[selectElement.selectedIndex];
+        if (selectedOpt && (selectedOpt.value === selectedName || selectedOpt.text === selectedName)) {
+            address = selectedOpt.dataset.address || '';
+            // ดึงทุกรูปแบบ dataset ที่อาจเป็นไปได้
+            taxId = selectedOpt.dataset.taxId || selectedOpt.dataset.tax || selectedOpt.dataset.taxid || selectedOpt.dataset.taxNo || '';
+        }
+    }
+
+    // 2. ค้นหาจาก LocalStorage เพิ่มเติม
+    let c = null;
+    try {
+        let localCustomers = JSON.parse(localStorage.getItem('saved_quot_customers') || '[]');
+        c = localCustomers.find(item => {
+            if (!item) return false;
+            let itemName = typeof item === 'object' ? (item.name || item.customerName || item.companyName || '') : item;
+            return itemName === selectedName;
+        });
+
+        if (c && typeof c === 'object') {
+            console.log("Customer Data Found:", c); // 📌 เปิด F12 ดูกล่อง Console เพื่อเช็คโครงสร้างข้อมูลจริง
+            
+            if (!address) {
+                address = c.address || c.custAddress || c.companyAddress || '';
+            }
+            if (!taxId) {
+                // วนหาคีย์ทั้งหมดใน object ที่มีคำว่า tax (ไม่สนพิมพ์เล็ก-ใหญ่) เพื่อป้องกันคีย์ไม่ตรงกัน
+                let taxKey = Object.keys(c).find(k => k.toLowerCase().includes('tax'));
+                if (taxKey) {
+                    taxId = c[taxKey] || '';
+                } else {
+                    taxId = c.taxId || c.tax || c.tax_id || c.taxNumber || c.tax_number || c.taxNo || '';
+                }
             }
         }
-    } catch (error) {
-        console.warn("⚠️ ไม่สามารถดึงข้อมูลจาก Cloud ได้:", error);
+    } catch (e) {
+        console.error("Error reading saved_quot_customers from localStorage:", e);
     }
 
-    // 2. ถ้าใน Cloud ไม่เจอ ให้ลองหาจาก LocalStorage ในเครื่องแทน
-    if (!c) {
-        let localCustomers = JSON.parse(localStorage.getItem('saved_quot_customers') || '[]');
-        c = localCustomers.find(item => item.name === selectedName);
+    // 3. แสดงผลลงฟอร์ม
+    let nameInput = document.getElementById('custName');
+    if (nameInput) {
+        let displayName = (c && typeof c === 'object' && (c.name || c.customerName || c.companyName)) ? (c.name || c.customerName || c.companyName) : selectedName;
+        nameInput.value = displayName;
+    }
+    
+    let addrArea = document.getElementById('custAddress');
+    if (addrArea) {
+        addrArea.value = address;
+        if (typeof autoGrow === 'function') autoGrow(addrArea);
     }
 
-    // 3. แสดงผลข้อมูลลงในฟอร์ม
-    if (c) {
-        document.getElementById('custName').value = c.name;
-        let addrArea = document.getElementById('custAddress');
-        addrArea.value = c.address || "";
-        autoGrow(addrArea);
+    let taxInput = document.getElementById('custTaxId');
+    if (taxInput) {
+        taxInput.value = taxId;
+    }
 
+    if (selectedName && typeof Swal !== 'undefined') {
         const Toast = Swal.mixin({
             toast: true,
             position: 'top-end',
@@ -2274,14 +2377,6 @@ window.addEventListener('DOMContentLoaded', () => {
             timerProgressBar: true
         });
         Toast.fire({ icon: 'success', title: 'ดึงข้อมูลลูกค้าสำเร็จ' });
-    } else {
-        Swal.fire({
-            icon: 'warning',
-            title: 'ไม่พบข้อมูลที่อยู่',
-            text: 'ไม่พบที่อยู่ของลูกค้ารายนี้ในระบบ',
-            timer: 1500,
-            showConfirmButton: false
-        });
     }
 }
 
@@ -2504,6 +2599,11 @@ async function deleteHistoryBill(billNo) {
     document.getElementById('bookNo').value = data.bookNo || '';
     document.getElementById('billDate').value = data.billDate || '';
     document.getElementById('custName').value = data.customerName || '';
+    
+    let taxInput = document.getElementById('custTaxId');
+    if (taxInput) {
+        taxInput.value = data.taxId || '';
+    }
     
     let addrArea = document.getElementById('custAddress');
     addrArea.value = data.address || '';
