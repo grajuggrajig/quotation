@@ -1751,6 +1751,22 @@ document.addEventListener('change', () => { isDataChanged = true; });
 
 
 async function executeSave(isNewBill, showSuccessAlert = true) {
+
+    // 1. เช็กตั้งแต่ต้นฟังก์ชัน ถูกต้องแล้ว
+    let cTaxId = document.getElementById('custTaxId') ? document.getElementById('custTaxId').value.trim() : '';
+
+    // ตรวจสอบเงื่อนไข Tax ID: ถ้ามีการกรอกข้อมูล ต้องมีความยาวเท่ากับ 13 ตัวอักษรและเป็นตัวเลขเท่านั้น
+    if (cTaxId !== "" && (!/^\d{13}$/.test(cTaxId))) {
+        Swal.fire({
+            icon: 'warning',
+            title: 'เลขประจำตัวผู้เสียภาษีไม่ถูกต้อง',
+            text: 'กรุณากรอกเลขประจำตัวผู้เสียภาษีให้ครบ 13 หลัก หรือเว้นว่างไว้ถ้าไม่มี',
+            confirmButtonText: 'เข้าใจแล้ว',
+            confirmButtonColor: '#0284c7'
+        });
+        return; // หยุดการทำงาน ไม่ให้บันทึกต่อ
+    }
+
     if (typeof firebase === 'undefined') {
         Swal.fire({
             icon: 'error',
@@ -1768,9 +1784,14 @@ async function executeSave(isNewBill, showSuccessAlert = true) {
 
     let cName = document.getElementById('custName').value.trim();
     let cAddr = document.getElementById('custAddress').value.trim();
-    let cTaxId = document.getElementById('custTaxId') ? document.getElementById('custTaxId').value.trim() : ''; // ดึงค่าเลขประจำตัวผู้เสียภาษีลูกค้า
+    
+    // ⚠️ จุดที่แก้ไข: เอาคำว่า 'let' ออก เพราะประกาศตัวแปร cTaxId ไปแล้วด้านบนสุด
+    cTaxId = document.getElementById('custTaxId') ? document.getElementById('custTaxId').value.trim() : ''; 
+    
     let bNoInput = document.getElementById('billNo');
     let bNo = bNoInput.value.trim();
+
+    // ... (โค้ดส่วนที่เหลือด้านล่างปล่อยไว้ตามเดิมได้เลยครับ ทุกอย่างทำงานร่วมกันได้ปกติ)
 
     if (!cName) {
         Swal.fire({
