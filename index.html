@@ -1945,7 +1945,8 @@ async function executeSave(isNewBill, showSuccessAlert = true) {
         billDate: dateField ? dateField.value.trim() : '',
         customerName: cName,
         address: cAddr,
-        customerTaxId: cTaxId, // เพิ่มฟิลด์บันทึกเลขประจำตัวผู้เสียภาษีลงในบิล
+        taxNo: cTaxId,        // ⬅️ เพิ่มพารามิเตอร์ taxNo ตรงนี้ครับ
+        customerTaxId: cTaxId, // (เก็บอันเดิมไว้เผื่อใช้งานส่วนอื่น)
         subject: document.getElementById('quotSubject').value,
         enclosure: document.getElementById('quotEnclose').value,
         remark: document.getElementById('remarkText').value,
@@ -2237,10 +2238,12 @@ function updateCustomerDropdownUI(customers) {
                     }
                 }
 
-                let taxInput = document.getElementById('custTaxId');
-                if (taxInput) {
-                    taxInput.value = taxId; // แก้ไขให้ดึงจากตัวแปร taxId ที่ดึงมาจาก dataset แทนการใช้ตัวแปร data ที่ไม่ได้ประกาศ
-                }
+// ในฟังก์ชัน fillPurchaseDataToDOM(data)
+let taxInput = document.getElementById('custTaxId');
+if (taxInput) {
+    // รองรับทั้ง taxNo, customerTaxId, taxId และ custTaxId
+    taxInput.value = data.taxNo || data.customerTaxId || data.taxId || data.custTaxId || '';
+}
             } else {
                 let addrArea = document.getElementById('custAddress');
                 if (addrArea) { addrArea.value = ''; if (typeof autoGrow === 'function') autoGrow(addrArea); }
