@@ -1090,9 +1090,10 @@ let docMeta = {
                     </tr>
                 </table>
 
-                <div style="margin-bottom: 15px; font-size: 12px; color: #475569;">
-                    <strong>หมายเหตุ :</strong> <input type="text" class="inline-input meta-field" data-field="remarkText" style="width: 82%;" placeholder="ระบุเงื่อนไขหรือหมายเหตุเพิ่มเติม (ถ้ามี)" value="${docMeta.remarkText}">
-                </div>
+                <div style="margin-bottom: 15px; font-size: 12px; color: #475569; display: flex; align-items: flex-start; gap: 6px;">
+    <strong style="white-space: nowrap; padding-top: 4px;">หมายเหตุ :</strong> 
+    <textarea class="inline-textarea meta-field" data-field="remarkText" style="flex: 1;" placeholder="ระบุเงื่อนไขหรือหมายเหตุเพิ่มเติม (ถ้ามี)">${docMeta.remarkText}</textarea>
+</div>
 
                 <div class="signature-section">
                     <div class="sig-box">
