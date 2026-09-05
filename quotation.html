@@ -797,6 +797,13 @@
         height: auto !important;
     }
 }
+.footer-table td:first-child {
+    width: %;
+}
+.footer-table td.footer-total-label {
+    width: 25%;
+    white-space: nowrap;
+}
 </style>
 
 <div class="modern-toolbar no-print">
@@ -1062,9 +1069,13 @@ let docMeta = {
                         <td class="subTotal" style="width: 25%; text-align: right; font-weight: 600;">0.00</td>
                     </tr>
                     <tr>
-                        <td class="footer-total-label" style="text-align: center;">ส่วนลด (<input type="text" class="inline-input discountRate" style="width: 35px; text-align: center;" value="${docMeta.discountRate}" oninput="updateMeta('discountRate', this.value); calculateTotals()">%)</td>
-                        <td style="text-align: right;"><input type="text" class="inline-input discountAmount" style="width: 80px; text-align: right; font-weight: 700; color: var(--danger-color);" value="0.00" readonly></td>
-                    </tr>
+    <td class="footer-total-label" style="text-align: center; white-space: nowrap;">
+        <div style="display: inline-flex; align-items: center; justify-content: center; gap: 2px;">
+            ส่วนลด (<input type="text" class="discountRate" style="width: 35px; text-align: center; border: none; background: transparent; outline: none;" value="${docMeta.discountRate}" oninput="updateMeta('discountRate', this.value); calculateTotals()">%)
+        </div>
+    </td>
+    <td style="text-align: right; padding-right: 12px;"><input type="text" class="discountAmount" style="width: 100%; text-align: right; font-weight: 700; color: var(--danger-color); border: none; background: transparent; outline: none;" value="0.00" readonly></td>
+</tr>
                     <tr>
                         <td class="footer-total-label" style="color: var(--primary-color); text-align: center;">รวมราคาสินค้าสุทธิ (Net Total)</td>
                         <td class="netTotal" style="font-weight: 600; text-align: right;">0.00</td>
