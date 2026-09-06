@@ -1838,7 +1838,6 @@ async function executeSave(isNewBill, showSuccessAlert = true, keepOriginalDate 
     let cName = document.getElementById('custName').value.trim();
     let cAddr = document.getElementById('custAddress').value.trim();
     
-    // ⚠️ จุดที่แก้ไข: เอาคำว่า 'let' ออก เพราะประกาศตัวแปร cTaxId ไปแล้วด้านบนสุด
     cTaxId = document.getElementById('custTaxId') ? document.getElementById('custTaxId').value.trim() : ''; 
     
     let bNoInput = document.getElementById('billNo');
@@ -1923,10 +1922,12 @@ async function executeSave(isNewBill, showSuccessAlert = true, keepOriginalDate 
     let dateField = document.getElementById('billDate');
     let sigSalesDate = document.getElementById('sigSalesDate');
 
-    // 📌 เพิ่มเงื่อนไขเช็ก keepOriginalDate: ถ้าเป็นจริง และไม่ได้สั่งสร้างบิลใหม่ จะไม่เปลี่ยนวันที่เป็นปัจจุบัน
     let isOldBill = document.getElementById('searchOldBillNo') && document.getElementById('searchOldBillNo').value.trim() !== "";
-    
+    let editingBillNo = document.getElementById('billNo') && document.getElementById('billNo').value.trim() !== "";
+
+    // 🛠️ แก้ไข: ถ้านี่เป็นการบันทึกทับบิลเดิม (ไม่ใช่การกดสร้างบิลใหม่) ระบบจะ "รักษาวันที่เดิม" บนหน้าจอไว้ ไม่ให้เด้งเปลี่ยนเป็นวันปัจจุบัน
     if (isNewBill) {
+        // กรณีสร้างเป็นบิลใหม่จริงๆ (กดปุ่มบันทึกเป็นบิลใหม่) ค่อยใช้วันที่ปัจจุบัน
         let d = new Date();
         let day = String(d.getDate()).padStart(2, '0');
         let month = String(d.getMonth() + 1).padStart(2, '0');
@@ -1934,8 +1935,9 @@ async function executeSave(isNewBill, showSuccessAlert = true, keepOriginalDate 
         let currentDateStr = `${day}/${month}/${year}`;
         if (dateField) dateField.value = currentDateStr;
         if (sigSalesDate) sigSalesDate.value = currentDateStr;
-    } else if (!keepOriginalDate && !isOldBill) {
-        // กรณีบันทึกแก้ไขปกติ แต่ไม่ใช่บิลเก่า ก็อาจจะปล่อยไว้ตามโค้ดเดิม
+    } else {
+        // กรณีบันทึกทับบิลเดิม (Save ปกติ) หรือดึงบิลเก่ามาแก้ ให้ใช้วันที่เดิมที่มีอยู่บนหน้าจอโดยไม่เปลี่ยนแปลง
+        console.log("📌 รักษาวันที่เดิมของบิลไว้ ไม่เปลี่ยนเป็นวันที่ปัจจุบัน");
     }
 
     let customers = [];
@@ -2709,76 +2711,78 @@ async function deleteHistoryBill(billNo) {
 }
 
   function fillPurchaseDataToDOM(data) {
-	// 📌 เพิ่ม 2 บรรทัดนี้เพื่อให้ช่องเลขที่บิลและเล่มที่แสดงข้อมูลเดิม
-    document.getElementById('billNo').value = data.billNo || '';
+    // 1. กำหนดเลขที่บิลและเล่มที่
+    document.getElementById('searchOldBillNo').value = data.billNo || '';
     document.getElementById('bookNo').value = data.bookNo || '';
-    // กำหนดข้อมูลพื้นฐานของลูกค้า
-    document.getElementById('custName').value = data.customerName || data.custName || '';
+    document.getElementById('billNo').value = data.billNo || '';
+    
+    // 🔑 จุดแก้ปัญหา: ดึงวันที่เดิมของบิลมาใส่ในช่อง Input (ไม่ให้ค้างเป็นวันปัจจุบัน)
+    document.getElementById('billDate').value = data.billDate || '';
+    
+    // 2. ข้อมูลลูกค้า
+    document.getElementById('customerSelect').value = data.customerName || '';
+    document.getElementById('custName').value = data.customerName || '';
     
     let addrArea = document.getElementById('custAddress');
     if (addrArea) {
-        addrArea.value = data.customerAddress || data.custAddress || data.address || '';
-        if (typeof autoGrow === 'function') autoGrow(addrArea);
+        addrArea.value = data.address || '';
+        autoGrow(addrArea);
     }
-
-    // 📌 [จุดสำคัญ] เพิ่มการดึง Tax ID จากข้อมูลบิลเดิมมาแสดงผล
+    
     let taxInput = document.getElementById('custTaxId');
     if (taxInput) {
-        taxInput.value = data.customerTaxId || data.taxId || data.custTaxId || '';
+        taxInput.value = data.taxNo || data.customerTaxId || data.taxId || '';
     }
-
-    // ข้อมูลอื่นๆ ของใบเสนอราคา
+    
+    // 3. ข้อมูลหัวข้อและหมายเหตุ
     document.getElementById('quotSubject').value = data.subject || 'ขอเสนอราคาสินค้า/บริการ';
     document.getElementById('quotEnclose').value = data.enclosure || '';
     document.getElementById('remarkText').value = data.remark || '';
-
-    // 2. เติมข้อมูลส่วนลงนาม (รองรับตัวแปรหลายรูปแบบเพื่อความชัวร์)
+    
+    // 4. ส่วนลดและยอดเงิน
+    document.getElementById('discountRate').value = data.discountRate || 0;
+    document.getElementById('discountAmount').value = (data.discountAmount || 0).toFixed(2);
+    
+    // 5. ข้อมูลลายเซ็นและวันที่ในช่องลายเซ็น
     document.getElementById('sigCustomerName').value = data.customerSignName || '';
     document.getElementById('sigCustomerDate').value = data.customerSignDate || '';
     
-    let salesNameVal = data.salesSignName !== undefined ? data.salesSignName : (data.salesName || '');
-    document.getElementById('sigSalesName').value = salesNameVal;
-    document.getElementById('sigSalesDate').value = data.salesSignDate || data.billDate || '';
+    let sigSalesName = document.getElementById('sigSalesName');
+    if (sigSalesName) sigSalesName.value = data.salesSignName || '';
+    
+    let sigSalesDate = document.getElementById('sigSalesDate');
+    if (sigSalesDate) sigSalesDate.value = data.salesSignDate || ''; // ดึงวันที่เซ็นของผู้เสนอราคาเดิม
 
-    // 3. เติมส่วนลด
-    document.getElementById('discountRate').value = data.discountRate !== undefined ? data.discountRate : 0;
-    document.getElementById('discountAmount').value = data.discountAmount !== undefined ? data.discountAmount.toFixed(2) : '0.00';
-
-    // 4. เติมรายการสินค้าในตาราง (Item Rows)
+    // 6. โหลดรายการสินค้าเดิมลงในตาราง
     let tbody = document.getElementById('billTable').getElementsByTagName('tbody')[0];
-    tbody.innerHTML = ''; // ล้างตารางเดิมก่อน
-
-    let itemsToLoad = (data.items && data.items.length > 0) ? data.items : [{ sku: '', model: '', desc: '', qty: 0, unit: '', price: 0 }];
-
-    itemsToLoad.forEach((item, index) => {
-        let newRow = tbody.insertRow();
-        newRow.className = "item-row";
-        
-        // รองรับการดึงค่ารหัสรุ่นจากหลายคีย์ เพื่อป้องกันปัญหาบิลเก่าไม่แสดงผล
-        let modelValue = item.sku || item.model || item.code || item.productCode || item.itemCode || '';
-
-        newRow.innerHTML = `
-            <td class="row-num" style="text-align: center;">${index + 1}</td>
-            <td class="desc-cell"><textarea class="item-desc" placeholder="ระบุรายละเอียดสินค้า" oninput="autoGrow(this)" onblur="fetchProductByDesc(this)">${item.desc || ''}</textarea></td>
-            <td style="text-align: center;">
-                <input type="text" class="sku-input" placeholder="รุ่น" value="${modelValue}" 
-                       onkeydown="if(event.key === 'Enter'){ fetchProductBySKU(this); this.blur(); }">
-            </td>
-            <td style="text-align: center;"><input type="text" class="qty" value="${item.qty !== undefined ? item.qty : 0}" inputmode="decimal" onfocus="if(this.value==='0')this.value='';" onblur="if(this.value==='')this.value='0';" oninput="formatNumberInput(this); calculate();"></td>
-            <td style="text-align: center;"><input type="text" class="unit-input" placeholder="ชิ้น/อัน" value="${item.unit || ''}"></td>
-            <td style="text-align: center;"><input type="text" class="price" value="${item.price !== undefined ? item.price : 0}" inputmode="decimal" onfocus="if(this.value==='0')this.value='';" onblur="if(this.value==='')this.value='0';" oninput="formatNumberInput(this); calculate();"></td>
-            <td class="amount" style="text-align: right; padding-right: 12px;">0.00</td>
-            <td class="no-print" style="text-align: center;"><button class="btn-del" onclick="removeRow(this)">ลบ</button></td>
-        `;
-        
-        let textarea = newRow.querySelector('.item-desc');
-        if (textarea) {
+    tbody.innerHTML = '';
+    
+    if (data.items && data.items.length > 0) {
+        data.items.forEach((item, index) => {
+            let newRow = tbody.insertRow();
+            newRow.className = "item-row";
+            newRow.innerHTML = `
+                <td class="row-num" style="text-align: center;">${index + 1}</td>
+                <td class="desc-cell"><textarea class="item-desc" placeholder="ระบุรายละเอียดสินค้า" oninput="autoGrow(this)" onblur="fetchProductByDesc(this)">${item.desc || ''}</textarea></td>
+                <td style="text-align: center;">
+                    <input type="text" class="sku-input" value="${item.sku || item.model || ''}" placeholder="รุ่น" 
+                           onkeydown="if(event.key === 'Enter'){ fetchProductBySKU(this); this.blur(); }">
+                </td>
+                <td style="text-align: center;"><input type="text" class="qty" value="${item.qty || 0}" inputmode="decimal" onfocus="if(this.value==='0')this.value='';" onblur="if(this.value==='')this.value='0';" oninput="formatNumberInput(this); calculate();"></td>
+                <td style="text-align: center;"><input type="text" class="unit-input" value="${item.unit || ''}" placeholder="ชิ้น/อัน"></td>
+                <td style="text-align: center;"><input type="text" class="price" value="${item.price || 0}" inputmode="decimal" onfocus="if(this.value==='0')this.value='';" onblur="if(this.value==='')this.value='0';" oninput="formatNumberInput(this); calculate();"></td>
+                <td class="amount" style="text-align: right; padding-right: 12px;">0.00</td>
+                <td class="no-print" style="text-align: center;"><button class="btn-del" onclick="removeRow(this)">ลบ</button></td>
+            `;
+            let textarea = newRow.querySelector('.item-desc');
             autoGrow(textarea);
-        }
-    });
-
-    // 5. คำนวณยอดเงินรวมใหม่ทั้งหมดทันที
+        });
+    } else {
+        addRow();
+    }
+    
     calculate();
+    autoShowAddressTaxIfDataExists();
 }
 
     function fetchProductBySKU(input) {
@@ -3207,7 +3211,6 @@ async function openQuotation() {
     }
 
     try {
-        // 1. แสดง Loading แจ้งเตือนผู้ใช้
         Swal.fire({
             title: 'กรุณารอสักครู่...',
             text: 'ระบบกำลังจัดเตรียมหน้าเอกสารสำหรับพิมพ์',
@@ -3217,9 +3220,8 @@ async function openQuotation() {
             }
         });
 
-        // 2. ส่งพารามิเตอร์บอก executeSave ว่าเป็นการพิมพ์ (ไม่ต้องรีเซ็ตวันที่หากเป็นบิลเก่า)
+        // ส่งพารามิเตอร์ตัวที่ 3 เป็น true เพื่อบังคับรักษาวันที่เดิมไว้ไม่ให้ถูกรีเซ็ต
         if (typeof executeSave === 'function') {
-            // สมมติส่ง parameter ตัวที่ 3 เป็น true เพื่อบอกว่าเป็นโหมดพิมพ์/ดูบิลเก่า ไม่ให้เปลี่ยนวันที่
             await executeSave(false, false, true); 
         }
 
@@ -3229,10 +3231,8 @@ async function openQuotation() {
         let salesNameInput = document.getElementById('sigSalesName');
         let currentSalesName = salesNameInput ? salesNameInput.value.trim() : '';
         
-        // 3. หน่วงเวลาค้างไว้ 1 วินาที ก่อนเปลี่ยนหน้า
         await new Promise(resolve => setTimeout(resolve, 1000));
 
-        // 4. ย้ายหน้าไปยัง quotation.html
         window.location.href = `quotation.html?billNo=${encodeURIComponent(currentBillNo)}&bookNo=${encodeURIComponent(currentBookNo)}&salesName=${encodeURIComponent(currentSalesName)}&autoPrint=true`;
 
     } catch (error) {
