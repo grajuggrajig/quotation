@@ -1954,22 +1954,36 @@ async function executeSave(isNewBill, showSuccessAlert = true, keepOriginalDate 
         customers = JSON.parse(localStorage.getItem('saved_quot_customers') || '[]');
     }
 
-    let existingIndex = customers.findIndex(c => {
-        let existingName = '';
-        if (typeof c === 'string') {
-            existingName = c;
-        } else if (c) {
-            existingName = c.name || c.customerName || c.companyName || '';
-        }
-        return existingName === cName;
-    });
+    // 💡 แนวทางปรับปรุง: เช็กว่ามีตัวแปรเก็บชื่อเก่าตอนกดแก้ไขหรือไม่ 
+    // (สมมติว่าคุณมีฟิลด์ซ่อนหรือตัวแปร global เก็บชื่อเดิมไว้ตอนกดเลือกบิลเก่า เช่น window.editingOldCustomerName)
+    let oldName = window.editingOldCustomerName ? window.editingOldCustomerName.trim() : "";
+    let existingIndex = -1;
 
-    // บันทึกข้อมูลลูกค้าพร้อม Tax ID ลงในอาเรย์
+    // 1. ถ้ามีชื่อเก่า ให้ลองหาก่อนว่าชื่อเก่านี้มีอยู่ในลิสต์ไหม (กรณีเปลี่ยนชื่อบริษัท)
+    if (oldName !== "") {
+        existingIndex = customers.findIndex(c => {
+            let name = typeof c === 'string' ? c : (c.name || c.customerName || c.companyName || '');
+            return name.trim() === oldName;
+        });
+    }
+
+    // 2. ถ้าไม่พบชื่อเก่า ให้ลองเช็กจากชื่อใหม่ (cName) ปกติ
+    if (existingIndex < 0) {
+        existingIndex = customers.findIndex(c => {
+            let name = typeof c === 'string' ? c : (c.name || c.customerName || c.companyName || '');
+            return name.trim() === cName;
+        });
+    }
+
+    // 3. ทำการอัปเดตทับตำแหน่งเดิม หรือเพิ่มใหม่ถ้าไม่พบเลย
     if (existingIndex >= 0) {
         customers[existingIndex] = { name: cName, address: cAddr, taxId: cTaxId };
     } else {
         customers.push({ name: cName, address: cAddr, taxId: cTaxId });
     }
+
+    // หลังจากบันทึกเสร็จ อย่าลืมเคลียร์ค่า oldName ทิ้งด้วย
+    window.editingOldCustomerName = ""; 
 
     localStorage.setItem('saved_quot_customers', JSON.stringify(customers));
 
@@ -2279,12 +2293,12 @@ function updateCustomerDropdownUI(customers) {
         let custTaxId = '';
 
         if (typeof c === 'string') {
-            custName = c;
+            custName = c.trim();
         } else if (c) {
-            custName = c.name || c.customerName || c.companyName || '';
+            custName = (c.name || c.customerName || c.companyName || '').trim();
             custAddr = c.address || c.custAddress || c.companyAddress || '';
-            // รองรับหลายคีย์สำหรับ Tax ID ตั้งแต่ตอนสร้าง Option Dataset
-            custTaxId = c.taxId || c.customerTaxId || c.tax || c.tax_id || c.taxNumber || c.tax_number || c.taxNo || '';
+            // รองรับทุกคีย์สำหรับ Tax ID ที่เป็นไปได้
+            custTaxId = c.taxId || c.customerTaxId || c.tax || c.tax_id || c.taxNumber || c.tax_number || c.taxNo || c.custTaxId || '';
         }
 
         if (custName) {
@@ -2305,11 +2319,13 @@ function updateCustomerDropdownUI(customers) {
         select.dataset.hasChangeListener = "true";
         select.addEventListener('change', function() {
             let selectedOpt = this.options[this.selectedIndex];
+            let addrArea = document.getElementById('custAddress');
+            let taxInput = document.getElementById('custTaxId');
+
             if (selectedOpt && selectedOpt.value) {
                 let addr = selectedOpt.dataset.address || '';
                 let taxId = selectedOpt.dataset.taxId || '';
 
-                let addrArea = document.getElementById('custAddress');
                 if (addrArea) {
                     addrArea.value = addr;
                     if (typeof autoGrow === 'function') {
@@ -2317,17 +2333,19 @@ function updateCustomerDropdownUI(customers) {
                     }
                 }
 
-// ในฟังก์ชัน fillPurchaseDataToDOM(data)
-let taxInput = document.getElementById('custTaxId');
-if (taxInput) {
-    // รองรับทั้ง taxNo, customerTaxId, taxId และ custTaxId
-    taxInput.value = data.taxNo || data.customerTaxId || data.taxId || data.custTaxId || '';
-}
+                if (taxInput) {
+                    taxInput.value = taxId;
+                }
             } else {
-                let addrArea = document.getElementById('custAddress');
-                if (addrArea) { addrArea.value = ''; if (typeof autoGrow === 'function') autoGrow(addrArea); }
-                let taxInput = document.getElementById('custTaxId');
-                if (taxInput) { taxInput.value = ''; }
+                if (addrArea) {
+                    addrArea.value = '';
+                    if (typeof autoGrow === 'function') {
+                        autoGrow(addrArea);
+                    }
+                }
+                if (taxInput) {
+                    taxInput.value = '';
+                }
             }
         });
     }
@@ -2335,13 +2353,32 @@ if (taxInput) {
 
 // 3. ฟังก์ชันดึงรายชื่อลูกค้าแบบเดิม (ปรับให้เรียกใช้ระบบ Real-time)
 function loadCustomerDropdown() {
-    // ดึงจาก LocalStorage ขึ้นมาแสดงก่อนทันทีเพื่อความเร็ว
-    let localCustomers = JSON.parse(localStorage.getItem('saved_quot_customers') || '[]');
+    // 1. ดึงจาก LocalStorage ขึ้นมาแสดงก่อนทันทีเพื่อความเร็ว
+    let localCustomers = JSON.parse(localStorage.getItem('saved_quot_customers') || localStorage.getItem('saved_customers') || '[]');
+    
     if (localCustomers.length > 0) {
-        updateCustomerDropdownUI(localCustomers);
+        // กรองรายชื่อที่ซ้ำออกก่อนส่งไปอัปเดต UI
+        let uniqueCustomers = [];
+        let seenNames = new Set();
+
+        localCustomers.forEach(cust => {
+            let name = typeof cust === 'string' ? cust : (cust.name || cust.customerName || cust.companyName || '');
+            name = name.trim();
+            if (name && !seenNames.has(name)) {
+                seenNames.add(name);
+                // แปลงข้อมูลให้อยู่ในรูปแบบ Object เสมอ เพื่อป้องกันพังตอนดึง data attribute
+                if (typeof cust === 'string') {
+                    uniqueCustomers.push({ name: name, address: '', taxId: '' });
+                } else {
+                    uniqueCustomers.push(cust);
+                }
+            }
+        });
+
+        updateCustomerDropdownUI(uniqueCustomers);
     }
     
-    // เริ่มเปิดระบบ Real-time ฟังข้อมูลจาก Cloud
+    // 2. เริ่มเปิดระบบ Real-time ฟังข้อมูลจาก Cloud
     initRealtimeMasterData();
 }
 
@@ -2497,7 +2534,7 @@ function autoShowAddressTaxIfDataExists() {
     }
 }
 
-    function loadDataByBillNo() {
+function loadDataByBillNo() {
         let searchNo = document.getElementById('searchOldBillNo').value.trim();
         if(!searchNo) {
             Swal.fire({ icon: 'warning', title: 'กรุณากรอกเลขที่บิลเดิม', text: 'โปรดระบุเลขที่บิลที่ต้องการค้นหา' });
@@ -2507,7 +2544,15 @@ function autoShowAddressTaxIfDataExists() {
         let found = purchases.find(p => p.billNo === searchNo);
 
         if(found) {
-            fillPurchaseDataToDOM(found);
+            // 📌 ย้ายและเปลี่ยนจาก data มาเป็น found ตรงนี้
+            window.editingOldCustomerName = found.customerName; 
+            document.getElementById('custName').value = found.customerName || '';
+            document.getElementById('custAddress').value = found.address || '';
+            document.getElementById('custTaxId').value = found.taxNo || found.customerTaxId || found.taxId || found.custTaxId || '';
+
+            // หากมีฟังก์ชันเติมรายการสินค้าอื่นๆ ก็ใส่ต่อตรงนี้ได้เลย
+            // fillPurchaseDataToDOM(found);
+
             Swal.fire({
                 icon: 'success',
                 title: 'ดึงข้อมูลสำเร็จ!',
@@ -2523,6 +2568,9 @@ function autoShowAddressTaxIfDataExists() {
             });
         }
     }
+	
+	
+	
 
     function openHistoryModal() {
         renderHistoryTable();
