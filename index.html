@@ -1623,6 +1623,19 @@ window.onload = function() {
                 let addrArea = document.getElementById('custAddress');
                 addrArea.value = "";
                 autoGrow(addrArea);
+				
+				
+				// 📌 เพิ่มส่วนนี้: ซ่อนกล่องที่อยู่/ภาษี และรีเซ็ตปุ่มเปิด/ปิด
+            let addressTaxDetails = document.getElementById('addressTaxDetails');
+            if (addressTaxDetails) {
+                addressTaxDetails.classList.add('hidden-section');
+            }
+            let toggleBtn = document.getElementById('toggleAddressTaxBtn');
+            if (toggleBtn) {
+                toggleBtn.innerHTML = '<i class="fa-solid fa-chevron-down" style="font-size: 10px; transition: transform 0.3s ease;"></i> แสดงที่อยู่/ภาษี';
+            }
+				
+				
                 document.getElementById('quotSubject').value = "ขอเสนอราคาสินค้า/บริการ";
                 document.getElementById('quotEnclose').value = "";
                 document.getElementById('searchOldBillNo').value = "";
@@ -1790,7 +1803,7 @@ document.addEventListener('input', () => { isDataChanged = true; });
 document.addEventListener('change', () => { isDataChanged = true; });
 
 
-async function executeSave(isNewBill, showSuccessAlert = true) {
+async function executeSave(isNewBill, showSuccessAlert = true, keepOriginalDate = false) {
 
     // 1. เช็กตั้งแต่ต้นฟังก์ชัน ถูกต้องแล้ว
     let cTaxId = document.getElementById('custTaxId') ? document.getElementById('custTaxId').value.trim() : '';
@@ -1830,8 +1843,6 @@ async function executeSave(isNewBill, showSuccessAlert = true) {
     
     let bNoInput = document.getElementById('billNo');
     let bNo = bNoInput.value.trim();
-
-    // ... (โค้ดส่วนที่เหลือด้านล่างปล่อยไว้ตามเดิมได้เลยครับ ทุกอย่างทำงานร่วมกันได้ปกติ)
 
     if (!cName) {
         Swal.fire({
@@ -1912,6 +1923,9 @@ async function executeSave(isNewBill, showSuccessAlert = true) {
     let dateField = document.getElementById('billDate');
     let sigSalesDate = document.getElementById('sigSalesDate');
 
+    // 📌 เพิ่มเงื่อนไขเช็ก keepOriginalDate: ถ้าเป็นจริง และไม่ได้สั่งสร้างบิลใหม่ จะไม่เปลี่ยนวันที่เป็นปัจจุบัน
+    let isOldBill = document.getElementById('searchOldBillNo') && document.getElementById('searchOldBillNo').value.trim() !== "";
+    
     if (isNewBill) {
         let d = new Date();
         let day = String(d.getDate()).padStart(2, '0');
@@ -1920,6 +1934,8 @@ async function executeSave(isNewBill, showSuccessAlert = true) {
         let currentDateStr = `${day}/${month}/${year}`;
         if (dateField) dateField.value = currentDateStr;
         if (sigSalesDate) sigSalesDate.value = currentDateStr;
+    } else if (!keepOriginalDate && !isOldBill) {
+        // กรณีบันทึกแก้ไขปกติ แต่ไม่ใช่บิลเก่า ก็อาจจะปล่อยไว้ตามโค้ดเดิม
     }
 
     let customers = [];
@@ -1980,7 +1996,7 @@ async function executeSave(isNewBill, showSuccessAlert = true) {
                 confirmButtonText: 'ตกลง',
                 confirmButtonColor: '#0284c7'
             });
-            return; // หยุดการทำงานหากไม่มีเลขที่บิลเดิมในการบันทึกทับ
+            return;
         }
         finalBillNo = bNo;
     }
@@ -2006,8 +2022,8 @@ async function executeSave(isNewBill, showSuccessAlert = true) {
         billDate: dateField ? dateField.value.trim() : '',
         customerName: cName,
         address: cAddr,
-        taxNo: cTaxId,        // ⬅️ เพิ่มพารามิเตอร์ taxNo ตรงนี้ครับ
-        customerTaxId: cTaxId, // (เก็บอันเดิมไว้เผื่อใช้งานส่วนอื่น)
+        taxNo: cTaxId,        
+        customerTaxId: cTaxId, 
         subject: document.getElementById('quotSubject').value,
         enclosure: document.getElementById('quotEnclose').value,
         remark: document.getElementById('remarkText').value,
@@ -3201,9 +3217,10 @@ async function openQuotation() {
             }
         });
 
-        // 2. รอให้ executeSave บันทึกเสร็จ
+        // 2. ส่งพารามิเตอร์บอก executeSave ว่าเป็นการพิมพ์ (ไม่ต้องรีเซ็ตวันที่หากเป็นบิลเก่า)
         if (typeof executeSave === 'function') {
-            await executeSave(false, false); 
+            // สมมติส่ง parameter ตัวที่ 3 เป็น true เพื่อบอกว่าเป็นโหมดพิมพ์/ดูบิลเก่า ไม่ให้เปลี่ยนวันที่
+            await executeSave(false, false, true); 
         }
 
         let rawBookNo = document.getElementById('bookNo').value.trim();
@@ -3212,7 +3229,7 @@ async function openQuotation() {
         let salesNameInput = document.getElementById('sigSalesName');
         let currentSalesName = salesNameInput ? salesNameInput.value.trim() : '';
         
-        // 🛑 3. หน่วงเวลาค้างไว้ 1 วินาที (1000 มิลลิวินาที) ก่อนเปลี่ยนหน้า
+        // 3. หน่วงเวลาค้างไว้ 1 วินาที ก่อนเปลี่ยนหน้า
         await new Promise(resolve => setTimeout(resolve, 1000));
 
         // 4. ย้ายหน้าไปยัง quotation.html
