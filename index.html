@@ -3490,6 +3490,92 @@ document.addEventListener("DOMContentLoaded", function() {
         });
     }
 });
+
+(function() {
+    // ป้องกันการสร้างปุ่มซ้ำ
+    if (document.getElementById('open-cust-mgr-btn')) return;
+
+    const btn = document.createElement('button');
+    btn.id = 'open-cust-mgr-btn';
+    btn.innerText = '⚙️ จัดการรายชื่อลูกค้า';
+    btn.style.cssText = 'position: fixed; bottom: 20px; right: 20px; z-index: 9999; background: #28a745; color: white; border: none; padding: 10px 15px; border-radius: 5px; cursor: pointer; font-weight: bold; box-shadow: 0 2px 5px rgba(0,0,0,0.3);';
+
+    btn.onclick = function() {
+        // เรียกใช้ฟังก์ชันเปิด Modal จัดการลูกค้า
+        if (typeof openCustomerManager === 'function') {
+            openCustomerManager();
+        } else {
+            // หากยังไม่มีฟังก์ชัน ให้สร้างและรันชุดคำสั่งเปิด Modal ทันที
+            let modal = document.getElementById('cust-manager-modal');
+            if (!modal) {
+                modal = document.createElement('div');
+                modal.id = 'cust-manager-modal';
+                modal.style.cssText = 'position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); display:flex; justify-content:center; align-items:center; z-index:10000;';
+                
+                let content = document.createElement('div');
+                content.style.cssText = 'background:#fff; padding:20px; border-radius:8px; width:400px; max-height:80vh; overflow-y:auto; box-shadow:0 4px 6px rgba(0,0,0,0.1); font-family:sans-serif;';
+                
+                content.innerHTML = `
+                    <h3 style="margin-top:0; margin-bottom:15px; font-size:18px; color:#333;">จัดการรายชื่อลูกค้า</h3>
+                    <div id="cust-list-container"></div>
+                    <button onclick="document.getElementById('cust-manager-modal').style.display='none'; location.reload();" style="margin-top:15px; padding:6px 12px; background:#007bff; color:#fff; border:none; border-radius:4px; cursor:pointer; width:100%;">ปิดและรีเฟรชหน้าเว็บ</button>
+                `;
+                modal.appendChild(content);
+                document.body.appendChild(modal);
+            } else {
+                modal.style.display = 'flex';
+            }
+
+            let listContainer = document.getElementById('cust-list-container');
+            listContainer.innerHTML = '';
+            
+            let customers = JSON.parse(localStorage.getItem('saved_quot_customers') || '[]');
+            if (customers.length === 0) {
+                listContainer.innerHTML = '<p style="color:#666; text-align:center;">ไม่มีรายชื่อลูกค้าในระบบ</p>';
+                return;
+            }
+
+            customers.forEach((cust, index) => {
+                let name = typeof cust === 'string' ? cust : (cust.name || cust.customerName || cust.companyName || '');
+                
+                let row = document.createElement('div');
+                row.style.cssText = 'display:flex; justify-content:space-between; align-items:center; padding:8px 0; border-bottom:1px solid #eee;';
+                
+                let nameSpan = document.createElement('span');
+                nameSpan.innerText = name;
+                nameSpan.style.cssText = 'font-size:14px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:300px; color:#333;';
+                
+                let deleteBtn = document.createElement('button');
+                deleteBtn.innerText = ' [x] ';
+                deleteBtn.style.cssText = 'background:#ff4d4f; color:white; border:none; border-radius:3px; padding:4px 8px; cursor:pointer; font-weight:bold;';
+                
+                deleteBtn.onclick = function() {
+                    if (confirm(`ต้องการลบ "${name}" ใช่หรือไม่?`)) {
+                        customers.splice(index, 1);
+                        localStorage.setItem('saved_quot_customers', JSON.stringify(customers));
+                        
+                        if (typeof firebase !== 'undefined' && firebase.apps.length > 0) {
+                            firebase.firestore().collection("settings").doc("master_data").set({
+                                customers: customers
+                            }, { merge: true });
+                        }
+                        
+                        btn.click(); // จำลองการคลิกเพื่อรีเฟรช Modal
+                    }
+                };
+                
+                row.appendChild(nameSpan);
+                row.appendChild(deleteBtn);
+                listContainer.appendChild(row);
+            });
+        }
+    };
+
+    document.body.appendChild(btn);
+    console.log("✅ สร้างปุ่ม [⚙️ จัดการรายชื่อลูกค้า] ที่มุมขวาล่างเรียบร้อยแล้ว");
+})();
+
+
 </script>
 </body>
 </html>
