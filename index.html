@@ -3492,17 +3492,88 @@ document.addEventListener("DOMContentLoaded", function() {
 });
 
 (function() {
-    // ลบปุ่มเดิมทิ้งก่อน (ถ้ามี) เพื่ออัปเดตเวอร์ชันใหม่
     const oldBtn = document.getElementById('open-cust-mgr-btn');
     if (oldBtn) oldBtn.remove();
     const oldModal = document.getElementById('cust-manager-modal');
     if (oldModal) oldModal.remove();
+    const oldToast = document.getElementById('cust-toast-msg');
+    if (oldToast) oldToast.remove();
+    const oldConfirm = document.getElementById('cust-confirm-modal');
+    if (oldConfirm) oldConfirm.remove();
 
-    // สร้างปุ่มลอยขนาดกะทัดรัด (ไม่บดบังหน้าจอ)
+    // สร้าง Toast สำหรับแจ้งเตือนมุมจอ
+    const toast = document.createElement('div');
+    toast.id = 'cust-toast-msg';
+    toast.style.cssText = 'position: fixed; bottom: 70px; right: 20px; z-index: 10002; background: rgba(0, 0, 0, 0.85); color: #fff; padding: 8px 16px; border-radius: 6px; font-size: 13px; font-family: sans-serif; opacity: 0; transition: opacity 0.3s ease; pointer-events: none; box-shadow: 0 4px 12px rgba(0,0,0,0.15);';
+    document.body.appendChild(toast);
+
+    function showToast(message) {
+        toast.innerText = message;
+        toast.style.opacity = '1';
+        setTimeout(() => {
+            toast.style.opacity = '0';
+        }, 2000);
+    }
+
+    // สร้างฟังก์ชัน Custom Confirm Modal (แทนหน้าต่างเดิม)
+    function showCustomConfirm(message, onConfirm) {
+        let confirmModal = document.getElementById('cust-confirm-modal');
+        if (confirmModal) confirmModal.remove();
+
+        confirmModal = document.createElement('div');
+        confirmModal.id = 'cust-confirm-modal';
+        confirmModal.style.cssText = 'position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); display:flex; justify-content:center; align-items:center; z-index:10003; padding: 15px; box-sizing: border-box; font-family: sans-serif;';
+        
+        let dialogBox = document.createElement('div');
+        dialogBox.style.cssText = 'background:#fff; border-radius:10px; width:100%; max-width:320px; padding:20px; box-shadow:0 6px 20px rgba(0,0,0,0.25); text-align:center;';
+        
+        dialogBox.innerHTML = `
+            <div style="font-size: 32px; margin-bottom: 10px;">⚠️</div>
+            <div style="font-size:15px; color:#333; font-weight:600; margin-bottom:20px; line-height: 1.4;">${message}</div>
+            <div style="display:flex; gap:10px; justify-content:center;">
+                <button id="conf-cancel-btn" style="flex:1; padding:10px; background:#f1f2f6; color:#333; border:none; border-radius:6px; cursor:pointer; font-weight:bold; font-size:14px;">ยกเลิก</button>
+                <button id="conf-ok-btn" style="flex:1; padding:10px; background:#ff4d4f; color:#fff; border:none; border-radius:6px; cursor:pointer; font-weight:bold; font-size:14px;">ยืนยันลบ</button>
+            </div>
+        `;
+        
+        confirmModal.appendChild(dialogBox);
+        document.body.appendChild(confirmModal);
+
+        document.getElementById('conf-cancel-btn').onclick = function() {
+            confirmModal.remove();
+        };
+
+        document.getElementById('conf-ok-btn').onclick = function() {
+            confirmModal.remove();
+            onConfirm();
+        };
+    }
+
+    // สร้างปุ่มไอคอนมินิมอล
     const btn = document.createElement('button');
     btn.id = 'open-cust-mgr-btn';
-    btn.innerText = '⚙️ จัดการลูกค้า';
-    btn.style.cssText = 'position: fixed; bottom: 15px; right: 15px; z-index: 9999; background: #28a745; color: white; border: none; padding: 8px 12px; border-radius: 20px; cursor: pointer; font-size: 13px; font-weight: bold; box-shadow: 0 2px 8px rgba(0,0,0,0.3);';
+    btn.innerHTML = '⚙️ <span class="btn-text" style="display: none; white-space: nowrap; margin-left: 4px; vertical-align: middle;">จัดการลูกค้า</span>';
+    btn.style.cssText = 'position: fixed; bottom: 20px; right: 20px; z-index: 9999; background: rgba(255, 255, 255, 0.7); color: #555; border: 1px solid rgba(0,0,0,0.08); width: 38px; height: 38px; border-radius: 50%; cursor: pointer; font-size: 14px; box-shadow: 0 2px 5px rgba(0,0,0,0.08); backdrop-filter: blur(4px); display: flex; align-items: center; justify-content: center; transition: all 0.3s ease;';
+
+    const textSpan = btn.querySelector('.btn-text');
+    
+    btn.onmouseenter = function() {
+        btn.style.width = 'auto';
+        btn.style.padding = '0 12px';
+        btn.style.borderRadius = '20px';
+        btn.style.background = '#ffffff';
+        btn.style.color = '#000000';
+        textSpan.style.display = 'inline-block';
+    };
+    
+    btn.onmouseleave = function() {
+        btn.style.width = '38px';
+        btn.style.padding = '0';
+        btn.style.borderRadius = '50%';
+        btn.style.background = 'rgba(255, 255, 255, 0.7)';
+        btn.style.color = '#555';
+        textSpan.style.display = 'none';
+    };
 
     btn.onclick = function() {
         let modal = document.getElementById('cust-manager-modal');
@@ -3512,15 +3583,15 @@ document.addEventListener("DOMContentLoaded", function() {
             modal.style.cssText = 'position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); display:flex; justify-content:center; align-items:center; z-index:10000; padding: 10px; box-sizing: border-box;';
             
             let content = document.createElement('div');
-            // กำหนดความสูงสูงสุดและใช้ Flexbox จัดระเบียบให้ปุ่มปิดลอยอยู่ด้านบน
-            content.style.cssText = 'background:#fff; border-radius:8px; width:100%; max-width:400px; height:80vh; max-height:500px; display:flex; flexDirection:column; box-shadow:0 4px 10px rgba(0,0,0,0.2); font-family:sans-serif; overflow:hidden;';
-            content.style.display = 'flex';
-            content.style.flexDirection = 'column';
+            content.style.cssText = 'background:#fff; border-radius:8px; width:100%; max-width:400px; height:80vh; max-height:550px; display:flex; flex-direction:column; box-shadow:0 4px 10px rgba(0,0,0,0.2); font-family:sans-serif; overflow:hidden;';
             
             content.innerHTML = `
                 <div style="padding:15px; border-bottom:1px solid #ddd; background:#f8f9fa; display:flex; justify-content:space-between; align-items:center;">
                     <h3 style="margin:0; font-size:16px; color:#333;">จัดการรายชื่อลูกค้า</h3>
                     <button id="close-refresh-btn" style="padding:6px 12px; background:#007bff; color:#fff; border:none; border-radius:4px; cursor:pointer; font-size:13px; font-weight:bold;">ปิดและรีเฟรช</button>
+                </div>
+                <div style="padding:10px 15px; border-bottom:1px solid #eee; background:#fff;">
+                    <input type="text" id="cust-search-input" placeholder="🔍 ค้นหาชื่อลูกค้า..." style="width:100%; padding:8px 12px; box-sizing:border-box; border:1px solid #ddd; border-radius:6px; font-size:14px; outline:none;">
                 </div>
                 <div id="cust-list-container" style="padding:15px; overflow-y:auto; flex-grow:1;"></div>
             `;
@@ -3532,8 +3603,23 @@ document.addEventListener("DOMContentLoaded", function() {
                 modal.style.display = 'none';
                 location.reload();
             };
+
+            // ระบบกรองค้นหาแบบเรียลไทม์
+            document.getElementById('cust-search-input').oninput = function(e) {
+                let keyword = e.target.value.toLowerCase();
+                let rows = document.querySelectorAll('.cust-row');
+                rows.forEach(row => {
+                    let nameText = row.getAttribute('data-name').toLowerCase();
+                    if (nameText.includes(keyword)) {
+                        row.style.display = 'flex';
+                    } else {
+                        row.style.display = 'none';
+                    }
+                });
+            };
         } else {
             modal.style.display = 'flex';
+            document.getElementById('cust-search-input').value = '';
         }
 
         let listContainer = document.getElementById('cust-list-container');
@@ -3549,6 +3635,8 @@ document.addEventListener("DOMContentLoaded", function() {
             let name = typeof cust === 'string' ? cust : (cust.name || cust.customerName || cust.companyName || '');
             
             let row = document.createElement('div');
+            row.className = 'cust-row';
+            row.setAttribute('data-name', name);
             row.style.cssText = 'display:flex; justify-content:space-between; align-items:center; padding:10px 0; border-bottom:1px solid #eee;';
             
             let nameSpan = document.createElement('span');
@@ -3560,7 +3648,7 @@ document.addEventListener("DOMContentLoaded", function() {
             deleteBtn.style.cssText = 'background:#ff4d4f; color:white; border:none; border-radius:4px; padding:5px 10px; cursor:pointer; font-weight:bold; flex-shrink:0;';
             
             deleteBtn.onclick = function() {
-                if (confirm(`ต้องการลบ "${name}" ใช่หรือไม่?`)) {
+                showCustomConfirm(`ต้องการลบ "${name}" ใช่หรือไม่?`, function() {
                     customers.splice(index, 1);
                     localStorage.setItem('saved_quot_customers', JSON.stringify(customers));
                     
@@ -3570,8 +3658,9 @@ document.addEventListener("DOMContentLoaded", function() {
                         }, { merge: true });
                     }
                     
-                    btn.click(); // จำลองคลิกเพื่อรีเฟรชรายการใน Modal ทันที
-                }
+                    showToast(`🗑️ ลบ "${name}" เรียบร้อยแล้ว`);
+                    btn.click();
+                });
             };
             
             row.appendChild(nameSpan);
@@ -3581,7 +3670,7 @@ document.addEventListener("DOMContentLoaded", function() {
     };
 
     document.body.appendChild(btn);
-    console.log("✅ ติดตั้งปุ่มเวอร์ชันปรับปรุงสำหรับมือถือ/โน้ตบุ๊คเรียบร้อยแล้ว!");
+    console.log("✅ เพิ่มช่องค้นหารายชื่อเรียบร้อยแล้ว!");
 })();
 
 
