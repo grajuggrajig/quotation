@@ -2783,6 +2783,13 @@ async function deleteHistoryBill(billNo) {
     
     calculate();
     autoShowAddressTaxIfDataExists();
+    
+    // เพิ่มการเรียกซ้ำและบังคับอัปเดตความสูงของช่องที่อยู่เพิ่มเติม เพื่อป้องกันกรณีที่ Element ถูกซ่อนอยู่ตอนเรียกครั้งแรก
+    if (addrArea) {
+        setTimeout(() => {
+            autoGrow(addrArea);
+        }, 50);
+    }
 }
 
     function fetchProductBySKU(input) {
@@ -3274,65 +3281,12 @@ document.addEventListener("DOMContentLoaded", function() {
 	
 	
 	// ฟังก์ชันสำหรับตรวจสอบและเปิด/ปิดการแสดงผลที่อยู่และเลขผู้เสียภาษีอัตโนมัติ
-function toggleCustomerDetails() {
-    // 💡 แนะนำให้ใช้ ID ให้ตรงกับฟังก์ชัน selectCustomer (เช่น custAddress / custTaxId)
-    const addressInput = document.getElementById('customerAddress'); 
-    const taxIdInput = document.getElementById('customerTaxId');     
-    
-    const addressContainer = document.getElementById('addressContainer');
-    const taxIdContainer = document.getElementById('taxIdContainer');
-
-    const addressValue = addressInput ? addressInput.value.trim() : "";
-    const taxIdValue = taxIdInput ? taxIdInput.value.trim() : "";
-
-    // 📌 ป้องกัน Error กรณีไม่พบ Container ด้วยการเช็ค if ก่อนเข้าถึง .style
-    if (addressContainer) {
-        addressContainer.style.display = addressValue !== "" ? "block" : "none";
-    }
-
-    if (taxIdContainer) {
-        taxIdContainer.style.display = taxIdValue !== "" ? "block" : "none";
-    }
-}
-
-// ผูก Event Listener เพื่อให้เช็คและอัปเดตแบบ Real-time ทุกครั้งที่มีการพิมพ์
-document.addEventListener("DOMContentLoaded", function() {
-    const addressInput = document.getElementById('customerAddress');
-    const taxIdInput = document.getElementById('customerTaxId');
-
-    if (addressInput) {
-        addressInput.addEventListener('input', toggleCustomerDetails);
-    }
-    if (taxIdInput) {
-        taxIdInput.addEventListener('input', toggleCustomerDetails);
-    }
-
-    // เรียกทำงานครั้งแรกตอนโหลดหน้าเว็บ (เผื่อกรณีโหลดข้อมูลเก่าขึ้นมาแสดง)
-    toggleCustomerDetails();
-});
-	
-	
-	// ฟังก์ชันสำหรับควบคุมการเปิด/ปิดกล่องที่อยู่และภาษีอัตโนมัติ
-function updateAddressTaxVisibility(forceShow = false) {
-    let addressTaxDiv = document.getElementById('addressTaxDetails');
-    let toggleBtn = document.getElementById('toggleAddressTaxBtn');
-    let custAddress = document.getElementById('custAddress').value.trim();
-    let custTaxId = document.getElementById('custTaxId').value.trim();
-
-    // ถ้ามีการกรอกที่อยู่ หรือ เลขผู้เสียภาษี หรือมีคำสั่งบังคับเปิด (forceShow = true)
-    if (forceShow || custAddress !== "" || custTaxId !== "") {
-        addressTaxDiv.classList.remove('hidden-section');
-        if (toggleBtn) {
-            toggleBtn.innerHTML = '<i class="fa-solid fa-chevron-up"></i> ซ่อนที่อยู่/ภาษี';
-        }
-    }
-}
-	
-	
-	// ฟังก์ชันสำหรับกดปุ่มสลับซ่อน/แสดงที่อยู่และภาษี
+// ฟังก์ชันสำหรับกดปุ่มสลับซ่อน/แสดงที่อยู่และภาษี
 function toggleAddressTax() {
     let details = document.getElementById('addressTaxDetails');
     let btn = document.getElementById('toggleAddressTaxBtn');
+    if (!details || !btn) return;
+    
     if (details.classList.contains('hidden-section')) {
         details.classList.remove('hidden-section');
         btn.innerHTML = '<i class="fa-solid fa-chevron-up"></i> ซ่อนที่อยู่/ภาษี';
@@ -3342,32 +3296,46 @@ function toggleAddressTax() {
     }
 }
 
-// ฟังก์ชันตรวจสอบและกางออกอัตโนมัติหากมีข้อมูล
+// ฟังก์ชันตรวจสอบ: ถ้ามีข้อมูลให้กางออกอัตโนมัติ, ถ้าไม่มีให้ซ่อน
 function autoShowAddressTaxIfDataExists() {
-    let address = document.getElementById('custAddress').value.trim();
-    let taxId = document.getElementById('custTaxId').value.trim();
-    let details = document.getElementById('addressTaxDetails');
+    let addrInput = document.getElementById('custAddress');
+    let taxInput = document.getElementById('custTaxId');
+    let detailsBox = document.getElementById('addressTaxDetails');
     let btn = document.getElementById('toggleAddressTaxBtn');
 
-    if ((address !== "" || taxId !== "") && details.classList.contains('hidden-section')) {
-        details.classList.remove('hidden-section');
+    if (!detailsBox) return;
+
+    let addr = addrInput ? addrInput.value.trim() : "";
+    let taxId = taxInput ? taxInput.value.trim() : "";
+
+    if (addr !== "" || taxId !== "") {
+        detailsBox.classList.remove('hidden-section');
         if (btn) {
             btn.innerHTML = '<i class="fa-solid fa-chevron-up"></i> ซ่อนที่อยู่/ภาษี';
+        }
+    } else {
+        detailsBox.classList.add('hidden-section');
+        if (btn) {
+            btn.innerHTML = '<i class="fa-solid fa-chevron-down"></i> แสดงที่อยู่/ภาษี';
         }
     }
 }
 
-function autoShowAddressTaxIfDataExists() {
-    let addr = document.getElementById('custAddress').value.trim();
-    let taxId = document.getElementById('custTaxId').value.trim();
-    let detailsBox = document.getElementById('addressTaxDetails');
-    let btn = document.getElementById('toggleAddressTaxBtn');
+// ผูก Event Listener และเรียกใช้งานตอนโหลดหน้าเว็บ
+document.addEventListener("DOMContentLoaded", function() {
+    let addrInput = document.getElementById('custAddress');
+    let taxInput = document.getElementById('custTaxId');
 
-    if ((addr !== "" || taxId !== "") && detailsBox.classList.contains('hidden-section')) {
-        detailsBox.classList.remove('hidden-section');
-        btn.innerHTML = '<i class="fa-solid fa-chevron-up"></i> ซ่อนที่อยู่/ภาษี';
+    if (addrInput) {
+        addrInput.addEventListener('input', autoShowAddressTaxIfDataExists);
     }
-}
+    if (taxInput) {
+        taxInput.addEventListener('input', autoShowAddressTaxIfDataExists);
+    }
+
+    // เรียกทำงานครั้งแรกตอนโหลดหน้าเว็บ (รองรับเคสดึงข้อมูลเก่า / History Log)
+    autoShowAddressTaxIfDataExists();
+});
 
 	function preparePrint() {
     // 1. ลบแถวข้อความเก่าออกก่อนทุกครั้งเพื่อป้องกันการเบิ้ลซ้ำ
