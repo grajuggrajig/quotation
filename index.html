@@ -1188,6 +1188,8 @@
     border-color: #7dd3fc !important;
     box-shadow: 0 2px 4px rgba(0,0,0,0.08);
 }
+
+
 </style>
     
 <div class="panel-group">
@@ -1303,10 +1305,25 @@
         <input type="text" id="custName" class="inline-input cust-name-input" placeholder="ชื่อบริษัท/ลูกค้า...">
     </div>
 
-    <!-- ปุ่มกดดีไซน์ทันสมัย น่ากด -->
+    <!-- ปุ่มกดดีไซน์ทันสมัย โดดเด่น ไม่เกะกะ -->
     <div class="no-print" style="margin: 8px 0; display: flex; justify-content: flex-end;">
-        <button type="button" id="toggleAddressTaxBtn" onclick="toggleAddressTax()" style="background: linear-gradient(135deg, #f0f9ff, #e0f2fe); border: 1px solid #bae6fd; color: #0284c7; border-radius: 20px; padding: 6px 14px; font-size: 12px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; box-shadow: 0 1px 2px rgba(0,0,0,0.05); transition: all 0.2s ease;">
-            <i class="fa-solid fa-chevron-down"></i> แสดงที่อยู่/ภาษี
+        <button type="button" id="toggleAddressTaxBtn" onclick="toggleAddressTax()" 
+            style="background: linear-gradient(135deg, #ffffff, #f0f9ff); 
+                   border: 1px solid #bae6fd; 
+                   color: #0284c7; 
+                   border-radius: 9999px; 
+                   padding: 6px 14px; 
+                   font-size: 12px; 
+                   font-weight: 600; 
+                   cursor: pointer; 
+                   display: inline-flex; 
+                   align-items: center; 
+                   gap: 6px; 
+                   box-shadow: 0 2px 4px rgba(2, 132, 199, 0.08); 
+                   transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);"
+            onmouseover="this.style.background='linear-gradient(135deg, #f0f9ff, #e0f2fe)'; this.style.borderColor='#38bdf8'; this.style.boxShadow='0 4px 12px rgba(2, 132, 199, 0.15)'; this.style.transform='translateY(-1px)';" 
+            onmouseout="this.style.background='linear-gradient(135deg, #ffffff, #f0f9ff)'; this.style.borderColor='#bae6fd'; this.style.boxShadow='0 2px 4px rgba(2, 132, 199, 0.08)'; this.style.transform='translateY(0)';">
+            <i class="fa-solid fa-chevron-down" style="font-size: 10px; transition: transform 0.3s ease;"></i> แสดงที่อยู่/ภาษี
         </button>
     </div>
 
@@ -2352,6 +2369,9 @@ window.addEventListener('DOMContentLoaded', () => {
         if (taxInput) { taxInput.value = ''; }
         let nameInput = document.getElementById('custName');
         if (nameInput) { nameInput.value = ''; }
+        
+        // 📌 เมื่อไม่มีการเลือกลูกค้า ให้ซ่อนกล่องที่อยู่และเลขภาษีอัตโนมัติทันที
+        autoShowAddressTaxIfDataExists();
         return;
     }
 
@@ -2415,7 +2435,48 @@ window.addEventListener('DOMContentLoaded', () => {
             title: 'ดึงข้อมูลลูกค้าสำเร็จ'
         });
     }
-	autoShowAddressTaxIfDataExists();
+
+    // 📌 เรียกใช้งานฟังก์ชันตรวจสอบและเปิด-ปิดกล่องที่อยู่/เลขภาษีอัตโนมัติทันทีหลังดึงข้อมูลเสร็จ
+    autoShowAddressTaxIfDataExists();
+}
+
+/**
+ * 📌 ฟังก์ชันตรวจสอบและควบคุมการเปิด-ปิดกล่องที่อยู่และเลขประจำตัวผู้เสียภาษีอัตโนมัติ
+ * - หากมีข้อมูลที่อยู่ (custAddress) หรือเลขภาษี (custTaxId) อย่างใดอย่างหนึ่ง หรือทั้งคู่ จะทำการ "เปิด" กล่องแสดงผล
+ * - หากไม่มีข้อมูลทั้งคู่ จะทำการ "ซ่อน" กล่องแสดงผลตามสถานะปกติ
+ */
+function autoShowAddressTaxIfDataExists() {
+    let addrArea = document.getElementById('custAddress');
+    let taxInput = document.getElementById('custTaxId');
+    let detailsBox = document.getElementById('addressTaxDetails'); // ไอ디ของกล่อง/คอนเทนเนอร์ห่อหุ้มที่อยู่และเลขภาษี
+    let toggleBtn = document.getElementById('toggleAddressTaxBtn');   // ปุ่มกดแสดง/ซ่อน (ถ้ามี)
+
+    // ถ้าไม่พบกล่องข้อมูล ให้จบการทำงานทันทีเพื่อป้องกัน Error
+    if (!detailsBox) return;
+
+    let addressVal = addrArea ? addrArea.value.trim() : '';
+    let taxVal = taxInput ? taxInput.value.trim() : '';
+
+    // ตรวจสอบว่ามีข้อมูลหรือไม่
+    let hasData = (addressVal !== '' || taxVal !== '');
+
+    if (hasData) {
+        // กรณีมีข้อมูล: เปิดแสดงกล่อง
+        detailsBox.classList.remove('hidden-section'); // หรือปรับเป็น detailsBox.style.display = 'block'; ตามโครงสร้าง CSS ของคุณ
+        
+        // อัปเดตข้อความหรือไอคอนปุ่มกด (ถ้ามีปุ่มควบคุม) ให้สอดคล้องกัน
+        if (toggleBtn) {
+            toggleBtn.innerHTML = `<i class="fa-solid fa-chevron-up"></i> ซ่อนที่อยู่/ภาษี`;
+        }
+    } else {
+        // กรณีไม่มีข้อมูล: ซ่อนกล่องตามปกติ
+        detailsBox.classList.add('hidden-section'); // หรือปรับเป็น detailsBox.style.display = 'none'; ตามโครงสร้าง CSS ของคุณ
+        
+        // อัปเดตข้อความหรือไอคอนปุ่มกด (ถ้ามีปุ่มควบคุม)
+        if (toggleBtn) {
+            toggleBtn.innerHTML = `<i class="fa-solid fa-chevron-down"></i> แสดงที่อยู่/ภาษี`;
+        }
+    }
 }
 
     function loadDataByBillNo() {
@@ -2448,6 +2509,8 @@ window.addEventListener('DOMContentLoaded', () => {
     function openHistoryModal() {
         renderHistoryTable();
         document.getElementById('historyModal').style.display = 'flex';
+		
+		updateAddressTaxVisibility(true);
     }
 	
 	
@@ -3191,6 +3254,64 @@ document.addEventListener("DOMContentLoaded", function() {
         }
     });
 	
+	
+	
+	// ฟังก์ชันสำหรับตรวจสอบและเปิด/ปิดการแสดงผลที่อยู่และเลขผู้เสียภาษีอัตโนมัติ
+function toggleCustomerDetails() {
+    // 💡 แนะนำให้ใช้ ID ให้ตรงกับฟังก์ชัน selectCustomer (เช่น custAddress / custTaxId)
+    const addressInput = document.getElementById('customerAddress'); 
+    const taxIdInput = document.getElementById('customerTaxId');     
+    
+    const addressContainer = document.getElementById('addressContainer');
+    const taxIdContainer = document.getElementById('taxIdContainer');
+
+    const addressValue = addressInput ? addressInput.value.trim() : "";
+    const taxIdValue = taxIdInput ? taxIdInput.value.trim() : "";
+
+    // 📌 ป้องกัน Error กรณีไม่พบ Container ด้วยการเช็ค if ก่อนเข้าถึง .style
+    if (addressContainer) {
+        addressContainer.style.display = addressValue !== "" ? "block" : "none";
+    }
+
+    if (taxIdContainer) {
+        taxIdContainer.style.display = taxIdValue !== "" ? "block" : "none";
+    }
+}
+
+// ผูก Event Listener เพื่อให้เช็คและอัปเดตแบบ Real-time ทุกครั้งที่มีการพิมพ์
+document.addEventListener("DOMContentLoaded", function() {
+    const addressInput = document.getElementById('customerAddress');
+    const taxIdInput = document.getElementById('customerTaxId');
+
+    if (addressInput) {
+        addressInput.addEventListener('input', toggleCustomerDetails);
+    }
+    if (taxIdInput) {
+        taxIdInput.addEventListener('input', toggleCustomerDetails);
+    }
+
+    // เรียกทำงานครั้งแรกตอนโหลดหน้าเว็บ (เผื่อกรณีโหลดข้อมูลเก่าขึ้นมาแสดง)
+    toggleCustomerDetails();
+});
+	
+	
+	// ฟังก์ชันสำหรับควบคุมการเปิด/ปิดกล่องที่อยู่และภาษีอัตโนมัติ
+function updateAddressTaxVisibility(forceShow = false) {
+    let addressTaxDiv = document.getElementById('addressTaxDetails');
+    let toggleBtn = document.getElementById('toggleAddressTaxBtn');
+    let custAddress = document.getElementById('custAddress').value.trim();
+    let custTaxId = document.getElementById('custTaxId').value.trim();
+
+    // ถ้ามีการกรอกที่อยู่ หรือ เลขผู้เสียภาษี หรือมีคำสั่งบังคับเปิด (forceShow = true)
+    if (forceShow || custAddress !== "" || custTaxId !== "") {
+        addressTaxDiv.classList.remove('hidden-section');
+        if (toggleBtn) {
+            toggleBtn.innerHTML = '<i class="fa-solid fa-chevron-up"></i> ซ่อนที่อยู่/ภาษี';
+        }
+    }
+}
+	
+	
 	// ฟังก์ชันสำหรับกดปุ่มสลับซ่อน/แสดงที่อยู่และภาษี
 function toggleAddressTax() {
     let details = document.getElementById('addressTaxDetails');
@@ -3272,6 +3393,8 @@ function autoShowAddressTaxIfDataExists() {
 window.onbeforeprint = preparePrint;
 	
 </script>
+
+
 <script>
     // ตรวจสอบว่า Firebase ทำงานอยู่หรือไม่
 document.addEventListener("DOMContentLoaded", function () {
@@ -3317,6 +3440,22 @@ document.addEventListener("DOMContentLoaded", function () {
         
         countRef.set(activeCount > 0 ? activeCount : 1);
     });
+});
+
+document.addEventListener("DOMContentLoaded", function() {
+    let custAddrInput = document.getElementById('custAddress');
+    let custTaxInput = document.getElementById('custTaxId');
+
+    if (custAddrInput) {
+        custAddrInput.addEventListener('input', function() {
+            updateAddressTaxVisibility();
+        });
+    }
+    if (custTaxInput) {
+        custTaxInput.addEventListener('input', function() {
+            updateAddressTaxVisibility();
+        });
+    }
 });
 </script>
 </body>
