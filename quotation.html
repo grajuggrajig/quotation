@@ -222,11 +222,16 @@
         }
 		/* 📌 ปรับสัดส่วนให้ฝั่งซ้ายกว้างขึ้นเพื่อรองรับที่อยู่ยาวๆ */
         .top-info td:first-child {
-            width: 62% !important;
+            width: 55% !important;
         }
         .top-info td:last-child {
-            width: 38% !important;
+            width: 45% !important;
         }
+		/* ขยายความกว้างและปรับขนาดตัวอักษรช่องเลขที่ (No.) ให้พอดีไม่ถูกตัด */
+.no-date-box .info-row input[data-field="billNo"] {
+    font-size: 11.5px !important;
+    letter-spacing: -0.3px;
+}
         .customer-info-box {
             background: #f8fafc;
             border: 1px solid var(--border-color);
