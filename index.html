@@ -1667,7 +1667,9 @@ window.onload = function() {
                         <td style="text-align: center;"><input type="text" class="unit-input" placeholder="ชิ้น/อัน"></td>
                         <td style="text-align: center;"><input type="text" class="price" value="0" inputmode="decimal" onfocus="if(this.value==='0')this.value='';" onblur="if(this.value==='')this.value='0';" oninput="formatNumberInput(this); calculate();"></td>
                         <td class="amount" style="text-align: right; padding-right: 12px;">0.00</td>
-                        <td class="no-print" style="text-align: center;"><button class="btn-del" onclick="removeRow(this)">ลบ</button></td>
+                        <td class="no-print" style="text-align: center; white-space: nowrap;">
+						<button type="button" class="btn-del" onclick="removeRow(this)" title="ลบแถว" style="background: none; border: none; color: #6c757d; font-size: 16px; cursor: pointer;"><i class="fas fa-trash-alt"></i></button>
+						</td>
                     </tr>
                 `;
 
