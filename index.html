@@ -1689,7 +1689,7 @@ window.onload = function() {
         });
     }
 
-    function addRow() {
+function addRow() {
         let table = document.getElementById('billTable').getElementsByTagName('tbody')[0];
         let rowCount = table.rows.length;
         let newRow = table.insertRow();
@@ -1705,10 +1705,13 @@ window.onload = function() {
             <td style="text-align: center;"><input type="text" class="unit-input" placeholder="ชิ้น/อัน"></td>
             <td style="text-align: center;"><input type="text" class="price" value="0" inputmode="decimal" onfocus="if(this.value==='0')this.value='';" onblur="if(this.value==='')this.value='0';" oninput="formatNumberInput(this); calculate();"></td>
             <td class="amount" style="text-align: right; padding-right: 12px;">0.00</td>
-            <td class="no-print" style="text-align: center;"><button class="btn-del" onclick="removeRow(this)">ลบ</button></td>
+            <td class="no-print" style="text-align: center; white-space: nowrap;">
+                <button type="button" class="btn-del" style="background: #0284c7; margin-right: 4px;" onclick="insertRowAbove(this)" title="แทรกแถวนี้">แทรก</button>
+                <button type="button" class="btn-del" onclick="removeRow(this)">ลบ</button>
+            </td>
         `;
         calculate();
-		// 📌 เพิ่มโค้ดส่วนนี้เพื่อสั่งให้ตารางเลื่อนลงมาแถวล่าสุดอัตโนมัติ
+        
         let wrapper = document.querySelector('.table-responsive-wrapper');
         if (wrapper) {
             wrapper.scrollTop = wrapper.scrollHeight;
@@ -2728,6 +2731,33 @@ function filterHistoryTable() {
     }
 }
 
+
+function insertRowAbove(btn) {
+    let currentRow = btn.closest('tr');
+    let table = document.getElementById('billTable').getElementsByTagName('tbody')[0];
+    let newRow = table.insertRow(currentRow.rowIndex - 1); // แทรกก่อนแถวปัจจุบัน
+    newRow.className = "item-row";
+    newRow.innerHTML = `
+        <td class="row-num" style="text-align: center;"></td>
+        <td class="desc-cell"><textarea class="item-desc" placeholder="ระบุรายละเอียดสินค้า" oninput="autoGrow(this)" onblur="fetchProductByDesc(this)"></textarea></td>
+        <td style="text-align: center;">
+            <input type="text" class="sku-input" placeholder="รหัส/รุ่น (กด Enter)" 
+                   onkeydown="if(event.key === 'Enter'){ fetchProductBySKU(this); this.blur(); }">
+        </td>
+        <td style="text-align: center;"><input type="text" class="qty" value="0" inputmode="decimal" onfocus="if(this.value==='0')this.value='';" onblur="if(this.value==='')this.value='0';" oninput="formatNumberInput(this); calculate();"></td>
+        <td style="text-align: center;"><input type="text" class="unit-input" placeholder="ชิ้น/อัน"></td>
+        <td style="text-align: center;"><input type="text" class="price" value="0" inputmode="decimal" onfocus="if(this.value==='0')this.value='';" onblur="if(this.value==='')this.value='0';" oninput="formatNumberInput(this); calculate();"></td>
+        <td class="amount" style="text-align: right; padding-right: 12px;">0.00</td>
+        <td class="no-print" style="text-align: center; white-space: nowrap;">
+            <button type="button" class="btn-del" style="background: #0284c7; margin-right: 4px;" onclick="insertRowAbove(this)" title="แทรกแถวนี้">แทรก</button>
+            <button type="button" class="btn-del" onclick="removeRow(this)" title="ลบแถวนี้">ลบ</button>
+        </td>
+    `;
+    calculate();
+}
+
+
+
 async function deleteHistoryBill(billNo) {
     Swal.fire({
         title: 'ยืนยันการลบประวัติ?',
@@ -2820,7 +2850,16 @@ async function deleteHistoryBill(billNo) {
                 <td style="text-align: center;"><input type="text" class="unit-input" value="${item.unit || ''}" placeholder="ชิ้น/อัน"></td>
                 <td style="text-align: center;"><input type="text" class="price" value="${item.price || 0}" inputmode="decimal" onfocus="if(this.value==='0')this.value='';" onblur="if(this.value==='')this.value='0';" oninput="formatNumberInput(this); calculate();"></td>
                 <td class="amount" style="text-align: right; padding-right: 12px;">0.00</td>
-                <td class="no-print" style="text-align: center;"><button class="btn-del" onclick="removeRow(this)">ลบ</button></td>
+                <td class="no-print" style="text-align: center; white-space: nowrap;">
+    <!-- ปุ่มแทรก (ไอคอนบวก) -->
+    <button type="button" class="btn-del" style="background: transparent; border: none; color: #0284c7; margin-right: 6px; padding: 4px; cursor: pointer; font-size: 14px;" onclick="insertRowAbove(this)" title="แทรกแถวนี้">
+        <i class="fas fa-plus"></i>
+    </button>
+    <!-- ปุ่มลบ (ไอคอนถังขยะ) -->
+    <button type="button" class="btn-del" style="background: transparent; border: none; color: #9ca3af; padding: 4px; cursor: pointer; font-size: 14px;" onclick="removeRow(this)" title="ลบแถวนี้" onmouseover="this.style.color='#dc2626'" onmouseout="this.style.color='#9ca3af'">
+        <i class="fas fa-trash-alt"></i>
+    </button>
+</td>
             `;
             let textarea = newRow.querySelector('.item-desc');
             autoGrow(textarea);
