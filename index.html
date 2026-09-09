@@ -1,0 +1,3726 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ใบเสนอราคา (Quotation)</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+	<link rel="icon" href="data:,">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    
+    <!-- [1] Firebase App (Core) -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+    <!-- [2] Firebase Firestore -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
+    <!-- [3] Firebase Realtime Database (สำหรับนับจำนวนเครื่อง) -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
+    <link rel="icon" href="favicon.ico" type="image/x-icon">
+    <link rel="shortcut icon" href="#">
+
+    <script>
+        // --- กำหนดค่า Config และประกาศตัวแปรให้ถูกต้อง ---
+        const firebaseConfig = {
+          apiKey: "AIzaSyDAUc2urvUbXTNQ4ALSDIoo9tmN-6VOHuc",
+          authDomain: "quotation-d2453.firebaseapp.com",
+          projectId: "quotation-d2453",
+          storageBucket: "quotation-d2453.firebasestorage.app",
+          messagingSenderId: "579932052426",
+          appId: "1:579932052426:web:31cea6db99aa8a8d7f4d33",
+          measurementId: "G-D5ZTZ2TL8W",
+          databaseURL: "https://quotation-d2453-default-rtdb.asia-southeast1.firebasedatabase.app"
+        };
+
+        // --- เริ่มต้นใช้งาน Firebase App ครั้งเดียวจบสำหรับทุกบริการ ---
+        if (!firebase.apps.length) {
+            firebase.initializeApp(firebaseConfig);
+        }
+    </script>
+</head>
+<style>
+    body { 
+        font-family: 'Prompt', 'Tahoma', sans-serif; 
+        font-size: 12px; 
+        margin: 0; 
+        padding: 10px;
+        background-color: #f1f5f9; 
+        color: #1e293b;
+    }
+    
+    .swal2-container {
+        z-index: 3000 !important;
+    }
+
+    .bill-container { 
+        width: 800px; 
+        margin: 0 auto; 
+        padding: 25px 30px; 
+        background-color: #ffffff; 
+        border-radius: 16px;
+        box-shadow: 0 10px 20px -5px rgba(0, 0, 0, 0.05);
+        border: 1px solid #e2e8f0;
+        box-sizing: border-box;
+    }
+    
+    .header-section { 
+        display: flex; 
+        justify-content: space-between; 
+        align-items: flex-start; 
+        border-bottom: 2px dashed #e2e8f0;
+        padding-bottom: 15px; 
+        margin-bottom: 15px;
+    }
+
+    .header-left {
+        display: flex;
+        gap: 15px;
+        align-items: flex-start;
+        flex-grow: 1;
+    }
+
+    .logo-container {
+        width: 75px;
+        height: 75px;
+        border-radius: 10px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        overflow: hidden;
+        background-color: #ffffff;
+        flex-shrink: 0;
+        border: 1px solid #e2e8f0;
+        padding: 2px;
+    }
+
+    .logo-container img {
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+    }
+
+    .shop-info-box {
+        line-height: 1.5;
+        flex-grow: 1;
+    }
+
+    .company-name {
+        font-size: 15px;
+        font-weight: 700;
+        color: #0369a1;
+        margin-bottom: 2px;
+        letter-spacing: 0.3px;
+    }
+
+    .shop-info-box .address-text {
+        color: #475569;
+        font-size: 11px;
+        margin-bottom: 2px;
+    }
+
+    .shop-info-box .tax-text {
+        color: #64748b;
+        font-size: 11px;
+        font-weight: 500;
+    }
+    
+    .title-box { 
+        background: linear-gradient(135deg, #0284c7, #0369a1); 
+        color: #ffffff;
+        padding: 10px 22px; 
+        border-radius: 10px; 
+        font-weight: 600; 
+        font-size: 18px;
+        letter-spacing: 0.5px;
+        box-shadow: 0 6px 10px -2px rgba(3, 105, 161, 0.3);
+        white-space: nowrap;
+        text-align: center;
+    }
+    
+    .top-info { 
+        width: 100%; 
+        margin-top: 2px; 
+        border-collapse: collapse; 
+        margin-bottom: 15px;
+    }
+    
+    .customer-info { 
+        border: 1px solid #f1f5f9;
+        padding: 12px 15px; 
+        width: 55%; 
+        vertical-align: top; 
+        border-radius: 12px;
+        background-color: #f8fafc;
+        line-height: 1.6;
+    }
+
+    .customer-info strong, .no-date-box strong {
+        color: #475569;
+        font-weight: 600;
+    }
+    
+    .no-date-box { 
+        border: 1px solid #f1f5f9; 
+        padding: 12px 15px; 
+        text-align: left; 
+        border-radius: 12px;
+        background-color: #f8fafc;
+        line-height: 1.8;
+    }
+    
+    .data-table { 
+        width: 100%; 
+        border-collapse: collapse; 
+        margin-top: 10px; 
+    }
+    
+    .data-table th, .data-table td { 
+        border: 1px solid #cbd5e1; 
+        padding: 8px 10px; 
+        vertical-align: top; 
+    }
+
+    .data-table td.desc-cell {
+        text-align: left;
+        vertical-align: top;
+    }
+    
+    .data-table th { 
+        background: linear-gradient(135deg, #0284c7, #0369a1); 
+        color: #ffffff;
+        font-weight: 500;
+        font-size: 12px;
+        letter-spacing: 0.5px;
+        border: none;
+        padding: 9px 8px;
+        vertical-align: middle;
+    }
+
+    .data-table th:first-child { border-top-left-radius: 6px; }
+    .data-table th:last-child { border-top-right-radius: 6px; }
+    .data-table tr:nth-child(even) td { background-color: #f8fafc; }
+    
+    .footer-table { 
+        width: 100%; 
+        border-collapse: collapse; 
+        margin-top: -1px;
+    }
+    
+    .footer-table td { 
+        border: 1px solid #e2e8f0; 
+        padding: 7px 15px; 
+    }
+    
+    .footer-total-label { 
+        background-color: #f8fafc; 
+        font-weight: 600; 
+        text-align: right; 
+        width: 25%; 
+        color: #1e293b;
+    }
+
+    #grandTotal, #subTotal, #vatAmount {
+        font-weight: 700;
+        color: #0369a1;
+        text-align: right;
+        padding-right: 15px !important;
+    }
+
+    .signature-section {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 25px; 
+        padding: 0 10px;
+    }
+
+    .sig-box {
+        text-align: center;
+        width: 260px;
+    }
+
+    .sig-line {
+        border-bottom: 1px dashed #94a3b8;
+        height: 25px; 
+        margin-bottom: 6px;
+    }
+
+    .sig-text {
+        font-weight: 600;
+        color: #475569;
+        font-size: 11px;
+        margin-bottom: 4px;
+    }
+
+    .sig-name-input {
+        width: 100%;
+        text-align: center;
+        font-size: 11px;
+        color: #334155;
+        border: 1px dashed transparent;
+        background: transparent;
+        padding: 2px 4px;
+        border-radius: 4px;
+    }
+
+    .sig-name-input:focus {
+        border-color: #0284c7;
+        background: #fff;
+    }
+
+    .sig-date-input {
+        width: 130px;
+        text-align: center;
+        font-size: 11px;
+        color: #64748b;
+        border: 1px dashed #cbd5e1;
+        background: transparent;
+        padding: 2px 4px;
+        border-radius: 4px;
+        margin-top: 4px;
+    }
+
+    .sig-date-input:focus {
+        border-color: #0284c7;
+        background: #fff;
+        color: #0f172a;
+    }
+    
+    input, textarea, select { 
+        border: 1px solid #cbd5e1; 
+        border-radius: 6px;
+        font-family: 'Prompt', sans-serif; 
+        font-size: 12px; 
+        padding: 5px 8px; 
+        color: #0f172a;
+        background-color: #fff;
+        box-sizing: border-box;
+        transition: all 0.2s ease;
+    }
+
+    input:focus, textarea:focus, select:focus {
+        outline: none;
+        border-color: #0284c7;
+        box-shadow: 0 0 0 2px rgba(2, 132, 199, 0.15);
+    }
+    
+    .inline-input { 
+        border: 1px solid transparent;
+        background-color: transparent;
+        border-bottom: 1px dashed #cbd5e1; 
+        border-radius: 0;
+        padding: 2px 4px;
+        width: 200px; 
+    }
+
+    .inline-input:focus {
+        border-radius: 4px;
+        border-bottom-color: #0284c7;
+    }
+	/* คลาสเสริมสำหรับช่องนามลูกค้าให้รองรับขี้ยาวๆ */
+	.cust-name-input {
+		width: 100% !important;
+		max-width: 100% !important;
+		box-sizing: border-box;
+}
+    .inline-textarea {
+        border: 1px solid transparent;
+        background-color: transparent;
+        border-bottom: 1px dashed #cbd5e1; 
+        border-radius: 0;
+        padding: 2px 4px;
+        resize: none;
+        vertical-align: top;
+        font-family: 'Prompt', sans-serif;
+        overflow: hidden;
+        height: 28px;
+        min-height: 28px;
+    }
+
+    .inline-textarea:focus {
+        border-radius: 4px;
+        border-bottom-color: #0284c7;
+        outline: none;
+    }
+    
+    .qty, .unit-input, .price { 
+        text-align: center; 
+    }
+    .qty { width: 55px; }
+    .unit-input { width: 55px; }
+    .price { width: 75px; }
+
+    .sku-input {
+        width: 75px;
+        text-align: center;
+    }
+
+    .item-desc {
+        width: 100%;
+        height: 28px;
+        min-height: 28px;
+        resize: none;
+        line-height: 1.4;
+        overflow: hidden;
+    }
+    
+    .control-panel { 
+        max-width: 800px;
+        margin: 0 auto 15px auto; 
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        background: linear-gradient(135deg, #f8fafc, #e2e8f0);
+        padding: 12px 20px;
+        border-radius: 14px;
+        box-shadow: 0 8px 16px -4px rgba(2, 132, 199, 0.15);
+        border: 2px solid #0284c7;
+        gap: 15px;
+        flex-wrap: wrap;
+        position: sticky;
+        top: 10px;
+        z-index: 2500;
+        box-sizing: border-box;
+    }
+
+    .panel-group {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+    }
+
+    .panel-group-label {
+        font-size: 10px;
+        font-weight: 700;
+        color: #0369a1;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .panel-buttons {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+        flex-wrap: wrap;
+    }
+
+    .panel-divider {
+        width: 1px;
+        height: 45px;
+        background-color: #cbd5e1;
+        align-self: center;
+    }
+
+    .icon-btn {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        border: none;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #fff;
+        font-size: 15px;
+        position: relative;
+        box-shadow: 0 4px 10px rgba(0,0,0,.15);
+        transition: .2s;
+        flex-shrink: 0;
+    }
+    .icon-btn:hover {
+        transform: translateY(-2px) scale(1.05);
+    }
+    .icon-btn:active {
+        transform: scale(0.95);
+    }
+
+    .btn-history-ui { background: linear-gradient(135deg, #4f46e5, #6366f1); }
+    .btn-manage-cust { background: linear-gradient(135deg, #d97706, #f59e0b); }
+    .btn-manage-prod { background: linear-gradient(135deg, #0891b2, #06b6d4); }
+    .btn-save-ui { background: linear-gradient(135deg, #7c3aed, #a855f7); }
+    .btn-savenew-ui { background: linear-gradient(135deg, #059669, #10b981); }
+    .btn-print-ui { background: linear-gradient(135deg, #0284c7, #0369a1); }
+    .btn-close-ui { background: linear-gradient(135deg, #dc2626, #ef4444); }
+    .btn-clear-ui { background: linear-gradient(135deg, #e11d48, #fb7185); }
+    .btn-export-ui { background: linear-gradient(135deg, #0891b2, #06b6d4); }
+    .btn-import-ui { background: linear-gradient(135deg, #7c3aed, #a855f7); }
+    .btn-line-ui { background: linear-gradient(135deg, #06c755, #00b900); }
+
+    .icon-btn[data-tip]::after {
+        content: attr(data-tip);
+        position: absolute;
+        bottom: -34px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: #333;
+        color: #fff;
+        padding: 4px 8px;
+        border-radius: 6px;
+        font-size: 10px;
+        white-space: nowrap;
+        opacity: 0;
+        pointer-events: none;
+        transition: 0.2s;
+        z-index: 10;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.15);
+        font-family: 'Prompt', sans-serif;
+        font-weight: 400;
+    }
+    .icon-btn[data-tip]:hover::after {
+        opacity: 1;
+    }
+    
+    .btn-del { 
+        background: #ef4444; 
+        border: none;
+        color: white;
+        padding: 5px 10px;
+        font-size: 11px; 
+        border-radius: 6px;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+    .btn-del:hover { background: #dc2626; }
+
+    .btn-select-history {
+        background: #0284c7;
+        color: white;
+        border: none;
+        padding: 4px 10px;
+        font-size: 11px;
+        border-radius: 6px;
+        cursor: pointer;
+    }
+    .btn-select-history:hover { background: #0369a1; }
+    
+    .credit { font-size: 11px; color: #475569; font-weight: 500; align-self: center; }
+    .credit strong { color: #0284c7; }
+
+    .modal {
+        display: none;
+        position: fixed;
+        z-index: 2500;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0,0,0,0.5);
+        justify-content: center;
+        align-items: center;
+        padding: 10px;
+        box-sizing: border-box;
+    }
+    .modal-content {
+        background: #fff;
+        padding: 20px;
+        border-radius: 14px;
+        width: 450px;
+        max-width: 100%;
+        box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1);
+        max-height: 80vh;
+        overflow-y: auto;
+        box-sizing: border-box;
+    }
+    .modal-content-wide {
+        background: #fff;
+        padding: 20px;
+        border-radius: 14px;
+        width: 750px;
+        max-width: 100%;
+        box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1);
+        max-height: 85vh;
+        overflow-y: auto;
+        box-sizing: border-box;
+    }
+    .modal-header {
+        font-size: 15px;
+        font-weight: 600;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        position: sticky;
+        top: -20px;
+        background-color: #ffffff;
+        padding: 15px 0 10px 0;
+        z-index: 20;
+        margin-bottom: 0;
+        border-bottom: 1px solid #e2e8f0;
+    }
+    .modal-sticky-top {
+        position: sticky;
+        top: 35px;
+        background-color: #ffffff;
+        z-index: 15;
+        padding-bottom: 5px;
+    }
+
+    .close-btn {
+        background: none;
+        border: none;
+        font-size: 16px;
+        cursor: pointer;
+        color: #64748b;
+    }
+    .list-item-box {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 6px 10px;
+        border: 1px solid #e2e8f0;
+        border-radius: 6px;
+        margin-bottom: 6px;
+        background: #f8fafc;
+        font-size: 11px;
+    }
+    .history-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 10px;
+        font-size: 11px;
+    }
+    .history-table th, .history-table td {
+        border: 1px solid #cbd5e1;
+        padding: 6px 8px;
+        text-align: left;
+    }
+    .history-table th {
+        background-color: #0284c7;
+        color: #fff;
+        font-weight: 500;
+    }
+    .history-table tr:nth-child(even) td {
+        background-color: #f8fafc;
+    }
+
+    /* --- Media Print Styles --- */
+    @media print { 
+        @page { 
+            size: A4 portrait; 
+            margin: 3mm 5mm 3mm 5mm !important;
+        }
+        body { 
+            background-color: #ffffff !important; 
+            padding: 0 !important; 
+            margin: 0 !important;
+            color: #0f172a !important; 
+            -webkit-print-color-adjust: exact !important; 
+            print-color-adjust: exact !important; 
+            font-size: 11px !important; 
+        } 
+        .control-panel, .no-print { display: none !important; } 
+        .bill-container { 
+            width: 100% !important; 
+            max-width: 100% !important; 
+            border: none !important; 
+            box-shadow: none !important; 
+            padding: 0 !important; 
+            margin: 0 !important;
+        } 
+
+        thead { display: table-header-group !important; }
+        tr { break-inside: avoid !important; page-break-inside: avoid !important; }
+        .footer-table, .signature-section { break-inside: avoid !important; page-break-inside: avoid !important; }
+
+        .header-section { 
+            border-bottom: 2px dashed #cbd5e1 !important; 
+            padding-bottom: 6px !important; 
+            margin-bottom: 6px !important; 
+        }
+        .logo-container { border: none !important; }
+        .title-box { 
+            background: linear-gradient(135deg, #0284c7, #0369a1) !important; 
+            color: #ffffff !important; 
+            padding: 6px 14px !important; 
+            font-size: 14px !important; 
+            box-shadow: none !important; 
+        }
+        .top-info { margin-bottom: 6px !important; }
+        .customer-info, .no-date-box { 
+            padding: 6px 10px !important; 
+            background-color: #f8fafc !important; 
+            border-radius: 8px !important; 
+        }
+        input, textarea, select, .inline-textarea, .sig-name-input, .sig-date-input { 
+            border: none !important; 
+            background: transparent !important; 
+            box-shadow: none !important; 
+            padding: 1px 2px !important; 
+            color: #0f172a !important; 
+            font-family: 'Prompt', sans-serif !important; 
+        }
+        input::placeholder, textarea::placeholder { color: transparent !important; }
+
+        .data-table th, .data-table td { 
+            border: 1px solid #cbd5e1 !important; 
+            padding: 3px 6px !important; 
+            vertical-align: top !important; 
+        }
+        .data-table td.desc-cell { text-align: left !important; vertical-align: top !important; }
+        .data-table th { 
+            background: linear-gradient(135deg, #0284c7, #0369a1) !important; 
+            color: #ffffff !important; 
+            vertical-align: middle !important;
+            padding: 4px 6px !important;
+        }
+        .data-table tr:nth-child(even) td { background-color: #f8fafc !important; }
+        
+        .footer-table td { border: 1px solid #cbd5e1 !important; padding: 3px 10px !important; }
+        .footer-total-label { background-color: #f8fafc !important; color: #1e293b !important; }
+        #grandTotal { background-color: #f0fdf4 !important; color: #16a34a !important; }
+        
+        .signature-section { margin-top: 10px !important; }
+        .sig-line { border-bottom: 1px dashed #94a3b8 !important; }
+    }
+
+    /* --- Media Screen Styles (มือถือ & แท็บเล็ต) --- */
+    @media screen and (max-width: 768px) {
+        body { padding: 4px; }
+        .bill-container { width: 100% !important; padding: 10px !important; }
+        
+        .control-panel { 
+            width: 100% !important; 
+            flex-direction: row; 
+            flex-wrap: nowrap;
+            gap: 12px; 
+            align-items: center; 
+            padding: 8px 12px;
+            top: 5px;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+        .panel-divider { 
+            display: block; 
+            height: 30px; 
+            flex-shrink: 0;
+        }
+        .panel-group {
+            flex-shrink: 0;
+            flex-direction: row;
+            align-items: center;
+            gap: 6px;
+        }
+        .panel-group-label {
+            display: none; 
+        }
+        .panel-buttons { 
+            display: flex;
+            flex-wrap: nowrap;
+            gap: 6px; 
+        }
+        .credit {
+            display: none; 
+        }
+        
+        .header-section { flex-direction: column; gap: 10px; }
+        .title-box { width: 100%; box-sizing: border-box; }
+        
+        .top-info, .top-info tr, .top-info td { display: block; width: 100% !important; box-sizing: border-box; }
+        .customer-info { margin-bottom: 10px; width: 100% !important; }
+        .customer-info input, .customer-info textarea, .no-date-box input { max-width: 100% !important; width: 100% !important; }
+        
+        .table-responsive-wrapper {
+            width: 100%;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            margin-bottom: 10px;
+        }
+        .data-table { 
+            min-width: 650px; 
+        }
+
+        .footer-table, .footer-table tr, .footer-table td {
+            display: block;
+            width: 100% !important;
+            box-sizing: border-box;
+        }
+        .footer-table td {
+            text-align: left !important;
+            padding: 8px 10px !important;
+        }
+        .footer-total-label {
+            text-align: left !important;
+            width: 100% !important;
+            background-color: #f1f5f9 !important;
+        }
+        #grandTotal, #subTotal, #vatAmount, #netTotal {
+            text-align: left !important;
+            padding-left: 0 !important;
+        }
+
+        .signature-section {
+            flex-direction: column;
+            gap: 20px;
+            align-items: center;
+        }
+        .sig-box {
+            width: 100% !important;
+        }
+    }
+	/* สำหรับหน้าจอมือถือ */
+@media screen and (max-width: 768px) {
+    /* เพิ่มเติมความยืดหยุ่นให้กล่องกลุ่มปุ่ม */
+    #backupGroup {
+        flex-wrap: nowrap;
+        overflow-x: auto;
+    }
+}
+/* สำหรับหน้าจอมือถือ (ความกว้างไม่เกิน 767px) */
+@media screen and (max-width: 767px) {
+    .panel-group-label span {
+        display: none !important;
+    }
+}
+@media screen and (max-width: 767px) {
+        /* ซ่อนเฉพาะข้อความ */
+        .label-text {
+            display: none !important;
+        }
+        /* ถ้าต้องการให้ปุ่มตั้งค่าขยับไปอยู่ตรงกลาง หรือขยายพื้นที่ให้ปุ่มอื่นบนมือถือ */
+        .panel-group-label {
+            justify-content: flex-end !important;
+        }
+    }
+	
+
+.terms-box {
+  background: var(--bg-light);
+  border: 1px solid var(--border-color);
+  padding: 10px 20px;
+  border-radius: 6px;
+  margin-bottom: 15px;
+  font-size: 11px;
+  line-height: 1.6;
+}
+
+.signature-section {
+  display: flex;
+  justify-content: space-between;
+  gap: 40px;
+}
+
+.sig-line {
+  border-bottom: 1px dotted #94a3b8;
+  margin: 30px 20px 8px 20px;
+}
+
+/* --- ทำให้หัวตารางลอยได้เฉพาะบนหน้าจอปกติ --- */
+@media screen {
+    .table-responsive-wrapper {
+        max-height: 450px; /* กำหนดความสูงของกรอบตารางที่จะให้เลื่อนดูได้ (ปรับเพื่ม/ลดได้ตามต้องการ) */
+        overflow-y: auto;
+        position: relative;
+    }
+
+    .data-table th {
+        position: sticky;
+        top: 0;
+        z-index: 10;
+        background: linear-gradient(135deg, #0284c7, #0369a1) !important;
+    }
+}
+
+/* --- บังคับให้ตอนสั่งพิมพ์ หัวตารางกลับมาอยู่ตำแหน่งปกติ ไม่ลอยตาม --- */
+@media print {
+    .table-responsive-wrapper {
+        max-height: none !important;
+        overflow: visible !important;
+		word-break: break-word !important;
+    }
+
+    .data-table th {
+        position: static !important;
+    }
+}
+</style>
+</head>
+<body>
+
+<div class="control-panel no-print">
+   <!-- HTML -->
+		<div class="version-badge" style="margin-left: auto;">
+            <i class="fa-solid fa-circle-dot" style="font-size: 8px; color: #10b981; animation: pulse 1.5s infinite;"></i>
+            <span>กำลังใช้งาน:</span>
+            <strong class="version-num" id="activeUsersCount">1</strong>
+            <span>เครื่อง</span>
+        </div>
+
+<!-- CSS (วางไว้ในแท็ก <style> หรือไฟล์ CSS ของคุณ) -->
+<style>
+.version-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 500;
+    color: #38bdf8;
+    background: rgba(15, 23, 42, 0.75);
+    border: 1px solid rgba(56, 189, 248, 0.3);
+    box-shadow: 0 0 12px rgba(56, 189, 248, 0.25);
+    position: relative;
+    overflow: hidden;
+    backdrop-filter: blur(8px);
+}
+
+/* เอฟเฟกต์แสงสะท้อนวิ่งผ่าน (Shimmering Light) */
+.version-badge::after {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -150%;
+    width: 100%;
+    height: 200%;
+    background: linear-gradient(
+        60deg,
+        transparent,
+        rgba(255, 255, 255, 0.4),
+        transparent
+    );
+    transform: rotate(30deg);
+    animation: shimmer 3s infinite;
+}
+
+/* เอฟเฟกต์ไฟกระพริบเปล่งประกาย (Glowing Pulsate) */
+.version-num {
+    color: #38bdf8;
+    text-shadow: 0 0 8px rgba(56, 189, 248, 0.8);
+}
+
+@keyframes shimmer {
+    0% { left: -150%; }
+    50%, 100% { left: 150%; }
+}
+
+.bill-container {
+    position: relative; /* ให้ .bill-container เป็นกรอบอ้างอิงตำแหน่ง */
+}
+
+.watermark-credit {
+    position: absolute;
+    bottom: 12%;          /* ปรับตัวเลขนี้ลดลงเพื่อให้ตำแหน่งลงมาอยู่ด้านล่างกึ่งกลาง (ลองปรับ 15% - 25% ดูได้ครับตามความเหมาะสม) */
+    left: 50%;            /* ดึงไปกึ่งกลางแนวนอน */
+    transform: translate(-50%, -50%); /* จัดกึ่งกลางพิกัดพอดีเป๊ะ */
+    font-size: 20px;      /* ขนาดตัวหนังสือลายน้ำ */
+    color: #94a3b8;       /* สีเทาจางๆ */
+    opacity: 0.15;        /* ความจางของลายน้ำ */
+    pointer-events: none; /* ป้องกันไม่ให้เมาส์คลิกโดนหรือคลุมดำ */
+    user-select: none;
+    font-family: 'Prompt', sans-serif;
+    white-space: nowrap;  /* ไม่ให้ข้อความขึ้นบรรทัดใหม่ */
+    z-index: 10;
+}
+
+/* ซ่อนเวลาสั่งพิมพ์ / บันทึก PDF */
+@media print {
+    .watermark-credit {
+        display: none !important;
+    }
+}
+
+@media print {
+    /* บังคับความสูงของแถวสินค้าให้คงที่ตอนพิมพ์ */
+    #billTable tbody tr.item-row {
+        height: 35px !important;
+        max-height: 35px !important;
+    }
+
+    /* ล็อกขนาดช่องกรอกข้อมูล (Textarea/Input) ไม่ให้ยืดขยายเองตอนพิมพ์ */
+#billTable tbody tr.item-row textarea.item-desc {
+            height: auto !important;
+            min-height: 28px !important;
+            max-height: none !important;
+            white-space: pre-wrap !important;
+            word-break: break-word !important;
+            overflow: visible !important;
+            padding: 2px 4px !important;
+            font-size: 11px !important;
+            line-height: 1.4 !important;
+            border: none !important;
+            background: transparent !important;
+            resize: none !important;
+        }
+
+        #billTable tbody tr.item-row input {
+            height: 28px !important;
+            min-height: 28px !important;
+            padding: 1px 2px !important;
+            font-size: 11px !important;
+            border: none !important;
+            background: transparent !important;
+        }
+
+    /* สไตล์และคำสั่งตัดหน้ากระดาษสำหรับแถวข้อความแจ้งเตือน */
+    tr.auto-continued-row {
+        display: table-row !important;
+        break-after: page;
+        page-break-after: always;
+    }
+}
+
+/* ซ่อนข้อความนี้ในหน้าจอปกติ (ให้แสดงเฉพาะตอนสั่งพิมพ์) */
+.auto-continued-row {
+    display: none;
+}
+
+@keyframes pulse-glow {
+        0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.5), 0 4px 12px rgba(5, 150, 105, 0.25); }
+        70% { box-shadow: 0 0 0 10px rgba(16, 185, 129, 0), 0 6px 16px rgba(5, 150, 105, 0.35); }
+        100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0), 0 4px 12px rgba(5, 150, 105, 0.25); }
+    }
+
+    @keyframes bg-animation {
+        0% { background-position: 0% 50%; }
+        50% { background-position: 100% 50%; }
+        100% { background-position: 0% 50%; }
+    }
+
+    .btn-icon-sparkle {
+        position: relative;
+        background: linear-gradient(135deg, #065f46, #059669, #10b981, #34d399);
+        background-size: 300% 300%;
+        color: #ffffff;
+        border: none;
+        border-radius: 30px;
+        padding: 5px 16px 5px 5px; /* ลดขนาด Padding ลงให้ปุ่มเล็กลง */
+        font-size: 13px;
+        font-weight: 600;
+        letter-spacing: 0.3px;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        animation: bg-animation 6s ease infinite, pulse-glow 2.5s infinite;
+        transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        box-shadow: 0 4px 12px rgba(5, 150, 105, 0.25);
+    }
+
+    /* กล่องไอคอนวงกลมเล็กลง */
+    .btn-icon-sparkle .icon-wrapper {
+        position: relative;
+        width: 28px;
+        height: 28px;
+        background: rgba(255, 255, 255, 0.22);
+        backdrop-filter: blur(4px);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 12px;
+        color: #ffffff;
+        transition: transform 0.3s ease;
+    }
+
+    /* วงแหวนกระเพื่อมวิบวับขนาดเล็ก */
+    .ripple-ring {
+        position: absolute;
+        top: 0; left: 0; right: 0; bottom: 0;
+        border-radius: 50%;
+        border: 1.5px solid rgba(255, 255, 255, 0.6);
+        animation: ripple 2s infinite;
+    }
+
+    @keyframes ripple {
+        0% { transform: scale(1); opacity: 1; }
+        100% { transform: scale(1.35); opacity: 0; }
+    }
+
+    .btn-text {
+        padding-right: 4px;
+        text-shadow: 0 1px 2px rgba(0, 0, 0, 0.15);
+    }
+
+    /* เอฟเฟกต์เวลาเอาเมาส์ชี้ (Hover) */
+    .btn-icon-sparkle:hover {
+        transform: translateY(-2px) scale(1.02);
+        box-shadow: 0 6px 18px rgba(16, 185, 129, 0.45);
+        filter: brightness(1.1);
+    }
+
+    .btn-icon-sparkle:hover .icon-wrapper {
+        transform: rotate(90deg) scale(1.08);
+        background: rgba(255, 255, 255, 0.35);
+    }
+
+    .btn-icon-sparkle:active {
+        transform: translateY(1px) scale(0.98);
+    }
+	
+	
+	/* --- เอฟเฟกต์ปุ่มบันทึกสุดล้ำสมัย --- */
+@keyframes save-pulse-glow {
+    0% { box-shadow: 0 0 0 0 rgba(124, 58, 237, 0.5), 0 4px 12px rgba(124, 58, 237, 0.3); }
+    70% { box-shadow: 0 0 0 8px rgba(124, 58, 237, 0), 0 6px 16px rgba(124, 58, 237, 0.4); }
+    100% { box-shadow: 0 0 0 0 rgba(124, 58, 237, 0), 0 4px 12px rgba(124, 58, 237, 0.3); }
+}
+
+@keyframes savenew-pulse-glow {
+    0% { box-shadow: 0 0 0 0 rgba(5, 150, 105, 0.5), 0 4px 12px rgba(5, 150, 105, 0.3); }
+    70% { box-shadow: 0 0 0 8px rgba(5, 150, 105, 0), 0 6px 16px rgba(5, 150, 105, 0.4); }
+    100% { box-shadow: 0 0 0 0 rgba(5, 150, 105, 0), 0 4px 12px rgba(5, 150, 105, 0.3); }
+}
+
+@keyframes bg-animation {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
+.btn-save-sparkle, .btn-savenew-sparkle {
+    width: 42px !important;
+    height: 42px !important;
+    border-radius: 50% !important;
+    border: none !important;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    position: relative;
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+/* ปุ่มบันทึกทับบิลเดิม (โทนสีม่วงหรูหรา) */
+.btn-save-sparkle {
+    background: linear-gradient(135deg, #6d28d9, #7c3aed, #a855f7, #c084fc);
+    background-size: 300% 300%;
+    animation: bg-animation 5s ease infinite, save-pulse-glow 2s infinite;
+}
+
+/* ปุ่มบันทึกเป็นบิลใหม่ (โทนสีเขียวสดใส) */
+.btn-savenew-sparkle {
+    background: linear-gradient(135deg, #047857, #059669, #10b981, #34d399);
+    background-size: 300% 300%;
+    animation: bg-animation 5s ease infinite, savenew-pulse-glow 2s infinite;
+}
+
+.btn-save-sparkle .icon-wrapper, .btn-savenew-sparkle .icon-wrapper {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+}
+
+/* วงแหวนกระเพื่อมวิบวับ */
+.ripple-ring {
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    border-radius: 50%;
+    border: 1.5px solid rgba(255, 255, 255, 0.7);
+    animation: ripple 2s infinite;
+}
+
+@keyframes ripple {
+    0% { transform: scale(1); opacity: 1; }
+    100% { transform: scale(1.35); opacity: 0; }
+}
+
+.btn-save-sparkle:hover, .btn-savenew-sparkle:hover {
+    transform: translateY(-2px) scale(1.08);
+    filter: brightness(1.15);
+}
+
+.btn-save-sparkle:active, .btn-savenew-sparkle:active {
+    transform: translateY(1px) scale(0.95);
+}
+	
+/* --- เอฟเฟกต์ปุ่มพิมพ์ / บันทึก PDF (โทนสีฟ้าสดใส) --- */
+@keyframes print-pulse-glow {
+    0% { box-shadow: 0 0 0 0 rgba(2, 132, 199, 0.5), 0 4px 12px rgba(2, 132, 199, 0.3); }
+    70% { box-shadow: 0 0 0 8px rgba(2, 132, 199, 0), 0 6px 16px rgba(2, 132, 199, 0.4); }
+    100% { box-shadow: 0 0 0 0 rgba(2, 132, 199, 0), 0 4px 12px rgba(2, 132, 199, 0.3); }
+}
+
+.btn-print-sparkle {
+    width: 42px !important;
+    height: 42px !important;
+    border-radius: 50% !important;
+    border: none !important;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    position: relative;
+    background: linear-gradient(135deg, #0284c7, #0369a1, #38bdf8, #7dd3fc);
+    background-size: 300% 300%;
+    animation: bg-animation 5s ease infinite, print-pulse-glow 2s infinite;
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.btn-print-sparkle .icon-wrapper {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+}
+
+/* วงแหวนกระเพื่อมเฉพาะปุ่มพิมพ์ */
+.ripple-ring-print {
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    border-radius: 50%;
+    border: 1.5px solid rgba(255, 255, 255, 0.7);
+    animation: ripple 2s infinite;
+}
+
+.btn-print-sparkle:hover {
+    transform: translateY(-2px) scale(1.08);
+    filter: brightness(1.15);
+}
+
+.btn-print-sparkle:active {
+    transform: translateY(1px) scale(0.95);
+}	
+.hidden-section {
+    display: none !important;
+}
+
+#toggleAddressTaxBtn:hover {
+    background: linear-gradient(135deg, #e0f2fe, #bae6fd) !important;
+    border-color: #7dd3fc !important;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.08);
+}
+
+/* ปุ่มเปิด/ยุบ ที่อยู่และเลขประจำตัวผู้เสียภาษี */
+.toggle-address-tax-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    border: 1px solid #bae6fd;
+    background: linear-gradient(135deg, #f0f9ff, #e0f2fe);
+    color: #0369a1;
+    border-radius: 7px;
+    padding: 5px 10px;
+    font-family: 'Prompt', sans-serif;
+    font-size: 11px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+}
+.toggle-address-tax-btn:hover {
+    transform: translateY(-1px);
+    background: linear-gradient(135deg, #e0f2fe, #bae6fd);
+    border-color: #7dd3fc;
+    box-shadow: 0 3px 7px rgba(2,132,199,0.15);
+}
+.toggle-address-tax-btn:active {
+    transform: translateY(0);
+}
+.toggle-address-tax-btn i {
+    width: 12px;
+    text-align: center;
+    transition: transform 0.2s ease;
+}
+
+
+
+</style>
+    
+<div class="panel-group">
+<div class="panel-group-label" style="display: flex; justify-content: space-between; align-items: center;">
+    <!-- ใส่ class ให้ข้อความเพื่อให้ CSS จัดการง่ายขึ้น -->
+    <span class="label-text">📁 ฐานข้อมูลลูกค้า</span>
+    
+    <button onclick="toggleBackupButtons()" title="ซ่อน/แสดงปุ่มสำรองข้อมูล" style="background: none; border: none; cursor: pointer; color: #64748b; font-size: 12px;">
+        <i class="fa-solid fa-sliders"></i> ตั้งค่า
+    </button>
+</div>
+        
+        <div class="panel-buttons">
+            <button class="icon-btn btn-history-ui" data-tip="ดูประวัติบิลทั้งหมด" onclick="openHistoryModal()"><i class="fa-solid fa-clipboard-list"></i></button>
+            <button class="icon-btn btn-manage-prod" data-tip="ดูรายชื่อสินค้าและราคาที่บันทึก" onclick="openModal('productModal')"><i class="fa-solid fa-boxes-stacked"></i></button>
+            
+            <!-- แก้ไขบรรทัดนี้ ให้เหลือ display: none; อันเดียวพอครับ -->
+<span id="backupGroup" style="display: none; gap: 5px; align-items: center;">
+    <button class="icon-btn btn-export-ui" data-tip="สำรองข้อมูลทั้งหมด (.JSON)" onclick="exportAllData()"><i class="fa-solid fa-cloud-arrow-down"></i></button>
+    <button class="icon-btn btn-import-ui" data-tip="นำเข้าข้อมูลทั้งหมด" onclick="document.getElementById('importAllFile').click()"><i class="fa-solid fa-cloud-arrow-up"></i></button>
+</span>
+            
+            <input type="file" id="importAllFile" style="display:none" accept=".json" onchange="importAllData(event)">
+        </div>
+    </div>
+
+    <div class="panel-divider"></div>
+
+<div class="panel-group">
+    <div class="panel-group-label">📝 จัดการเอกสาร</div>
+    <div class="panel-buttons">
+        <button class="icon-btn btn-clear-ui" data-tip="ล้างรายการเพื่อเริ่มใหม่" onclick="clearAllData()"><i class="fa-solid fa-arrow-rotate-left"></i></button>
+        
+        <!-- ปุ่มบันทึกข้อมูล (ทับบิลเดิม) ดีไซน์ใหม่ กระพริบวิบวับ -->
+        <button class="icon-btn btn-save-sparkle" data-tip="บันทึกข้อมูล (ทับบิลเดิม)" onclick="saveCurrentData()">
+            <div class="icon-wrapper">
+                <i class="fa-solid fa-floppy-disk"></i>
+                <div class="ripple-ring"></div>
+            </div>
+        </button>
+
+        <!-- ปุ่มบันทึกเป็นบิลใหม่ ดีไซน์ใหม่ กระพริบวิบวับ -->
+        <button class="icon-btn btn-savenew-sparkle" data-tip="บันทึกเป็นบิลใหม่" onclick="saveAsNewData()">
+            <div class="icon-wrapper">
+                <i class="fa-solid fa-file-circle-plus"></i>
+                <div class="ripple-ring"></div>
+            </div>
+        </button>
+
+        <a href="price_update.html" class="icon-btn" data-tip="ไปยังหน้าใบแจ้งปรับราคาสินค้า" style="background-color: #3b82f6; color: white; display: inline-flex; align-items: center; justify-content: center; text-decoration: none;">
+            <i class="fa-solid fa-file-invoice-dollar"></i>
+        </a>
+    </div>
+</div>
+
+    <div class="panel-divider"></div>
+	<div class="panel-group">
+    <div class="panel-group-label">📤 ส่งเมลล์</div>
+    <div class="panel-buttons">
+        <!-- ปุ่มส่งเมลผ่าน Gmail (บังคับเปิดในหน้าต่างเดิม/แอปเดิม ไม่เด้งแยกออกไป) -->
+        <button class="icon-btn btn-export-ui" data-tip="เขียนใบเสนอราคาใน Gmail" onclick="location.href='https://mail.google.com/mail/u/0/?tab=rm&ogbl#inbox?compose=new'; return false;">
+            <i class="fa-solid fa-envelope"></i>
+        </button> 
+    </div>
+</div>
+
+    <div class="panel-divider"></div>
+
+<div class="panel-group">
+    <div class="panel-group-label">⚙️ พิมพ์ & PDF</div>
+    <div class="panel-buttons">
+        <!-- ปุ่มพิมพ์ / บันทึก PDF ดีไซน์ใหม่ กระพริบวิบวับเข้าชุดกัน -->
+        <button class="icon-btn btn-print-sparkle" data-tip="พิมพ์ / บันทึก PDF" onclick="openQuotation()">
+            <div class="icon-wrapper">
+                <i class="fa-solid fa-print"></i>
+                <div class="ripple-ring-print"></div>
+            </div>
+        </button>
+    </div>
+</div>
+</div>
+
+<div class="bill-container">
+    <div class="header-section">
+        <div class="header-left">
+            <div class="logo-container">
+                <img src="logo.png" alt="KL Stationery Logo">
+            </div>
+            <div class="shop-info-box">
+                <div class="company-name">บริษัท เค แอล สเตชั่นเนอรี่ จำกัด (สำนักงานใหญ่)</div>
+                <div class="address-text">873, 875 ถนนสุขุมวิท105 แขวงบางนาใต้ เขตบางนา กรุงเทพมหานคร 10260</div>
+                <div class="address-text">โทร. 0-2748-6788</div>
+                <div class="tax-text">เลขประจำตัวผู้เสียภาษี: 0105544005337</div>
+            </div>
+        </div>
+        <div class="title-box">ใบเสนอราคา<br><span style="font-size: 11px; font-weight: 400;">QUOTATION</span></div>
+    </div>
+    
+    <table class="top-info">
+        <tr>
+  <td class="customer-info">
+    <div style="margin-bottom: 6px;">
+        <strong style="color: #0284c7; font-weight: 700;">🔍 เลือก/ค้นหาลูกค้า:</strong> 
+    </div>
+    <div class="no-print" style="margin-bottom: 6px;">
+        <select id="customerSelect" class="inline-input no-print" style="width: 100%; font-weight: 600; color: #0369a1; border-bottom-color: #0284c7; margin-top: 4px;" onchange="selectCustomer(this)">
+            <option value="">-- เลือกลูกค้า --</option>
+        </select>
+    </div>
+    
+    <div style="margin-bottom: 6px;">
+        <strong style="display: block; margin-bottom: 2px;">นามลูกค้า (Attention):</strong> 
+        <input type="text" id="custName" class="inline-input cust-name-input" placeholder="ชื่อบริษัท/ลูกค้า...">
+    </div>
+
+    <!-- ปุ่มเปิด/ยุบ ที่อยู่และเลขประจำตัวผู้เสียภาษี -->
+    <div class="no-print" style="margin: 4px 0 8px 0;">
+        <button
+            type="button"
+            id="toggleAddressTaxBtn"
+            class="toggle-address-tax-btn"
+            onclick="toggleAddressTax()"
+            aria-expanded="false"
+            title="เปิด/ยุบ ที่อยู่และเลขประจำตัวผู้เสียภาษี">
+            <i class="fa-solid fa-chevron-down"></i>
+            <span>แสดงที่อยู่/ภาษี</span>
+        </button>
+    </div>
+
+    <!-- รายละเอียดที่อยู่และเลขประจำตัวผู้เสียภาษี: ซ่อนไว้เป็นค่าเริ่มต้น -->
+    <div id="addressTaxDetails" class="hidden-section">
+        <div style="margin-bottom: 6px;">
+            <strong style="display: block; margin-bottom: 2px;">ที่อยู่ (Address):</strong> 
+            <textarea id="custAddress" class="inline-textarea" style="width: 100%;" placeholder="ที่อยู่ลูกค้า..." oninput="autoGrow(this)"></textarea>
+        </div>
+        <div style="margin-bottom: 6px;">
+            <strong>เลขประจำตัวผู้เสียภาษี (Tax ID):</strong> <input type="text" id="custTaxId" class="inline-input" style="width: calc(100% - 150px);" placeholder="เลขประจำตัวผู้เสียภาษี 13 หลัก">
+        </div>
+    </div>
+
+    <div style="margin-bottom: 6px;">
+        <strong>เรื่อง (Subject):</strong> <input type="text" id="quotSubject" class="inline-input" style="width: calc(100% - 50px);" value="ขอเสนอราคาสินค้า/บริการ">
+    </div>
+    <div>
+        <strong>สิ่งที่ส่งมาด้วย (Enclosures):</strong> <input type="text" id="quotEnclose" class="inline-input" style="width: calc(100% - 130px);" placeholder="-">
+    </div>
+</td>
+            <td style="padding-left: 15px; width: 40%;">
+                <div class="no-date-box">
+                    <strong class="no-print" style="color: #0284c7;">🔍 ค้นหาบิลเดิม:</strong> 
+                    <div class="no-print" style="display: flex; gap: 5px; margin-bottom: 6px;">
+                        <input type="text" id="searchOldBillNo" class="inline-input" style="width: 110px;" placeholder="เลขที่บิลเก่า">
+                        <button class="btn-json" style="background: linear-gradient(135deg, #0891b2, #06b6d4); color: white; border: none; border-radius: 6px; padding: 2px 8px; font-size: 10px; cursor: pointer;" onclick="loadDataByBillNo()">ดึงข้อมูล</button>
+                    </div>
+                    <strong>เล่มที่ (Book No.):</strong> <input type="text" id="bookNo" class="inline-input" style="width: 110px;" placeholder="-"><br>
+                    <strong>เลขที่ (No.):</strong> <input type="text" id="billNo" class="inline-input" style="width: 120px;" placeholder="QT2026xxxx"><br>
+                    <strong>วันที่ (Date):</strong> <input type="text" id="billDate" class="inline-input" style="width: 120px;" placeholder="วว/ดด/ปปปป">
+                </div>
+            </td>
+        </tr>
+    </table>
+
+    <div class="table-responsive-wrapper">
+        <table class="data-table" id="billTable">
+            <thead>
+                <tr>
+                    <th style="width: 5%;">ลำดับ<br><span style="font-size: 9px; font-weight: 300;">Item</span></th>
+                    <th style="width: 38%;">รายการสินค้า / รายละเอียด<br><span style="font-size: 9px; font-weight: 300;">Description</span></th>
+                    <th style="width: 9%;">แบบรุ่น<br><span style="font-size: 9px; font-weight: 300;">Model</span></th>
+                    <th style="width: 8%;">จำนวน<br><span style="font-size: 9px; font-weight: 300;">Qty</span></th>
+                    <th style="width: 8%;">หน่วย<br><span style="font-size: 9px; font-weight: 300;">Unit</span></th>
+                    <th style="width: 11%;">ราคาต่อหน่วย<br><span style="font-size: 9px; font-weight: 300;">Unit Price</span></th>
+                    <th style="width: 13%;">จำนวนเงิน<br><span style="font-size: 9px; font-weight: 300;">Amount</span></th>
+                    <th class="no-print" style="width: 6%;">ลบ</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr class="item-row">
+                    <td class="row-num" style="text-align: center;">1</td>
+                    <td class="desc-cell"><textarea class="item-desc" placeholder="ระบุรายละเอียดสินค้า" oninput="autoGrow(this)" onblur="fetchProductByDesc(this)"></textarea></td>
+                    <td style="text-align: center;">
+                        <input type="text" class="sku-input" placeholder="รหัส/รุ่น " 
+                               onkeydown="if(event.key === 'Enter'){ fetchProductBySKU(this); this.blur(); }">
+                    </td>
+                    <td style="text-align: center;"><input type="text" class="qty" value="0" inputmode="decimal" onfocus="if(this.value==='0')this.value='';" onblur="if(this.value==='')this.value='0';" oninput="formatNumberInput(this); calculate();"></td>
+                    <td style="text-align: center;"><input type="text" class="unit-input" placeholder="ชิ้น/อัน"></td>
+                    <td style="text-align: center;"><input type="text" class="price" value="0" inputmode="decimal" onfocus="if(this.value==='0')this.value='';" onblur="if(this.value==='')this.value='0';" oninput="formatNumberInput(this); calculate();"></td>
+                    <td class="amount" style="text-align: right; padding-right: 12px;">0.00</td>
+                    <td class="no-print" style="text-align: center; white-space: nowrap;">
+					<button type="button" class="btn-del" onclick="removeRow(this)" title="ลบแถว" style="background: none; border: none; color: #6c757d; font-size: 16px; cursor: pointer;"><i class="fas fa-trash-alt"></i></button>
+					</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+<!-- ปุ่มเพิ่มรายการแบบสัญลักษณ์/ไอคอนล้ำสมัย วิบวับ ซ่อนอัตโนมัติเวลาพิมพ์ -->
+    <div class="no-print" style="margin: 25px 0; text-align: center;">
+        <button class="btn-icon-sparkle" onclick="addRow()" title="เพิ่มรายการสินค้า">
+            <div class="icon-wrapper">
+                <i class="fa-solid fa-plus"></i>
+                <div class="ripple-ring"></div>
+            </div>
+            <span class="btn-text">เพิ่มรายการ</span>
+        </button>
+    </div>
+    
+    <table class="footer-table" style="width: 100%; border-collapse: collapse;">
+    <tr>
+        <td rowspan="5" style="width: 50%; vertical-align: middle; text-align: center; background-color: #f8fafc; border-right: 1px solid #e2e8f0; padding: 10px;">
+            <div style="font-size: 11px; color: #64748b; margin-bottom: 6px;">(จำนวนเงินตัวอักษร)</div>
+            <div id="textAmount" style="font-size: 14px; color: #0369a1; font-weight: 600;">
+                ศูนย์บาทถ้วน
+            </div>
+        </td>
+        <td class="footer-total-label" style="text-align: center; vertical-align: middle; padding: 8px;">
+            รวมเงิน<br><span style="font-size: 10px; font-weight: 400; color: #64748b;">(Sub Total)</span>
+        </td>
+        <td id="subTotal" style="width: 25%; text-align: center; vertical-align: middle;">0.00</td>
+    </tr>
+    <tr>
+        <td class="footer-total-label" style="text-align: center; vertical-align: middle; padding: 8px;">
+            ส่วนลด (<input type="text" id="discountRate" class="inline-input" style="width: 35px; text-align: center;" value="0">%)<br>
+            <span style="font-size: 10px; font-weight: 400; color: #64748b;">(Discount)</span>
+        </td>
+        <td style="width: 25%; text-align: center; vertical-align: middle; padding-right: 0;">
+            <input type="text" id="discountAmount" class="inline-input" style="width: 100px; text-align: center; font-weight: 700; color: #ef4444;" value="0.00" inputmode="decimal" oninput="formatNumberInput(this); calculate();">
+        </td>
+    </tr>
+    <tr>
+        <td class="footer-total-label" style="font-weight: 600; color: #0369a1; text-align: center; vertical-align: middle; padding: 8px;">
+            รวมราคาสินค้า<br><span style="font-size: 10px; font-weight: 400; color: #64748b;">(Net Total)</span>
+        </td>
+        <td id="netTotal" style="width: 25%; font-weight: 600; text-align: center; vertical-align: middle;">0.00</td>
+    </tr>
+    <tr>
+        <td class="footer-total-label" style="text-align: center; vertical-align: middle; padding: 8px;">
+            ภาษีมูลค่าเพิ่ม<br><span style="font-size: 10px; font-weight: 400; color: #64748b;">(VAT 7%)</span>
+        </td>
+        <td id="vatAmount" style="width: 25%; text-align: center; vertical-align: middle;">0.00</td>
+    </tr>
+    <tr>
+        <td class="footer-total-label" style="background-color: #f8fafc; font-weight: 700; color: #0369a1; text-align: center; vertical-align: middle; padding: 8px;">
+            จำนวนเงินรวมทั้งสิ้น<br>
+            <span style="font-size: 10px; font-weight: 600; color: #0369a1;">(Grand Total)</span>
+        </td>
+        <td id="grandTotal" style="width: 25%; background-color: #f0fdf4; color: #16a34a; font-size: 14px; text-align: center; vertical-align: middle; font-weight: 700;">0.00</td>
+    </tr>
+</table>
+
+    <div style="margin-top: 10px; font-size: 11px; color: #475569; line-height: 1.5;">
+        <strong>หมายเหตุ :</strong> <input type="text" id="remarkText" class="inline-input" style="width: 78%;" placeholder="ระบุหมายเหตุ (ถ้ามี)">
+    </div>
+
+    <div class="signature-section">
+        <div class="sig-box">
+            <div class="sig-line"></div>
+            <input type="text" id="sigCustomerName" class="sig-name-input" placeholder="(พิมพ์ชื่อ-นามสกุล ลูกค้า)">
+            <div class="sig-text">ผู้อนุมัติสั่งซื้อ / ลูกค้า (Approved)</div>
+            <div class="sig-date">วันที่: <input type="text" id="sigCustomerDate" class="sig-date-input" placeholder="วว/ดด/ปปปป"></div>
+        </div>
+		
+		<div class="watermark-credit">
+    <i class="fa-solid fa-user" style="margin-right: 4px;"></i> 
+    ผู้จัดทำ: Thanong Chooduang
+</div>
+		
+		
+        <div class="sig-box">
+            <div class="sig-line"></div>
+            <input type="text" id="sigSalesName" class="sig-name-input" placeholder="(พิมพ์ชื่อ-นามสกุล ผู้เสนอราคา)">
+            <div class="sig-text">ผู้เสนอราคา (Sales Department)</div>
+            <div class="sig-date">วันที่: <input type="text" id="sigSalesDate" class="sig-date-input" placeholder="วว/ดด/ปปปป"></div>
+        </div>
+    </div>
+</div>
+
+<div id="historyModal" class="modal">
+    <div class="modal-content-wide">
+        <div class="modal-header">
+            <span id="historyModalTitle">📋 ประวัติการขายและใบเสนอราคาทั้งหมด (History Log)</span>
+            <button class="close-btn" onclick="closeModal('historyModal')">&times;</button>
+        </div>
+        <div style="margin-bottom: 12px;">
+            <input type="text" id="historySearchInput" placeholder="🔍 ค้นหาจากชื่อลูกค้า, เลขที่บิล, วันที่ หรือยอดเงิน..." oninput="renderHistoryTable(this.value)">
+        </div>
+        <div id="historyTableContainer" style="max-height: 50vh; overflow-y: auto;"></div>
+    </div>
+</div>
+
+<div id="productModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <span>📦 จัดการข้อมูลสินค้า</span>
+            <button class="close-btn" onclick="closeModal('productModal')">&times;</button>
+        </div>
+        
+        <div class="modal-sticky-top">
+            <div style="margin: 10px 0 8px 0;">
+                <input type="text" id="productSearchInput" style="width: 100%; padding: 8px 12px; box-sizing: border-box;" placeholder="🔍 ค้นหาจากรหัสรุ่น หรือรายละเอียดสินค้า..." oninput="renderProductList()">
+            </div>
+            <div id="productCountText" style="font-weight: 600; color: #0369a1; font-size: 12px;"></div>
+        </div>
+
+        <div id="productListContainer" style="margin-top: 5px;"></div>
+    </div>
+</div>
+
+<script>
+function performSilentBackup() {}
+// เริ่มทำงานเมื่อเปิดหน้าเว็บ
+function initAutoBackup(intervalHours = 24) {
+    const intervalMs = intervalHours * 60 * 60 * 1000;
+    const lastBackup = parseInt(localStorage.getItem('last_auto_backup_timestamp') || '0', 10);
+    const now = new Date().getTime();
+
+    // ถ้ายังไม่เคย Backup ในรอบเวลา ให้สั่งทำงานทันทีเมื่อเปิดเว็บ
+    if (now - lastBackup >= intervalMs) {
+        performSilentBackup();
+    }
+
+    // ตั้งเวลาลูปทำงานตามระยะเวลาที่กำหนด
+    setInterval(() => {
+        performSilentBackup();
+    }, intervalMs);
+}
+
+window.addEventListener('DOMContentLoaded', () => {
+    initAutoBackup(24); // สำรองข้อมูลทุกๆ 24 ชั่วโมง (หรือเมื่อเปิดแอปครั้งแรกของวัน)
+});
+
+
+window.onload = function() {
+    calculate();
+    loadCustomerDropdown();
+    
+    let dateField = document.getElementById('billDate');
+    let sigSalesDate = document.getElementById('sigSalesDate');
+    let sigSalesNameInput = document.getElementById('sigSalesName');
+    
+    // แก้ไขตรงนี้: เปลี่ยนจาก sigCustDate เป็น sigCustomerDate
+    let sigCustomerDate = document.getElementById('sigCustomerDate'); 
+    
+    let d = new Date();
+    let day = String(d.getDate()).padStart(2, '0');
+    let month = String(d.getMonth() + 1).padStart(2, '0');
+    let year = d.getFullYear() + 543;
+    let currentDateStr = `${day}/${month}/${year}`;
+
+    if(!dateField.value) dateField.value = currentDateStr;
+    if(!sigSalesDate.value) sigSalesDate.value = currentDateStr;
+    
+    // ป้องกัน Error กรณีไม่พบ element
+    if(sigCustomerDate && !sigCustomerDate.value) {
+        sigCustomerDate.value = ""; 
+    }
+
+    let savedSalesName = localStorage.getItem('default_sales_name');
+    if (savedSalesName && sigSalesNameInput && !sigSalesNameInput.value) {
+        sigSalesNameInput.value = savedSalesName;
+    }
+
+    if (sigSalesNameInput) {
+        sigSalesNameInput.addEventListener('input', function() {
+            localStorage.setItem('default_sales_name', this.value.trim());
+        });
+    }
+};
+    function formatNumberInput(input) {
+        let value = input.value;
+        value = value.replace(/[^0-9.]/g, '');
+
+        let parts = value.split('.');
+        if (parts.length > 2) {
+            value = parts[0] + '.' + parts.slice(1).join('');
+        }
+        if (value.length > 1 && value.startsWith('0') && value.charAt(1) !== '.') {
+            value = value.replace(/^0+/, '');
+            if (value === '') value = '0';
+        }
+
+        if (input.value !== value) {
+            input.value = value;
+        }
+    }
+
+    function closeAppWindow() {
+        Swal.fire({
+            title: 'อย่าลืมกดปุ่มบันทึก',
+            text: 'คุณต้องการออกจากระบบใบเสนอราคาใช่หรือไม่',
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonColor: '#ef4444',
+            cancelButtonColor: '#94a3b8',
+            confirmButtonText: 'ปิดโปรแกรม',
+            cancelButtonText: 'ยกเลิก'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                window.close();
+            }
+        });
+    }
+
+    function autoGrow(element) {
+        element.style.height = "28px";
+        element.style.height = (element.scrollHeight) + "px";
+    }
+
+    function clearAllData() {
+        Swal.fire({
+            title: 'ต้องการล้างรายการทั้งหมด?',
+            text: 'ข้อมูลลูกค้า ตารางสินค้า และรายละเอียดทั้งหมดจะถูกรีเซ็ตเพื่อเริ่มรายการใหม่',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#e11d48',
+            cancelButtonColor: '#94a3b8',
+            confirmButtonText: 'ล้างรายการ',
+            cancelButtonText: 'ยกเลิก'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                document.getElementById('customerSelect').value = "";
+				loadCustomerDropdown();
+                document.getElementById('custName').value = "";
+				document.getElementById('custTaxId').value = "";
+                let addrArea = document.getElementById('custAddress');
+                addrArea.value = "";
+                autoGrow(addrArea);
+				
+				
+				// 📌 เพิ่มส่วนนี้: ซ่อนกล่องที่อยู่/ภาษี และรีเซ็ตปุ่มเปิด/ปิด
+            let addressTaxDetails = document.getElementById('addressTaxDetails');
+            if (addressTaxDetails) {
+                addressTaxDetails.classList.add('hidden-section');
+            }
+            updateAddressTaxButtonState();
+				
+				
+                document.getElementById('quotSubject').value = "ขอเสนอราคาสินค้า/บริการ";
+                document.getElementById('quotEnclose').value = "";
+                document.getElementById('searchOldBillNo').value = "";
+                document.getElementById('bookNo').value = "";
+                document.getElementById('billNo').value = "";
+                
+                let d = new Date();
+                let day = String(d.getDate()).padStart(2, '0');
+                let month = String(d.getMonth() + 1).padStart(2, '0');
+                let year = d.getFullYear() + 543;
+                let currentDateStr = `${day}/${month}/${year}`;
+
+                document.getElementById('billDate').value = currentDateStr;
+                document.getElementById('sigSalesDate').value = currentDateStr;
+                document.getElementById('sigCustomerDate').value = "";
+
+                let tbody = document.getElementById('billTable').getElementsByTagName('tbody')[0];
+                tbody.innerHTML = `
+                    <tr class="item-row">
+                        <td class="row-num" style="text-align: center;">1</td>
+                        <td class="desc-cell"><textarea class="item-desc" placeholder="ระบุรายละเอียดสินค้า" oninput="autoGrow(this)" onblur="fetchProductByDesc(this)"></textarea></td>
+                        <td style="text-align: center;">
+                            <input type="text" class="sku-input" placeholder="รหัส/รุ่น (กด Enter)" 
+                                   onkeydown="if(event.key === 'Enter'){ fetchProductBySKU(this); this.blur(); }">
+                        </td>
+                        <td style="text-align: center;"><input type="text" class="qty" value="0" inputmode="decimal" onfocus="if(this.value==='0')this.value='';" onblur="if(this.value==='')this.value='0';" oninput="formatNumberInput(this); calculate();"></td>
+                        <td style="text-align: center;"><input type="text" class="unit-input" placeholder="ชิ้น/อัน"></td>
+                        <td style="text-align: center;"><input type="text" class="price" value="0" inputmode="decimal" onfocus="if(this.value==='0')this.value='';" onblur="if(this.value==='')this.value='0';" oninput="formatNumberInput(this); calculate();"></td>
+                        <td class="amount" style="text-align: right; padding-right: 12px;">0.00</td>
+                        <td class="no-print" style="text-align: center; white-space: nowrap;">
+						<button type="button" class="btn-del" onclick="removeRow(this)" title="ลบแถว" style="background: none; border: none; color: #6c757d; font-size: 16px; cursor: pointer;"><i class="fas fa-trash-alt"></i></button>
+						</td>
+                    </tr>
+                `;
+
+                document.getElementById('remarkText').value = "";
+                document.getElementById('sigCustomerName').value = "";
+                document.getElementById('sigSalesName').value = "";
+
+				document.getElementById('discountRate').value = "0";
+				document.getElementById('discountAmount').value = "0.00";
+                calculate();
+
+                const Toast = Swal.mixin({
+                    toast: true,
+                    position: 'top-end',
+                    showConfirmButton: false,
+                    timer: 1500,
+                    timerProgressBar: true
+                });
+                Toast.fire({ icon: 'success', title: 'ล้างรายการเรียบร้อย พร้อมเริ่มรายการใหม่' });
+            }
+        });
+    }
+
+function addRow() {
+    let table = document.getElementById('billTable').getElementsByTagName('tbody')[0];
+    let rowCount = table.rows.length;
+    let newRow = table.insertRow();
+    newRow.className = "item-row";
+    newRow.innerHTML = `
+        <td class="row-num" style="text-align: center;">${rowCount + 1}</td>
+        <td class="desc-cell"><textarea class="item-desc" placeholder="ระบุรายละเอียดสินค้า" oninput="autoGrow(this)" onblur="fetchProductByDesc(this)"></textarea></td>
+        <td style="text-align: center;">
+            <input type="text" class="sku-input" placeholder="รหัส/รุ่น (กด Enter)" 
+                   onkeydown="if(event.key === 'Enter'){ fetchProductBySKU(this); this.blur(); }">
+        </td>
+        <td style="text-align: center;"><input type="text" class="qty" value="0" inputmode="decimal" onfocus="if(this.value==='0')this.value='';" onblur="if(this.value==='')this.value='0';" oninput="formatNumberInput(this); calculate();"></td>
+        <td style="text-align: center;"><input type="text" class="unit-input" placeholder="ชิ้น/อัน"></td>
+        <td style="text-align: center;"><input type="text" class="price" value="0" inputmode="decimal" onfocus="if(this.value==='0')this.value='';" onblur="if(this.value==='')this.value='0';" oninput="formatNumberInput(this); calculate();"></td>
+        <td class="amount" style="text-align: right; padding-right: 12px;">0.00</td>
+        <td class="no-print" style="text-align: center; white-space: nowrap;">
+            <button type="button" class="icon-btn" style="width: 28px; height: 28px; font-size: 12px; background: linear-gradient(135deg, #0284c7, #0369a1); display: inline-flex; align-items: center; justify-content: center; margin-right: 4px;" onclick="insertRowAbove(this)" title="แทรกแถว"><i class="fa-solid fa-plus"></i></button>
+            <button type="button" class="icon-btn" style="width: 28px; height: 28px; font-size: 12px; background: linear-gradient(135deg, #dc2626, #ef4444); display: inline-flex; align-items: center; justify-content: center;" onclick="removeRow(this)" title="ลบแถว"><i class="fa-solid fa-trash-alt"></i></button>
+        </td>
+    `;
+    calculate();
+    
+    let wrapper = document.querySelector('.table-responsive-wrapper');
+    if (wrapper) {
+        wrapper.scrollTop = wrapper.scrollHeight;
+    }
+}
+
+    function removeRow(btn) {
+        let rows = document.querySelectorAll('.item-row');
+        if (rows.length <= 1) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'ไม่สามารถลบได้',
+                text: 'ต้องมีรายการสินค้าอย่างน้อย 1 รายการครับ',
+                confirmButtonText: 'ตกลง',
+                confirmButtonColor: '#0284c7'
+            });
+            return;
+        }
+        btn.parentNode.parentNode.remove();
+        calculate();
+    }
+
+    function calculate() {
+        let rows = document.querySelectorAll('.item-row');
+        let subTotal = 0;
+        rows.forEach((row, index) => {
+            row.querySelector('.row-num').innerText = index + 1;
+            let qty = parseFloat(row.querySelector('.qty').value) || 0;
+            let price = parseFloat(row.querySelector('.price').value) || 0;
+            let amount = qty * price;
+            row.querySelector('.amount').innerText = amount.toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+            subTotal += amount;
+        });
+
+        let discountRate = parseFloat(document.getElementById('discountRate').value) || 0;
+        let discountAmountInput = document.getElementById('discountAmount');
+        let discountAmount = (subTotal * discountRate) / 100;
+        discountAmountInput.value = discountAmount.toFixed(2);
+
+        let netTotal = subTotal - discountAmount;
+        if (netTotal < 0) netTotal = 0;
+
+        let vat = netTotal * 0.07;
+        let grandTotal = netTotal + vat;
+
+        document.getElementById('subTotal').innerText = subTotal.toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        document.getElementById('netTotal').innerText = netTotal.toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        document.getElementById('vatAmount').innerText = vat.toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        document.getElementById('grandTotal').innerText = grandTotal.toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+        document.getElementById('textAmount').innerText = convertNumberToThaiText(grandTotal);
+        return grandTotal;
+    }
+
+    // ฟังก์ชันส่งไลน์ผ่านลิงก์ URL Scheme บนมือถือ
+    function sendToLine() {
+        let customerName = document.getElementById('custName').value.trim() || 'ลูกค้าทั่วไป';
+        let billNo = document.getElementById('billNo').value.trim() || '-';
+        let grandTotal = document.getElementById('grandTotal').innerText;
+
+        let text = `สวัสดีครับ/ค่ะ ส่งใบเสนอราคาครับ/ค่ะ\n` +
+                   `เลขที่บิล: ${billNo}\n` +
+                   `ลูกค้า: ${customerName}\n` +
+                   `ยอดรวมทั้งสิ้น: ${grandTotal} บาท`;
+
+        let lineUrl = `https://line.me/R/msg/text/?` + encodeURIComponent(text);
+        window.open(lineUrl, '_blank');
+    }
+
+    function saveCurrentData() {
+        executeSave(false);
+    }
+
+    function saveAsNewData() {
+        executeSave(true);
+    }
+
+    function validateRowData(qty, price) {
+        let parsedQty = parseFloat(qty);
+        let parsedPrice = parseFloat(price);
+
+        if (isNaN(parsedQty) || parsedQty < 0) parsedQty = 0;
+        if (isNaN(parsedPrice) || parsedPrice < 0) parsedPrice = 0;
+
+        return { qty: parsedQty, price: parsedPrice };
+    }
+
+let isDataChanged = false;
+
+// จับตาดูการเปลี่ยนแปลงข้อมูลในฟอร์มทั้งหมด
+document.addEventListener('input', () => { isDataChanged = true; });
+document.addEventListener('change', () => { isDataChanged = true; });
+
+
+async function executeSave(isNewBill, showSuccessAlert = true, keepOriginalDate = false) {
+
+    // 1. เช็กตั้งแต่ต้นฟังก์ชัน ถูกต้องแล้ว
+    let cTaxId = document.getElementById('custTaxId') ? document.getElementById('custTaxId').value.trim() : '';
+
+    // ตรวจสอบเงื่อนไข Tax ID: ถ้ามีการกรอกข้อมูล ต้องมีความยาวเท่ากับ 13 ตัวอักษรและเป็นตัวเลขเท่านั้น
+    if (cTaxId !== "" && (!/^\d{13}$/.test(cTaxId))) {
+        Swal.fire({
+            icon: 'warning',
+            title: 'เลขประจำตัวผู้เสียภาษีไม่ถูกต้อง',
+            text: 'กรุณากรอกเลขประจำตัวผู้เสียภาษีให้ครบ 13 หลัก หรือเว้นว่างไว้ถ้าไม่มี',
+            confirmButtonText: 'เข้าใจแล้ว',
+            confirmButtonColor: '#0284c7'
+        });
+        return; // หยุดการทำงาน ไม่ให้บันทึกต่อ
+    }
+
+    if (typeof firebase === 'undefined') {
+        Swal.fire({
+            icon: 'error',
+            title: 'ไม่พบไลบรารี Firebase',
+            text: 'กรุณาตรวจสอบการเชื่อมต่ออินเทอร์เน็ต เนื่องจากสคริปต์ Firebase โหลดไม่สำเร็จ',
+            confirmButtonText: 'ตกลง'
+        });
+        return;
+    }
+
+    if (!firebase.apps.length) {
+        firebase.initializeApp(firebaseConfig);
+    }
+    const db = firebase.firestore();
+
+    let cName = document.getElementById('custName').value.trim();
+    let cAddr = document.getElementById('custAddress').value.trim();
+    
+    cTaxId = document.getElementById('custTaxId') ? document.getElementById('custTaxId').value.trim() : ''; 
+    
+    let bNoInput = document.getElementById('billNo');
+    let bNo = bNoInput.value.trim();
+
+    if (!cName) {
+        Swal.fire({
+            icon: 'warning',
+            title: 'กรุณากรอกชื่อลูกค้า',
+            text: 'โปรดระบุชื่อลูกค้าหรือบริษัทก่อนทำการบันทึก',
+            confirmButtonText: 'เข้าใจแล้ว',
+            confirmButtonColor: '#0284c7'
+        });
+        return;
+    }
+
+    let rows = document.querySelectorAll('.item-row');
+    let currentItems = [];
+    let savedProdCount = 0;
+
+    let products = [];
+    try {
+        const masterDoc = await db.collection("settings").doc("master_data").get();
+        if (masterDoc.exists && masterDoc.data().products) {
+            products = masterDoc.data().products;
+        }
+    } catch (err) {
+        console.warn("⚠️ ไม่สามารถดึงรายการสินค้าจาก Cloud มา Sync ได้:", err);
+    }
+
+    if (products.length === 0) {
+        products = JSON.parse(localStorage.getItem('saved_quot_products') || '[]');
+    }
+
+    rows.forEach(row => {
+        let sku = row.querySelector('.sku-input').value.trim();
+        let desc = row.querySelector('.item-desc').value.trim();
+        let rawQty = row.querySelector('.qty').value;
+        let rawPrice = row.querySelector('.price').value;
+        let validated = validateRowData(rawQty, rawPrice);
+        let unit = row.querySelector('.unit-input').value.trim();
+
+        if (sku || desc) {
+            currentItems.push({ 
+                sku: sku, 
+                model: sku, 
+                desc: desc, 
+                qty: validated.qty, 
+                unit: unit, 
+                price: validated.price 
+            });
+            
+            if (sku && desc) {
+                let pIndex = products.findIndex(p => p.sku === sku || p.model === sku);
+                let prodData = { sku: sku, model: sku, desc: desc, unit: unit, price: validated.price };
+                
+                if (pIndex >= 0) {
+                    products[pIndex] = prodData;
+                } else {
+                    products.push(prodData);
+                }
+                savedProdCount++;
+            }
+        }
+    });
+
+    if (currentItems.length === 0 || (currentItems.length === 1 && !currentItems[0].desc)) {
+        Swal.fire({
+            icon: 'warning',
+            title: 'ไม่มีรายการสินค้า',
+            text: 'กรุณากรอกข้อมูลสินค้าอย่างน้อย 1 รายการก่อนบันทึก',
+            confirmButtonText: 'เข้าใจแล้ว',
+            confirmButtonColor: '#0284c7'
+        });
+        return;
+    }
+
+    if (savedProdCount > 0) {
+        localStorage.setItem('saved_quot_products', JSON.stringify(products));
+    }
+
+    let dateField = document.getElementById('billDate');
+    let sigSalesDate = document.getElementById('sigSalesDate');
+
+    let isOldBill = document.getElementById('searchOldBillNo') && document.getElementById('searchOldBillNo').value.trim() !== "";
+    let editingBillNo = document.getElementById('billNo') && document.getElementById('billNo').value.trim() !== "";
+
+    // 🛠️ แก้ไข: ถ้านี่เป็นการบันทึกทับบิลเดิม (ไม่ใช่การกดสร้างบิลใหม่) ระบบจะ "รักษาวันที่เดิม" บนหน้าจอไว้ ไม่ให้เด้งเปลี่ยนเป็นวันปัจจุบัน
+    if (isNewBill) {
+        // กรณีสร้างเป็นบิลใหม่จริงๆ (กดปุ่มบันทึกเป็นบิลใหม่) ค่อยใช้วันที่ปัจจุบัน
+        let d = new Date();
+        let day = String(d.getDate()).padStart(2, '0');
+        let month = String(d.getMonth() + 1).padStart(2, '0');
+        let year = d.getFullYear() + 543;
+        let currentDateStr = `${day}/${month}/${year}`;
+        if (dateField) dateField.value = currentDateStr;
+        if (sigSalesDate) sigSalesDate.value = currentDateStr;
+    } else {
+        // กรณีบันทึกทับบิลเดิม (Save ปกติ) หรือดึงบิลเก่ามาแก้ ให้ใช้วันที่เดิมที่มีอยู่บนหน้าจอโดยไม่เปลี่ยนแปลง
+        console.log("📌 รักษาวันที่เดิมของบิลไว้ ไม่เปลี่ยนเป็นวันที่ปัจจุบัน");
+    }
+
+    let customers = [];
+    try {
+        const masterDoc = await db.collection("settings").doc("master_data").get();
+        if (masterDoc.exists && masterDoc.data().customers) {
+            customers = masterDoc.data().customers;
+        }
+    } catch (err) {
+        console.warn("⚠️ ไม่สามารถดึงรายชื่อลูกค้าจาก Cloud มา Sync ได้:", err);
+    }
+
+    if (customers.length === 0) {
+        customers = JSON.parse(localStorage.getItem('saved_quot_customers') || '[]');
+    }
+
+    // 💡 แนวทางปรับปรุง: เช็กว่ามีตัวแปรเก็บชื่อเก่าตอนกดแก้ไขหรือไม่ 
+    // (สมมติว่าคุณมีฟิลด์ซ่อนหรือตัวแปร global เก็บชื่อเดิมไว้ตอนกดเลือกบิลเก่า เช่น window.editingOldCustomerName)
+    let oldName = window.editingOldCustomerName ? window.editingOldCustomerName.trim() : "";
+    let existingIndex = -1;
+
+    // 1. ถ้ามีชื่อเก่า ให้ลองหาก่อนว่าชื่อเก่านี้มีอยู่ในลิสต์ไหม (กรณีเปลี่ยนชื่อบริษัท)
+    if (oldName !== "") {
+        existingIndex = customers.findIndex(c => {
+            let name = typeof c === 'string' ? c : (c.name || c.customerName || c.companyName || '');
+            return name.trim() === oldName;
+        });
+    }
+
+    // 2. ถ้าไม่พบชื่อเก่า ให้ลองเช็กจากชื่อใหม่ (cName) ปกติ
+    if (existingIndex < 0) {
+        existingIndex = customers.findIndex(c => {
+            let name = typeof c === 'string' ? c : (c.name || c.customerName || c.companyName || '');
+            return name.trim() === cName;
+        });
+    }
+
+    // 3. ทำการอัปเดตทับตำแหน่งเดิม หรือเพิ่มใหม่ถ้าไม่พบเลย
+    if (existingIndex >= 0) {
+        customers[existingIndex] = { name: cName, address: cAddr, taxId: cTaxId };
+    } else {
+        customers.push({ name: cName, address: cAddr, taxId: cTaxId });
+    }
+
+    // หลังจากบันทึกเสร็จ อย่าลืมเคลียร์ค่า oldName ทิ้งด้วย
+    window.editingOldCustomerName = ""; 
+
+    localStorage.setItem('saved_quot_customers', JSON.stringify(customers));
+
+    try {
+        await db.collection("settings").doc("master_data").set({
+            customers: customers,
+            products: products
+        }, { merge: true });
+    } catch (err) {
+        console.warn("⚠️ ไม่สามารถอัปเดต Master Data ขึ้น Cloud ได้:", err);
+    }
+
+    loadCustomerDropdown();
+
+    let grandTotalVal = calculate();
+    let finalBillNo;
+    if (isNewBill) {
+        finalBillNo = 'QT' + new Date().getTime();
+        bNoInput.value = finalBillNo;
+    } else {
+        if (!bNo) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'ไม่พบเลขที่บิลเดิม',
+                text: 'กรุณาเลือกบิลที่ต้องการแก้ไข หรือใช้ปุ่ม "บันทึกเป็นบิลใหม่" แทน',
+                confirmButtonText: 'ตกลง',
+                confirmButtonColor: '#0284c7'
+            });
+            return;
+        }
+        finalBillNo = bNo;
+    }
+
+    let rawBookNo = document.getElementById('bookNo').value.trim();
+    let currentBookNo = rawBookNo.replace(/^:/, '').trim();
+    let salesNameInput = document.getElementById('sigSalesName');
+    let currentSalesName = salesNameInput ? salesNameInput.value.trim() : '';
+
+    let existingTimestamp = null;
+    try {
+        const existingDoc = await db.collection("quotations").doc(finalBillNo).get();
+        if (existingDoc.exists && existingDoc.data().timestamp) {
+            existingTimestamp = existingDoc.data().timestamp;
+        }
+    } catch (e) {
+        console.warn("⚠️ ไม่สามารถตรวจสอบ timestamp เดิมได้:", e);
+    }
+
+    let billDataToSave = {
+        billNo: finalBillNo,
+        bookNo: currentBookNo,
+        billDate: dateField ? dateField.value.trim() : '',
+        customerName: cName,
+        address: cAddr,
+        taxNo: cTaxId,        
+        customerTaxId: cTaxId, 
+        subject: document.getElementById('quotSubject').value,
+        enclosure: document.getElementById('quotEnclose').value,
+        remark: document.getElementById('remarkText').value,
+        discountRate: parseFloat(document.getElementById('discountRate').value) || 0,
+        discountAmount: parseFloat(document.getElementById('discountAmount').value) || 0,
+        grandTotal: grandTotalVal,
+        items: currentItems,
+        customerSignName: document.getElementById('sigCustomerName').value,
+        customerSignDate: document.getElementById('sigCustomerDate').value,
+        salesSignName: currentSalesName,
+        salesSignDate: sigSalesDate ? sigSalesDate.value.trim() : '',
+        timestamp: (isNewBill || !existingTimestamp) ? new Date().getTime() : existingTimestamp
+    };
+
+    try {
+        await db.collection("quotations").doc(finalBillNo).set(billDataToSave);
+
+        let purchases = JSON.parse(localStorage.getItem('saved_quot_purchases') || '[]');
+        if (!isNewBill) {
+            purchases = purchases.filter(p => p.billNo !== finalBillNo);
+        }
+        purchases.push(billDataToSave);
+
+        if (purchases.length > 200) {
+            purchases.sort((a, b) => b.timestamp - a.timestamp);
+            purchases = purchases.slice(0, 200);
+        }
+        localStorage.setItem('saved_quot_purchases', JSON.stringify(purchases));
+
+        if (showSuccessAlert) {
+            Swal.fire({
+                icon: 'success',
+                title: isNewBill ? 'บันทึกเป็นบิลใหม่สำเร็จ' : 'บันทึกข้อมูลสำเร็จ',
+                text: `เลขที่บิล: ${finalBillNo}`,
+                timer: 1500,
+                showConfirmButton: false
+            });
+        }
+
+        return;
+    } catch (error) {
+        console.error("❌ เกิดข้อผิดพลาดในการบันทึก Firebase: ", error);
+        Swal.fire({
+            icon: 'error',
+            title: 'บันทึกข้อมูลไม่สำเร็จ',
+            text: 'ไม่สามารถเชื่อมต่อกับ Cloud ได้ โปรดตรวจสอบอินเทอร์เน็ตแล้วลองใหม่อีกครั้ง',
+            confirmButtonText: 'ตกลง',
+            confirmButtonColor: '#ef4444'
+        });
+    }
+}
+
+    async function exportAllData() {
+    try {
+        // 1. ดึงข้อมูลล่าสุดจาก LocalStorage มาเป็นค่าเริ่มต้น
+        let customers = JSON.parse(localStorage.getItem('saved_quot_customers') || '[]');
+        let products = JSON.parse(localStorage.getItem('saved_quot_products') || '[]');
+        let purchases = JSON.parse(localStorage.getItem('saved_quot_purchases') || '[]');
+
+        // 2. ดึงข้อมูลล่าสุดจาก Firebase Cloud มารวมด้วย เพื่อให้ไฟล์สำรองสมบูรณ์ที่สุด
+        try {
+            if (typeof firebase !== 'undefined') {
+                if (!firebase.apps.length) {
+                    firebase.initializeApp(firebaseConfig);
+                }
+                const db = firebase.firestore();
+                
+                // 📍 ดึงทั้งรายชื่อลูกค้า และ รายการสินค้า จาก Cloud ในจุดนี้
+                const masterDoc = await db.collection("settings").doc("master_data").get();
+                if (masterDoc.exists) {
+                    if (masterDoc.data().customers) customers = masterDoc.data().customers;
+                    if (masterDoc.data().products) products = masterDoc.data().products; // ✅ เพิ่มการดึงสินค้าตรงนี้
+                }
+
+                // ดึงประวัติบิลทั้งหมดจาก Cloud
+                const querySnapshot = await db.collection("quotations").get();
+                let cloudPurchases = [];
+                querySnapshot.forEach((doc) => {
+                    cloudPurchases.push(doc.data());
+                });
+                if (cloudPurchases.length > 0) {
+                    purchases = cloudPurchases;
+                }
+            }
+        } catch (cloudErr) {
+            console.warn("⚠️ ไม่สามารถดึงข้อมูลจาก Cloud มาสำรองได้ ใช้ข้อมูลในเครื่องแทน:", cloudErr);
+        }
+
+        const allData = {
+            customers: customers,
+            products: products,
+            purchases: purchases
+        };
+
+        const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(allData, null, 2));
+        
+        if ('showSaveFilePicker' in window) {
+            const options = {
+                suggestedName: `system_backup_${new Date().toISOString().slice(0, 10)}.json`,
+                types: [{
+                    description: 'JSON Files',
+                    accept: { 'application/json': ['.json'] }
+                }]
+            };
+            const handle = await window.showSaveFilePicker(options);
+            const writable = await handle.createWritable();
+            await writable.write(JSON.stringify(allData, null, 2));
+            await writable.close();
+            
+            Swal.fire('สำเร็จ', 'สำรองข้อมูลทั้งหมดเรียบร้อยแล้ว', 'success');
+            return;
+        }
+
+        const downloadAnchor = document.createElement('a');
+        downloadAnchor.setAttribute("href", dataStr);
+        downloadAnchor.setAttribute("download", `system_backup_${new Date().toISOString().slice(0, 10)}.json`);
+        document.body.appendChild(downloadAnchor);
+        downloadAnchor.click();
+        downloadAnchor.remove();
+
+        Swal.fire('สำเร็จ', 'สำรองข้อมูลทั้งหมดเรียบร้อยแล้ว', 'success');
+    } catch (err) {
+        if (err.name !== 'AbortError') {
+            Swal.fire('เกิดข้อผิดพลาด', 'ไม่สามารถสำรองข้อมูลได้: ' + err.message, 'error');
+        }
+    }
+}
+
+
+
+
+    async function importAllData(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = async function(e) {
+        try {
+            const jsonContent = JSON.parse(e.target.result);
+
+            if (!jsonContent.customers && !jsonContent.products && !jsonContent.purchases) {
+                throw new Error('โครงสร้างไฟล์ JSON ไม่ถูกต้อง');
+            }
+
+            Swal.fire({
+                title: 'ยืนยันการนำเข้าข้อมูล?',
+                text: 'ข้อมูลปัจจุบันทั้งหมดจะถูกแทนที่ด้วยข้อมูลจากไฟล์สำรอง',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'ยืนยัน',
+                cancelButtonText: 'ยกเลิก'
+            }).then(async (result) => {
+                if (result.isConfirmed) {
+                    // 1. บันทึกลง localStorage ของเครื่อง
+                    if (jsonContent.customers) localStorage.setItem('saved_quot_customers', JSON.stringify(jsonContent.customers));
+                    if (jsonContent.products) localStorage.setItem('saved_quot_products', JSON.stringify(jsonContent.products));
+                    if (jsonContent.purchases) localStorage.setItem('saved_quot_purchases', JSON.stringify(jsonContent.purchases));
+
+                    // 2. อัปเดตข้อมูลขึ้น Firebase Cloud (ทั้งลูกค้า, สินค้า และประวัติบิล)
+                    try {
+                        if (typeof firebase !== 'undefined') {
+                            if (!firebase.apps.length) {
+                                firebase.initializeApp(firebaseConfig);
+                            }
+                            const db = firebase.firestore();
+
+                            // อัปเดตรายชื่อลูกค้า และ รายการสินค้า ขึ้น Cloud ที่ master_data จุดเดียวจบ
+                            let masterDataToUpdate = {};
+                            if (jsonContent.customers) masterDataToUpdate.customers = jsonContent.customers;
+                            if (jsonContent.products) masterDataToUpdate.products = jsonContent.products;
+
+                            if (Object.keys(masterDataToUpdate).length > 0) {
+                                await db.collection("settings").doc("master_data").set(masterDataToUpdate, { merge: true });
+                            }
+
+                            // อัปเดตประวัติบิลทั้งหมดขึ้น Cloud Firestore
+                            if (jsonContent.purchases && Array.isArray(jsonContent.purchases)) {
+                                let batch = db.batch();
+                                jsonContent.purchases.forEach(bill => {
+                                    if (bill.billNo) {
+                                        let docRef = db.collection("quotations").doc(bill.billNo);
+                                        batch.set(docRef, bill);
+                                    }
+                                });
+                                await batch.commit();
+                            }
+                        }
+                    } catch (cloudErr) {
+                        console.warn("⚠️ ไม่สามารถอัปเดตข้อมูลขึ้น Cloud หลัง Import ได้:", cloudErr);
+                    }
+
+                    // 3. แจ้งเตือนและรีโหลดหน้าจอ
+                    Swal.fire('สำเร็จ!', 'นำเข้าข้อมูลทั้งหมดและซิงค์ขึ้น Cloud เรียบร้อยแล้ว', 'success').then(() => {
+                        location.reload();
+                    });
+                }
+            });
+        } catch (err) {
+            Swal.fire('เกิดข้อผิดพลาด', 'ไฟล์ไม่ถูกต้องหรือเสียหาย: ' + err.message, 'error');
+        } finally {
+            event.target.value = '';
+        }
+    };
+    reader.readAsText(file);
+}
+
+// ==========================================
+// ระบบ Real-time Listener (ดึงข้อมูลอัปเดตทันทีทุกเครื่อง)
+// ==========================================
+
+let isCustomerListenerActive = false;
+
+function initRealtimeMasterData() {
+    if (isCustomerListenerActive) return; // ถ้าเปิดฟังอยู่อยู่แล้ว ให้ข้ามได้เลย
+    
+    try {
+        if (typeof firebase === 'undefined') return;
+        if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+        
+        const db = firebase.firestore();
+
+        db.collection("settings").doc("master_data")
+            .onSnapshot((doc) => {
+                if (doc.exists && doc.data().customers) {
+                    const customers = doc.data().customers;
+                    localStorage.setItem('saved_quot_customers', JSON.stringify(customers));
+                    updateCustomerDropdownUI(customers);
+                }
+            }, (error) => {
+                console.warn("⚠️ Real-time Listener ข้อผิดพลาด:", error);
+            });
+
+        isCustomerListenerActive = true; // บันทึกสถานะว่าเปิด Listener เรียบร้อยแล้ว
+
+    } catch (err) {
+        console.error("❌ ไม่สามารถเปิดระบบ Real-time Sync ได้:", err);
+    }
+}
+
+// 2. ฟังก์ชันอัปเดต Dropdown บนหน้าจอ
+function updateCustomerDropdownUI(customers) {
+    let select = document.getElementById('customerSelect');
+    if (!select) return;
+
+    let currentSelected = select.value;
+    select.innerHTML = '<option value="">-- เลือกลูกค้า/บริษัท --</option>';
+
+    customers.forEach((c) => {
+        let custName = '';
+        let custAddr = '';
+        let custTaxId = '';
+
+        if (typeof c === 'string') {
+            custName = c.trim();
+        } else if (c) {
+            custName = (c.name || c.customerName || c.companyName || '').trim();
+            custAddr = c.address || c.custAddress || c.companyAddress || '';
+            // รองรับทุกคีย์สำหรับ Tax ID ที่เป็นไปได้
+            custTaxId = c.taxId || c.customerTaxId || c.tax || c.tax_id || c.taxNumber || c.tax_number || c.taxNo || c.custTaxId || '';
+        }
+
+        if (custName) {
+            let opt = document.createElement('option');
+            opt.value = custName;
+            opt.innerText = custName;
+            opt.dataset.address = custAddr;
+            opt.dataset.taxId = custTaxId;
+            select.appendChild(opt);
+        }
+    });
+
+    if (currentSelected) {
+        select.value = currentSelected;
+    }
+
+    if (!select.dataset.hasChangeListener) {
+        select.dataset.hasChangeListener = "true";
+        select.addEventListener('change', function() {
+            let selectedOpt = this.options[this.selectedIndex];
+            let addrArea = document.getElementById('custAddress');
+            let taxInput = document.getElementById('custTaxId');
+
+            if (selectedOpt && selectedOpt.value) {
+                let addr = selectedOpt.dataset.address || '';
+                let taxId = selectedOpt.dataset.taxId || '';
+
+                if (addrArea) {
+                    addrArea.value = addr;
+                    if (typeof autoGrow === 'function') {
+                        autoGrow(addrArea);
+                    }
+                }
+
+                if (taxInput) {
+                    taxInput.value = taxId;
+                }
+
+                // หากลูกค้ามีที่อยู่หรือเลขภาษี ให้เปิดรายละเอียดอัตโนมัติ
+                autoShowAddressTaxIfDataExists();
+            } else {
+                if (addrArea) {
+                    addrArea.value = '';
+                    if (typeof autoGrow === 'function') {
+                        autoGrow(addrArea);
+                    }
+                }
+                if (taxInput) {
+                    taxInput.value = '';
+                }
+            }
+        });
+    }
+}
+
+// 3. ฟังก์ชันดึงรายชื่อลูกค้าแบบเดิม (ปรับให้เรียกใช้ระบบ Real-time)
+function loadCustomerDropdown() {
+    // 1. ดึงจาก LocalStorage ขึ้นมาแสดงก่อนทันทีเพื่อความเร็ว
+    let localCustomers = JSON.parse(localStorage.getItem('saved_quot_customers') || localStorage.getItem('saved_customers') || '[]');
+    
+    if (localCustomers.length > 0) {
+        // กรองรายชื่อที่ซ้ำออกก่อนส่งไปอัปเดต UI
+        let uniqueCustomers = [];
+        let seenNames = new Set();
+
+        localCustomers.forEach(cust => {
+            let name = typeof cust === 'string' ? cust : (cust.name || cust.customerName || cust.companyName || '');
+            name = name.trim();
+            if (name && !seenNames.has(name)) {
+                seenNames.add(name);
+                // แปลงข้อมูลให้อยู่ในรูปแบบ Object เสมอ เพื่อป้องกันพังตอนดึง data attribute
+                if (typeof cust === 'string') {
+                    uniqueCustomers.push({ name: name, address: '', taxId: '' });
+                } else {
+                    uniqueCustomers.push(cust);
+                }
+            }
+        });
+
+        updateCustomerDropdownUI(uniqueCustomers);
+    }
+    
+    // 2. เริ่มเปิดระบบ Real-time ฟังข้อมูลจาก Cloud
+    initRealtimeMasterData();
+}
+
+// วางไว้ที่บรรทัดล่างสุดของไฟล์ .js เลยครับ
+window.addEventListener('DOMContentLoaded', () => {
+    console.log("🚀 ระบบกำลังโหลดข้อมูลเริ่มต้น...");
+    
+    // เรียกโหลดรายการลูกค้า
+    loadCustomerDropdown();
+    
+    // เรียกโหลดรายการสินค้า (ถ้ามีฟังก์ชันนี้)
+    if (typeof renderProductList === 'function') {
+        renderProductList();
+    }
+    
+    // หากมีฟังก์ชันโหลดประวัติบิลด้วย ก็ใส่ได้เลย
+    if (typeof loadHistoryData === 'function') {
+        loadHistoryData();
+    }
+});
+
+ async function selectCustomer(select) {
+    let selectedName = '';
+    let selectElement = document.getElementById('customerSelect');
+    
+    if (select) {
+        if (typeof select === 'object') {
+            if (select.value !== undefined) {
+                selectedName = select.value;
+            } else if (select.tagName === 'SELECT') {
+                selectElement = select;
+                selectedName = select.value;
+            }
+        } else {
+            selectedName = select;
+        }
+    }
+
+    if (!selectedName || selectedName === "") {
+        let addrArea = document.getElementById('custAddress');
+        if (addrArea) { addrArea.value = ''; if (typeof autoGrow === 'function') autoGrow(addrArea); }
+        let taxInput = document.getElementById('custTaxId');
+        if (taxInput) { taxInput.value = ''; }
+        let nameInput = document.getElementById('custName');
+        if (nameInput) { nameInput.value = ''; }
+        
+        // 📌 เมื่อไม่มีการเลือกลูกค้า ให้ซ่อนกล่องที่อยู่และเลขภาษีอัตโนมัติทันที
+        autoShowAddressTaxIfDataExists();
+        return;
+    }
+
+    let address = '';
+    let taxId = '';
+
+    // 1. ดึงจาก dataset ของ option ใน dropdown
+    if (selectElement && selectElement.selectedIndex !== -1) {
+        let selectedOpt = selectElement.options[selectElement.selectedIndex];
+        if (selectedOpt && (selectedOpt.value === selectedName || selectedOpt.text === selectedName)) {
+            address = selectedOpt.dataset.address || '';
+            // ตรวจสอบชื่อ dataset ให้ครอบคลุมทุกรูปแบบที่อาจถูกบันทึกไว้
+            taxId = selectedOpt.dataset.taxId || selectedOpt.dataset.tax || selectedOpt.dataset.taxid || selectedOpt.dataset.taxNo || '';
+        }
+    }
+
+    // 2. หากไม่เจอใน dataset ให้ค้นหาจาก LocalStorage หรือฐานข้อมูลลูกค้า
+    if (!address || !taxId) {
+        let localCustomers = JSON.parse(localStorage.getItem('saved_quot_customers') || '[]');
+        let found = localCustomers.find(c => {
+            let cName = typeof c === 'string' ? c : (c.name || c.customerName || c.companyName || '');
+            return cName === selectedName;
+        });
+        
+        if (found && typeof found === 'object') {
+            address = found.address || found.custAddress || '';
+            taxId = found.taxId || found.tax || found.custTaxId || '';
+        }
+    }
+
+    // กำหนดค่าชื่อลูกค้า
+    let nameInput = document.getElementById('custName');
+    if (nameInput) {
+        nameInput.value = selectedName;
+    }
+
+    // กำหนดค่าที่อยู่
+    let addrArea = document.getElementById('custAddress');
+    if (addrArea) {
+        addrArea.value = address;
+        if (typeof autoGrow === 'function') autoGrow(addrArea);
+    }
+
+    // 📌 [จุดสำคัญ] กำหนดค่าเลขประจำตัวผู้เสียภาษีลงใน Input ที่ถูกต้อง
+    let taxInput = document.getElementById('custTaxId');
+    if (taxInput) {
+        taxInput.value = taxId;
+    }
+
+    // แจ้งเตือนเล็กน้อยเมื่อดึงข้อมูลสำเร็จ
+    if (selectedName && typeof Swal !== 'undefined') {
+        const Toast = Swal.mixin({
+            toast: true,
+            position: 'top-end',
+            showConfirmButton: false,
+            timer: 1500,
+            timerProgressBar: true
+        });
+        Toast.fire({
+            icon: 'success',
+            title: 'ดึงข้อมูลลูกค้าสำเร็จ'
+        });
+    }
+
+    // 📌 เรียกใช้งานฟังก์ชันตรวจสอบและเปิด-ปิดกล่องที่อยู่/เลขภาษีอัตโนมัติทันทีหลังดึงข้อมูลเสร็จ
+    autoShowAddressTaxIfDataExists();
+}
+
+/**
+ * คงชื่อฟังก์ชันเดิมไว้เพื่อไม่ให้ส่วนอื่นของระบบที่เรียกใช้งานเกิด Error
+ * แต่การเปิด/ยุบจะควบคุมด้วยปุ่มเท่านั้น
+ */
+function autoShowAddressTaxIfDataExists() {
+    const detailsBox = document.getElementById('addressTaxDetails');
+    if (!detailsBox) return;
+
+    const addr = document.getElementById('custAddress')?.value.trim() || '';
+    const taxId = document.getElementById('custTaxId')?.value.trim() || '';
+    const hasData = !!addr || !!taxId;
+
+    if (hasData) {
+        detailsBox.classList.remove('hidden-section');
+    } else {
+        detailsBox.classList.add('hidden-section');
+    }
+
+    updateAddressTaxButtonState();
+}
+
+function loadDataByBillNo() {
+        let searchNo = document.getElementById('searchOldBillNo').value.trim();
+        if(!searchNo) {
+            Swal.fire({ icon: 'warning', title: 'กรุณากรอกเลขที่บิลเดิม', text: 'โปรดระบุเลขที่บิลที่ต้องการค้นหา' });
+            return;
+        }
+        let purchases = JSON.parse(localStorage.getItem('saved_quot_purchases') || '[]');
+        let found = purchases.find(p => p.billNo === searchNo);
+
+        if(found) {
+            // 📌 ย้ายและเปลี่ยนจาก data มาเป็น found ตรงนี้
+            window.editingOldCustomerName = found.customerName; 
+            document.getElementById('custName').value = found.customerName || '';
+            document.getElementById('custAddress').value = found.address || '';
+            document.getElementById('custTaxId').value = found.taxNo || found.customerTaxId || found.taxId || found.custTaxId || '';
+            autoShowAddressTaxIfDataExists();
+
+            // หากมีฟังก์ชันเติมรายการสินค้าอื่นๆ ก็ใส่ต่อตรงนี้ได้เลย
+            // fillPurchaseDataToDOM(found);
+
+            Swal.fire({
+                icon: 'success',
+                title: 'ดึงข้อมูลสำเร็จ!',
+                text: `โหลดข้อมูลจากเลขที่บิล ${searchNo} เรียบร้อยแล้ว`,
+                timer: 1500,
+                showConfirmButton: false
+            });
+        } else {
+            Swal.fire({
+                icon: 'error',
+                title: 'ไม่พบข้อมูล',
+                text: `ไม่พบเลขที่บิล "${searchNo}" ในระบบประวัติการบันทึก`
+            });
+        }
+    }
+	
+	
+	
+
+    function openHistoryModal() {
+        renderHistoryTable();
+        document.getElementById('historyModal').style.display = 'flex';
+		
+		updateAddressTaxVisibility(true);
+    }
+	
+	
+
+async function renderHistoryTable(filterText = '') {
+    let container = document.getElementById('historyTableContainer');
+    let titleElement = document.getElementById('historyModalTitle');
+    
+    container.innerHTML = '<p style="text-align:center; color:#64748b; padding: 20px;">กำลังโหลดข้อมูลประวัติจาก Cloud...</p>';
+    
+    let purchases = [];
+    try {
+        if (!firebase.apps.length) {
+            firebase.initializeApp(firebaseConfig);
+        }
+        const db = firebase.firestore();
+        const querySnapshot = await db.collection("quotations").get();
+        
+        querySnapshot.forEach((doc) => {
+            purchases.push(doc.data());
+        });
+
+        // 📌 ปรับปรุงการเรียงลำดับ: เรียงจากวันที่ล่าสุดไปเก่าสุด + เรียงตามเวลาบันทึก (Timestamp) ก่อน-หลัง แม้จะเป็นวันเดียวกัน
+        purchases.sort((a, b) => {
+            let parseDate = (dateStr) => {
+                if (!dateStr || !dateStr.includes('/')) return 0;
+                let parts = dateStr.split('/');
+                if (parts.length !== 3) return 0;
+                let day = parts[0].padStart(2, '0');
+                let month = parts[1].padStart(2, '0');
+                let year = parts[2];
+                return parseInt(`${year}${month}${day}`) || 0;
+            };
+
+            let dateA = parseDate(a.billDate);
+            let dateB = parseDate(b.billDate);
+
+            // ถ้าวันที่ไม่เท่ากัน ให้เรียงจากวันใหม่ไปวันเก่า
+            if (dateB !== dateA) {
+                return dateB - dateA;
+            }
+
+            // ถ้าเป็นวันที่เดียวกัน ให้เรียงตามเวลาที่บันทึก (Timestamp) รายการที่บันทีหลังสุดจะอยู่บน
+            let timeA = Number(a.timestamp || 0);
+            let timeB = Number(b.timestamp || 0);
+            return timeB - timeA;
+        });
+
+    } catch (error) {
+        console.error("❌ เกิดข้อผิดพลาดในการโหลดจาก Cloud:", error);
+        purchases = JSON.parse(localStorage.getItem('saved_quot_purchases') || '[]');
+    }
+
+    if (filterText) {
+        let lower = filterText.toLowerCase();
+        purchases = purchases.filter(p => {
+            let bNo = (p.billNo || '').toLowerCase();
+            let cName = (p.customerName || '').toLowerCase();
+            let sName = (p.salesSignName || '').toLowerCase();
+            let subj = (p.subject || '').toLowerCase();
+            let bDate = (p.billDate || '').toLowerCase();
+
+            return bNo.includes(lower) || 
+                   cName.includes(lower) || 
+                   sName.includes(lower) || 
+                   subj.includes(lower) || 
+                   bDate.includes(lower);
+        });
+    }
+
+    let totalRecords = purchases.length;
+    titleElement.innerHTML = `📋 ประวัติการขายและใบเสนอราคาทั้งหมด (History Log) - พบ ${totalRecords} รายการ`;
+
+    if (totalRecords === 0) {
+        container.innerHTML = '<p style="text-align:center; color:#64748b; padding: 20px;">ไม่พบข้อมูลประวัติที่ค้นหา</p>';
+        return;
+    }
+
+    let html = `
+        <div style="overflow-x: auto;">
+            <table class="history-table" style="min-width: 500px;">
+                <thead>
+                    <tr>
+                        <th style="width: 13%;">วันที่</th>
+                        <th style="width: 14%;">เลขที่บิล</th>
+                        <th style="width: 33%;">ชื่อลูกค้า / บริษัท</th>
+                        <th style="width: 18%;">ผู้เสนอราคา</th>
+                        <th style="width: 13%; text-align: right;">ยอดรวมทั้งสิ้น</th>
+                        <th style="width: 9%; text-align: center;">เลือก</th>
+                    </tr>
+                </thead>
+                <tbody>
+    `;
+
+    purchases.forEach(p => {
+        let formattedTotal = (p.grandTotal !== undefined ? p.grandTotal : 0).toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        html += `
+            <tr>
+                <td>${p.billDate || '-'}</td>
+                <td><strong>${p.billNo || '-'}</strong></td>
+                <td>${p.customerName || '-'}</td>
+                <td>${p.salesSignName || '-'}</td>
+                <td style="text-align: right; color: #0369a1; font-weight: 600;">${formattedTotal}</td>
+                <td style="text-align: center; white-space: nowrap;">
+                    <button class="btn-select-history" onclick="selectHistoryBill('${p.billNo}')">เลือก</button>
+                    <button class="btn-select-history" style="background: #f59e0b; margin-left: 2px;" onclick="selectHistoryBill('${p.billNo}'); closeModal('historyModal');">แก้ไข</button>
+                    <button class="btn-del" style="padding: 4px 8px; margin-left: 2px;" onclick="deleteHistoryBill('${p.billNo}')">ลบ</button>
+                </td>
+            </tr>
+        `;
+    });
+
+    html += `</tbody></table></div>`;
+    container.innerHTML = html;
+}
+
+function filterHistoryTable() {
+    // 1. ดึงค่าจากช่อง Input
+    const filterText = document.getElementById('historySearchInput').value;
+    
+    // 2. เรียกฟังก์ชัน Render โดยส่งค่า filterText เข้าไป
+    renderHistoryTable(filterText);
+}
+
+    async function selectHistoryBill(billNo) {
+    try {
+        const db = firebase.firestore();
+        const docRef = await db.collection("quotations").doc(billNo).get();
+        
+        if (docRef.exists) {
+            let billData = docRef.data();
+            fillPurchaseDataToDOM(billData);
+            closeModal('historyModal');
+            
+            const Toast = Swal.mixin({
+                toast: true,
+                position: 'top-end',
+                showConfirmButton: false,
+                timer: 1500,
+                timerProgressBar: true
+            });
+            Toast.fire({ icon: 'success', title: `ดึงข้อมูลบิล ${billNo} สำเร็จ` });
+        } else {
+            Swal.fire({ icon: 'error', title: 'ไม่พบข้อมูล', text: 'ไม่พบข้อมูลบิลดังกล่าวบน Cloud' });
+        }
+    } catch (error) {
+        console.error("❌ เกิดข้อผิดพลาดในการดึงข้อมูลบิล:", error);
+        Swal.fire({ icon: 'error', title: 'เกิดข้อผิดพลาด', text: 'ไม่สามารถดึงข้อมูลจาก Cloud ได้' });
+    }
+}
+
+
+function insertRowAbove(btn) {
+    let currentRow = btn.closest('tr');
+    let tableBody = currentRow.parentNode;
+    let newRow = tableBody.insertRow(currentRow.rowIndex - 1);
+    newRow.className = "item-row";
+    newRow.innerHTML = `
+        <td class="row-num" style="text-align: center;"></td>
+        <td class="desc-cell"><textarea class="item-desc" placeholder="ระบุรายละเอียดสินค้า" oninput="autoGrow(this)" onblur="fetchProductByDesc(this)"></textarea></td>
+        <td style="text-align: center;">
+            <input type="text" class="sku-input" placeholder="รหัส/รุ่น (กด Enter)" 
+                   onkeydown="if(event.key === 'Enter'){ fetchProductBySKU(this); this.blur(); }">
+        </td>
+        <td style="text-align: center;"><input type="text" class="qty" value="0" inputmode="decimal" onfocus="if(this.value==='0')this.value='';" onblur="if(this.value==='')this.value='0';" oninput="formatNumberInput(this); calculate();"></td>
+        <td style="text-align: center;"><input type="text" class="unit-input" placeholder="ชิ้น/อัน"></td>
+        <td style="text-align: center;"><input type="text" class="price" value="0" inputmode="decimal" onfocus="if(this.value==='0')this.value='';" onblur="if(this.value==='')this.value='0';" oninput="formatNumberInput(this); calculate();"></td>
+        <td class="amount" style="text-align: right; padding-right: 12px;">0.00</td>
+        <td class="no-print" style="text-align: center; white-space: nowrap;">
+            <button type="button" class="icon-btn" style="width: 28px; height: 28px; font-size: 12px; background: linear-gradient(135deg, #0284c7, #0369a1); display: inline-flex; align-items: center; justify-content: center; margin-right: 4px;" onclick="insertRowAbove(this)" title="แทรกแถว"><i class="fa-solid fa-plus"></i></button>
+            <button type="button" class="icon-btn" style="width: 28px; height: 28px; font-size: 12px; background: linear-gradient(135deg, #dc2626, #ef4444); display: inline-flex; align-items: center; justify-content: center;" onclick="removeRow(this)" title="ลบแถว"><i class="fa-solid fa-trash-alt"></i></button>
+        </td>
+    `;
+    calculate();
+}
+
+
+
+async function deleteHistoryBill(billNo) {
+    Swal.fire({
+        title: 'ยืนยันการลบประวัติ?',
+        text: `คุณต้องการลบใบเสนอเลขที่ ${billNo} ใช่หรือไม่`,
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#ef4444',
+        cancelButtonColor: '#94a3b8',
+        confirmButtonText: 'ลบ',
+        cancelButtonText: 'ยกเลิก'
+    }).then(async (result) => {
+        if (result.isConfirmed) {
+            try {
+                const db = firebase.firestore();
+                await db.collection("quotations").doc(billNo).delete();
+
+                let purchases = JSON.parse(localStorage.getItem('saved_quot_purchases') || '[]');
+                purchases = purchases.filter(p => p.billNo !== billNo);
+                localStorage.setItem('saved_quot_purchases', JSON.stringify(purchases));
+
+                renderHistoryTable(document.getElementById('historySearchInput').value);
+                Swal.fire({ icon: 'success', title: 'ลบประวัติสำเร็จ', showConfirmButton: false, timer: 1000 });
+            } catch (error) {
+                console.error("❌ ลบไม่สำเร็จ: ", error);
+                Swal.fire({ icon: 'error', title: 'เกิดข้อผิดพลาด', text: 'ไม่สามารถลบข้อมูลบน Cloud ได้' });
+            }
+        }
+    });
+}
+
+  function fillPurchaseDataToDOM(data) {
+    // 1. กำหนดเลขที่บิลและเล่มที่
+    document.getElementById('searchOldBillNo').value = data.billNo || '';
+    document.getElementById('bookNo').value = data.bookNo || '';
+    document.getElementById('billNo').value = data.billNo || '';
+    
+    // 🔑 จุดแก้ปัญหา: ดึงวันที่เดิมของบิลมาใส่ในช่อง Input (ไม่ให้ค้างเป็นวันปัจจุบัน)
+    document.getElementById('billDate').value = data.billDate || '';
+    
+    // 2. ข้อมูลลูกค้า
+    document.getElementById('customerSelect').value = data.customerName || '';
+    document.getElementById('custName').value = data.customerName || '';
+    
+    let addrArea = document.getElementById('custAddress');
+    if (addrArea) {
+        addrArea.value = data.address || '';
+        autoGrow(addrArea);
+    }
+    
+    let taxInput = document.getElementById('custTaxId');
+    if (taxInput) {
+        taxInput.value = data.taxNo || data.customerTaxId || data.taxId || '';
+    }
+    
+    // 3. ข้อมูลหัวข้อและหมายเหตุ
+    document.getElementById('quotSubject').value = data.subject || 'ขอเสนอราคาสินค้า/บริการ';
+    document.getElementById('quotEnclose').value = data.enclosure || '';
+    document.getElementById('remarkText').value = data.remark || '';
+    
+    // 4. ส่วนลดและยอดเงิน
+    document.getElementById('discountRate').value = data.discountRate || 0;
+    document.getElementById('discountAmount').value = (data.discountAmount || 0).toFixed(2);
+    
+    // 5. ข้อมูลลายเซ็นและวันที่ในช่องลายเซ็น
+    document.getElementById('sigCustomerName').value = data.customerSignName || '';
+    document.getElementById('sigCustomerDate').value = data.customerSignDate || '';
+    
+    let sigSalesName = document.getElementById('sigSalesName');
+    if (sigSalesName) sigSalesName.value = data.salesSignName || '';
+    
+    let sigSalesDate = document.getElementById('sigSalesDate');
+    if (sigSalesDate) sigSalesDate.value = data.salesSignDate || ''; // ดึงวันที่เซ็นของผู้เสนอราคาเดิม
+
+    // 6. โหลดรายการสินค้าเดิมลงในตาราง
+    let tbody = document.getElementById('billTable').getElementsByTagName('tbody')[0];
+    tbody.innerHTML = '';
+    
+    if (data.items && data.items.length > 0) {
+        data.items.forEach((item, index) => {
+            let newRow = tbody.insertRow();
+            newRow.className = "item-row";
+            newRow.innerHTML = `
+                <td class="row-num" style="text-align: center;">${index + 1}</td>
+                <td class="desc-cell"><textarea class="item-desc" placeholder="ระบุรายละเอียดสินค้า" oninput="autoGrow(this)" onblur="fetchProductByDesc(this)">${item.desc || ''}</textarea></td>
+                <td style="text-align: center;">
+                    <input type="text" class="sku-input" value="${item.sku || item.model || ''}" placeholder="รุ่น" 
+                           onkeydown="if(event.key === 'Enter'){ fetchProductBySKU(this); this.blur(); }">
+                </td>
+                <td style="text-align: center;"><input type="text" class="qty" value="${item.qty || 0}" inputmode="decimal" onfocus="if(this.value==='0')this.value='';" onblur="if(this.value==='')this.value='0';" oninput="formatNumberInput(this); calculate();"></td>
+                <td style="text-align: center;"><input type="text" class="unit-input" value="${item.unit || ''}" placeholder="ชิ้น/อัน"></td>
+                <td style="text-align: center;"><input type="text" class="price" value="${item.price || 0}" inputmode="decimal" onfocus="if(this.value==='0')this.value='';" onblur="if(this.value==='')this.value='0';" oninput="formatNumberInput(this); calculate();"></td>
+                <td class="amount" style="text-align: right; padding-right: 12px;">0.00</td>
+                <td class="no-print" style="text-align: center; white-space: nowrap;">
+    <!-- ปุ่มแทรก (ไอคอนบวก) -->
+    <button type="button" class="btn-del" style="background: transparent; border: none; color: #0284c7; margin-right: 6px; padding: 4px; cursor: pointer; font-size: 14px;" onclick="insertRowAbove(this)" title="แทรกแถวนี้">
+        <i class="fas fa-plus"></i>
+    </button>
+    <!-- ปุ่มลบ (ไอคอนถังขยะ) -->
+    <button type="button" class="btn-del" style="background: transparent; border: none; color: #9ca3af; padding: 4px; cursor: pointer; font-size: 14px;" onclick="removeRow(this)" title="ลบแถวนี้" onmouseover="this.style.color='#dc2626'" onmouseout="this.style.color='#9ca3af'">
+        <i class="fas fa-trash-alt"></i>
+    </button>
+</td>
+            `;
+            let textarea = newRow.querySelector('.item-desc');
+            autoGrow(textarea);
+        });
+    } else {
+        addRow();
+    }
+    
+    calculate();
+    autoShowAddressTaxIfDataExists();
+    
+    // เพิ่มการเรียกซ้ำและบังคับอัปเดตความสูงของช่องที่อยู่เพิ่มเติม เพื่อป้องกันกรณีที่ Element ถูกซ่อนอยู่ตอนเรียกครั้งแรก
+    if (addrArea) {
+        setTimeout(() => {
+            autoGrow(addrArea);
+        }, 50);
+    }
+}
+
+function updateAddressTaxVisibility() {
+    autoShowAddressTaxIfDataExists();
+}
+
+// Ensure toggleAddressTax points to the correct implementation if used interchangeably
+function toggleAddressTax() {
+    const detailsBox = document.getElementById('addressTaxDetails');
+    if (!detailsBox) return;
+
+    const hasCustomerDetails =
+        !!document.getElementById('custAddress')?.value.trim() ||
+        !!document.getElementById('custTaxId')?.value.trim();
+
+    // ถ้ามีข้อมูลลูกค้า ให้เปิดอัตโนมัติเมื่อเลือกลูกค้า
+    // ถ้าไม่มีข้อมูล ให้ทำงานเป็นปุ่มเปิด/ยุบตามปกติ
+    const isHidden = detailsBox.classList.contains('hidden-section');
+    if (isHidden) {
+        detailsBox.classList.remove('hidden-section');
+    } else {
+        detailsBox.classList.add('hidden-section');
+    }
+
+    updateAddressTaxButtonState();
+}
+
+
+    function fetchProductBySKU(input) {
+        let sku = input.value.trim();
+        if (!sku) return;
+        let products = JSON.parse(localStorage.getItem('saved_quot_products') || '[]');
+        let found = products.find(p => p.sku === sku);
+        if (found) {
+            let row = input.closest('tr');
+            let descArea = row.querySelector('.item-desc'); 
+            descArea.value = found.desc;
+            autoGrow(descArea);
+            if(found.unit) row.querySelector('.unit-input').value = found.unit;
+            row.querySelector('.price').value = found.price;
+            calculate();
+
+            input.style.borderColor = '#10b981';
+            input.style.backgroundColor = '#f0fdf4';
+            setTimeout(() => {
+                input.style.borderColor = '';
+                input.style.backgroundColor = '';
+            }, 1000);
+
+            const Toast = Swal.mixin({
+                toast: true,
+                position: 'top-end',
+                showConfirmButton: false,
+                timer: 1500,
+                timerProgressBar: true
+            });
+            Toast.fire({ icon: 'success', title: `✅ พบสินค้า: ${found.desc}` });
+        } else {
+            const Toast = Swal.mixin({
+                toast: true,
+                position: 'top-end',
+                showConfirmButton: false,
+                timer: 1500,
+                timerProgressBar: true
+            });
+            Toast.fire({ icon: 'info', title: `⚠️ ไม่พบรหัสรุ่น "${sku}" ในระบบ` });
+        }
+    }
+
+    function fetchProductByDesc(textarea) {
+        let searchText = textarea.value.trim();
+        if (!searchText) return;
+
+        let products = JSON.parse(localStorage.getItem('saved_quot_products') || '[]');
+        let keyword = searchText.toLowerCase();
+
+        let matchedProducts = products.filter(p => 
+            p.desc && p.desc.toLowerCase().includes(keyword)
+        );
+
+        if (matchedProducts.length === 1) {
+            let found = matchedProducts[0]; 
+            let row = textarea.closest('tr');
+            let skuInput = row.querySelector('.sku-input'); 
+            
+            skuInput.value = found.sku;  
+            textarea.value = found.desc; 
+            autoGrow(textarea);
+            if(found.unit) row.querySelector('.unit-input').value = found.unit;
+            row.querySelector('.price').value = found.price;
+            calculate();
+
+            const Toast = Swal.mixin({
+                toast: true,
+                position: 'top-end',
+                showConfirmButton: false,
+                timer: 1500,
+                timerProgressBar: true
+            });
+            Toast.fire({ icon: 'success', title: `✅ พบสินค้า: [${found.sku}]` });
+
+        } else if (matchedProducts.length > 1) {
+            let options = {};
+            matchedProducts.forEach((p, idx) => {
+                options[idx] = `[${p.sku}] ${p.desc} (${p.price} บาท)`;
+            });
+
+            Swal.fire({
+                title: 'พบสินค้าหลายรายการ',
+                input: 'select',
+                inputOptions: options,
+                inputPlaceholder: '== เลือกสินค้าที่ต้องการ ==',
+                showCancelButton: true,
+                confirmButtonText: 'เลือก',
+                cancelButtonText: 'ยกเลิก',
+                confirmButtonColor: '#0284c7'
+            }).then((result) => {
+                if (result.isConfirmed && result.value !== "") {
+                    let found = matchedProducts[result.value];
+                    let row = textarea.closest('tr');
+                    let skuInput = row.querySelector('.sku-input');
+                    
+                    skuInput.value = found.sku;
+                    textarea.value = found.desc;
+                    autoGrow(textarea);
+                    if(found.unit) row.querySelector('.unit-input').value = found.unit;
+                    row.querySelector('.price').value = found.price;
+                    calculate();
+
+                    const Toast = Swal.mixin({
+                        toast: true,
+                        position: 'top-end',
+                        showConfirmButton: false,
+                        timer: 1500,
+                        timerProgressBar: true
+                    });
+                    Toast.fire({ icon: 'success', title: `✅ เลือกสินค้า: [${found.sku}]` });
+                }
+            });
+
+        } else {
+            const Toast = Swal.mixin({
+                toast: true,
+                position: 'top-end',
+                showConfirmButton: false,
+                timer: 1500,
+                timerProgressBar: true
+            });
+            Toast.fire({ icon: 'info', title: `⚠️ ไม่พบรายละเอียดสินค้าใกล้เคียง (ใช้ข้อความอิสระ)` });
+        }
+    }
+
+    function openModal(modalId) {
+        if (modalId === 'productModal') {
+            let searchInput = document.getElementById('productSearchInput');
+            if (searchInput) searchInput.value = '';
+            renderProductList();
+        }
+        document.getElementById(modalId).style.display = 'flex';
+    }
+
+    function closeModal(modalId) {
+        document.getElementById(modalId).style.display = 'none';
+    }
+
+// 1. วางฟังก์ชันแก้ Error ตัวนี้ไว้บนสุดเสมอ
+    function performSilentBackup() {
+        // ว่างไว้ป้องกัน Error ค้าง
+    }
+
+    async function renderProductList() {
+    let container = document.getElementById('productListContainer');
+    let countContainer = document.getElementById('productCountText'); 
+    
+    container.innerHTML = '<p style="text-align:center; color:#64748b; padding: 15px;">กำลังโหลดข้อมูลสินค้าจาก Cloud...</p>';
+    
+    let products = [];
+    try {
+        if (!firebase.apps.length) {
+            firebase.initializeApp(firebaseConfig);
+        }
+        const db = firebase.firestore();
+        
+        const docSnap = await db.collection("settings").doc("master_data").get();
+        if (docSnap.exists && docSnap.data().products) {
+            products = docSnap.data().products;
+        } else {
+            products = JSON.parse(localStorage.getItem('saved_quot_products') || '[]');
+        }
+    } catch (error) {
+        console.error("❌ โหลดสินค้าจาก Cloud ไม่สำเร็จ:", error);
+        products = JSON.parse(localStorage.getItem('saved_quot_products') || '[]');
+    }
+    
+    container.innerHTML = '';
+    let searchInput = document.getElementById('productSearchInput');
+    let filterText = searchInput ? searchInput.value.trim().toLowerCase() : '';
+
+    let filteredProducts = products.map((p, originalIndex) => ({ ...p, originalIndex })).filter(p => 
+        (p.sku && p.sku.toLowerCase().includes(filterText)) ||
+        (p.desc && p.desc.toLowerCase().includes(filterText))
+    );
+
+    if (countContainer) {
+        countContainer.innerText = `พบสินค้า = ${filteredProducts.length} รายการ (จากทั้งหมด ${products.length} รายการ)`;
+    }
+
+    if (filteredProducts.length === 0) {
+        container.innerHTML = '<p style="text-align:center; color:#64748b; padding: 15px;">ไม่พบข้อมูลสินค้าที่ค้นหา</p>';
+        return;
+    }
+    
+    filteredProducts.forEach((p) => {
+        container.innerHTML += `
+            <div class="list-item-box" style="display: flex; justify-content: space-between; align-items: center;">
+                <div><strong>[${p.sku || '-'}]</strong> ${p.desc || '-'}<br><small style="color:#64748b;">หน่วย: ${p.unit || '-'} | ราคา: ${p.price || 0} บาท</small></div>
+                <div style="display: flex; gap: 4px;">
+                    <!-- 🛠️ เพิ่มปุ่มแก้ไขตรงนี้ -->
+                    <button class="btn-select-history" style="background: #f59e0b; padding: 4px 8px;" onclick="openEditProductModal(${p.originalIndex})">แก้ไข</button>
+                    <button class="btn-del" onclick="confirmDeleteProduct(${p.originalIndex})">ลบ</button>
+                </div>
+            </div>`;
+    });
+}
+
+async function confirmDeleteProduct(index) {
+    // 1. เรียกใช้ SweetAlert2 ถามยืนยัน
+    const result = await Swal.fire({
+        title: 'ยืนยันการลบ?',
+        text: 'หากลบแล้วจะไม่สามารถกู้คืนได้',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#ef4444',
+        cancelButtonColor: '#94a3b8',
+        confirmButtonText: 'ลบ',
+        cancelButtonText: 'ยกเลิก'
+    });
+
+    // ถ้าผู้ใช้กด "ยกเลิก" ให้หยุดทำงาน
+    if (!result.isConfirmed) return;
+
+    try {
+        const db = firebase.firestore();
+        const docRef = db.collection("settings").doc("master_data");
+        const docSnap = await docRef.get();
+
+        if (docSnap.exists) {
+            let products = docSnap.data().products || [];
+            
+            // ลบรายการใน Array
+            products.splice(index, 1);
+
+            // 2. อัปเดตข้อมูลขึ้น Firebase Cloud
+            await docRef.update({ products: products });
+
+            // 3. อัปเดตลง LocalStorage สำรอง
+            localStorage.setItem('saved_quot_products', JSON.stringify(products));
+
+            // 4. แจ้งเตือนลบสำเร็จ
+            Swal.fire({ 
+                icon: 'success', 
+                title: 'ลบสำเร็จ', 
+                showConfirmButton: false, 
+                timer: 1000 
+            });
+
+            // 5. โหลดรายการบนหน้าจอใหม่ทันที
+            await renderProductList();
+        }
+    } catch (error) {
+        console.error("❌ เกิดข้อผิดพลาดในการลบ:", error);
+        Swal.fire({
+            icon: 'error',
+            title: 'เกิดข้อผิดพลาด',
+            text: 'ไม่สามารถลบข้อมูลได้: ' + error.message
+        });
+    }
+}
+
+async function openEditProductModal(index) {
+    try {
+        if (!firebase.apps.length) {
+            firebase.initializeApp(firebaseConfig);
+        }
+        const db = firebase.firestore();
+        const docSnap = await db.collection("settings").doc("master_data").get();
+        
+        if (docSnap.exists && docSnap.data().products) {
+            let products = docSnap.data().products;
+            let p = products[index];
+
+            if (!p) {
+                Swal.fire('Error', 'ไม่พบข้อมูลสินค้านี้', 'error');
+                return;
+            }
+
+            // ใช้ SweetAlert2 ทำ Modal สำหรับแก้ไขข้อมูลสินค้า
+            const { value: formValues } = await Swal.fire({
+                title: 'แก้ไขข้อมูลสินค้า',
+                html:
+                    `<input id="swal-edit-sku" class="swal2-input" placeholder="รหัส/รุ่น" value="${p.sku || ''}">` +
+                    `<input id="swal-edit-desc" class="swal2-input" placeholder="รายละเอียดสินค้า" value="${p.desc || ''}">` +
+                    `<input id="swal-edit-unit" class="swal2-input" placeholder="หน่วย (เช่น ชิ้น, อัน)" value="${p.unit || ''}">` +
+                    `<input id="swal-edit-price" type="number" class="swal2-input" placeholder="ราคา" value="${p.price || 0}">`,
+                focusConfirm: false,
+                showCancelButton: true,
+                confirmButtonText: 'บันทึกการแก้ไข',
+                cancelButtonText: 'ยกเลิก',
+                
+                preConfirm: () => {
+    const sku = document.getElementById('swal-edit-sku').value.trim();
+    if (!sku) {
+        Swal.showValidationMessage('กรุณากรอกรหัส/รุ่นสินค้า');
+        return false;
+    }
+    return {
+        sku: sku,
+        desc: document.getElementById('swal-edit-desc').value.trim(),
+        unit: document.getElementById('swal-edit-unit').value.trim(),
+        price: parseFloat(document.getElementById('swal-edit-price').value) || 0
+    }
+}
+            });
+
+            // ถ้าผู้ใช้กดบันทึก
+            if (formValues) {
+                products[index] = formValues; // อัปเดตข้อมูลในอาเรย์ตำแหน่งเดิม
+
+                // บันทึกกลับลง Cloud Firestore
+                await db.collection("settings").doc("master_data").update({
+                    products: products
+                });
+
+                // บันทึกสำรองลง LocalStorage ด้วย
+                localStorage.setItem('saved_quot_products', JSON.stringify(products));
+
+                Swal.fire({
+                    icon: 'success',
+                    title: 'แก้ไขสินค้าสำเร็จ',
+                    showConfirmButton: false,
+                    timer: 1500
+                });
+
+                // รีเฟรชรายการสินค้าบนหน้าจอใหม่
+                renderProductList();
+            }
+        }
+    } catch (error) {
+        console.error("❌ แก้ไขสินค้าไม่สำเร็จ:", error);
+        Swal.fire('Error', 'เกิดข้อผิดพลาดในการแก้ไขสินค้า', 'error');
+    }
+}
+
+function toggleBackupButtons() {
+    let backupGroup = document.getElementById('backupGroup');
+    if (backupGroup) {
+        if (backupGroup.style.display === 'none' || backupGroup.style.display === '') {
+            backupGroup.style.display = 'flex';
+        } else {
+            backupGroup.style.display = 'none';
+        }
+    }
+}
+    
+    function convertNumberToThaiText(number) {
+        if (isNaN(number)) return "";
+        let isNegative = number < 0;
+        let absNumber = Math.abs(number);
+
+        let totalSatang = Math.round(absNumber * 100);
+        let integerPart = Math.floor(totalSatang / 100);
+        let fractionPart = totalSatang % 100;
+
+        if (integerPart === 0 && fractionPart === 0) {
+            return "ศูนย์บาทถ้วน";
+        }
+
+        let thaiNums = ["", "หนึ่ง", "สอง", "สาม", "สี่", "ห้า", "หก", "เจ็ด", "แปด", "เก้า"];
+        let thaiUnits = ["", "สิบ", "ร้อย", "พัน", "หมื่น", "แสน", "ล้าน"];
+
+        function convertChunk(n) {
+            if (n === 0) return "";
+            let result = "";
+            let str = n.toString();
+            let length = str.length;
+            for (let i = 0; i < length; i++) {
+                let digit = parseInt(str.charAt(i), 10);
+                let pos = length - i - 1;
+                if (digit !== 0) {
+                    if (pos === 1 && digit === 1) {
+                        result += "สิบ";
+                    } else if (pos === 1 && digit === 2) {
+                        result += "ยี่สิบ";
+                    } else if (pos === 0 && digit === 1 && length > 1 && parseInt(str.charAt(length - 2), 10) !== 0) {
+                        result += "เอ็ด";
+                    } else {
+                        result += thaiNums[digit] + thaiUnits[pos];
+                    }
+                }
+            }
+            return result;
+        }
+
+        function convertToText(n) {
+            if (n === 0) return "";
+            let millions = Math.floor(n / 1000000);
+            let remainder = n % 1000000;
+            let res = "";
+            if (millions > 0) {
+                res += convertToText(millions) + "ล้าน";
+            }
+            if (remainder > 0 || millions === 0) {
+                res += convertChunk(remainder);
+            }
+            return res;
+        }
+
+        let bahtText = "";
+        if (integerPart > 0) {
+            bahtText += convertToText(integerPart) + "บาท";
+        }
+
+        let satangText = "";
+        if (fractionPart > 0) {
+            satangText = convertChunk(fractionPart) + "สตางค์";
+        } else {
+            satangText = "ถ้วน";
+        }
+
+        let finalResult = bahtText + satangText;
+        return isNegative ? "ลบ" + finalResult : finalResult;
+    }
+
+    document.getElementById('discountRate').addEventListener('input', function() {
+        calculate();
+    });
+	
+
+	
+async function openQuotation() {
+    let currentBillNo = document.getElementById('billNo').value.trim();
+    
+    if (!currentBillNo) {
+        Swal.fire({
+            icon: 'warning',
+            title: 'ยังไม่ได้ระบุเลขที่บิล',
+            text: 'กรุณากรอกหรือสร้างเลขที่บิลก่อนเปิดหน้า Quotation',
+            confirmButtonText: 'ตกลง',
+            confirmButtonColor: '#0284c7'
+        });
+        return;
+    }
+
+    try {
+        Swal.fire({
+            title: 'กรุณารอสักครู่...',
+            text: 'ระบบกำลังจัดเตรียมหน้าเอกสารสำหรับพิมพ์',
+            allowOutsideClick: false,
+            didOpen: () => {
+                Swal.showLoading();
+            }
+        });
+
+        // ส่งพารามิเตอร์ตัวที่ 3 เป็น true เพื่อบังคับรักษาวันที่เดิมไว้ไม่ให้ถูกรีเซ็ต
+        if (typeof executeSave === 'function') {
+            await executeSave(false, false, true); 
+        }
+
+        let rawBookNo = document.getElementById('bookNo').value.trim();
+        let currentBookNo = rawBookNo.replace(/^:/, '').trim();
+        
+        let salesNameInput = document.getElementById('sigSalesName');
+        let currentSalesName = salesNameInput ? salesNameInput.value.trim() : '';
+        
+        await new Promise(resolve => setTimeout(resolve, 1000));
+
+        window.location.href = `quotation.html?billNo=${encodeURIComponent(currentBillNo)}&bookNo=${encodeURIComponent(currentBookNo)}&salesName=${encodeURIComponent(currentSalesName)}&autoPrint=true`;
+
+    } catch (error) {
+        console.error("Error before opening quotation:", error);
+        Swal.fire({
+            icon: 'error',
+            title: 'เกิดข้อผิดพลาด',
+            text: 'ไม่สามารถบันทึกข้อมูลก่อนพิมพ์ได้ กรุณาลองใหม่อีกครั้ง'
+        });
+    }
+}
+
+document.addEventListener("DOMContentLoaded", function() {
+        if (typeof firebase !== 'undefined' && firebase.database) {
+            const db = firebase.database();
+            const connectionRef = db.ref(".info/connected");
+            const activeUsersRef = db.ref("active_quotation_users");
+
+            connectionRef.on("value", function(snap) {
+                if (snap.val() === true) {
+                    const userRef = activeUsersRef.push();
+                    userRef.onDisconnect().remove();
+                    userRef.set({
+                        onlineAt: firebase.database.ServerValue.TIMESTAMP
+                    });
+                }
+            });
+
+            activeUsersRef.on("value", function(snapshot) {
+                const count = snapshot.numChildren();
+                const countElement = document.getElementById("activeUsersCount");
+                if (countElement) {
+                    countElement.textContent = count > 0 ? count : 1;
+                }
+            });
+        }
+    });
+	
+	
+	
+	// ฟังก์ชันสำหรับตรวจสอบและเปิด/ปิดการแสดงผลที่อยู่และเลขผู้เสียภาษีอัตโนมัติ
+// ปุ่มกดเปิด/ยุบ ที่อยู่และเลขประจำตัวผู้เสียภาษี
+
+
+function updateAddressTaxButtonState() {
+    const detailsBox = document.getElementById('addressTaxDetails');
+    const toggleBtn = document.getElementById('toggleAddressTaxBtn');
+    if (!detailsBox || !toggleBtn) return;
+
+    const isHidden = detailsBox.classList.contains('hidden-section');
+    const icon = toggleBtn.querySelector('i');
+    const text = toggleBtn.querySelector('span');
+
+    toggleBtn.setAttribute('aria-expanded', String(!isHidden));
+
+    if (isHidden) {
+        if (icon) icon.className = 'fa-solid fa-chevron-down';
+        if (text) text.textContent = 'แสดงที่อยู่/ภาษี';
+        toggleBtn.title = 'เปิดที่อยู่และเลขประจำตัวผู้เสียภาษี';
+    } else {
+        if (icon) icon.className = 'fa-solid fa-chevron-up';
+        if (text) text.textContent = 'ซ่อนที่อยู่/ภาษี';
+        toggleBtn.title = 'ยุบที่อยู่และเลขประจำตัวผู้เสียภาษี';
+    }
+}
+
+// ฟังก์ชันเดิมสำหรับความเข้ากันได้: ไม่เปิดกล่องอัตโนมัติ
+
+
+// ผูก Event Listener และเรียกใช้งานตอนโหลดหน้าเว็บ
+document.addEventListener("DOMContentLoaded", function() {
+    // เริ่มต้นให้กล่องที่อยู่/ภาษี "ยุบ" เสมอ และผู้ใช้เป็นคนกดเปิดเอง
+    const detailsBox = document.getElementById('addressTaxDetails');
+    if (detailsBox) detailsBox.classList.add('hidden-section');
+    updateAddressTaxButtonState();
+});
+
+	function preparePrint() {
+    // 1. ลบแถวข้อความเก่าออกก่อนทุกครั้งเพื่อป้องกันการเบิ้ลซ้ำ
+    document.querySelectorAll('.auto-continued-row').forEach(el => el.remove());
+
+    const rows = Array.from(document.querySelectorAll('#billTable tbody tr.item-row'));
+    if (rows.length === 0) return;
+
+    // 💡 กำหนดจำนวนแถวที่แน่นอนต่อหน้า (เนื่องจากล็อกความสูงแถวแล้ว ตัวเลขนี้จะนิ่งและแม่นยำ)
+    const FIRST_PAGE_ROWS = 17; // จำนวนแถวที่พอดีในหน้าแรก (เพราะมีหัวบิลกินพื้นที่)
+    const NEXT_PAGE_ROWS = 24;  // จำนวนแถวที่พอดีในหน้าถัดไป (ไม่มีหัวบิล พื้นที่เลยเยอะขึ้น)
+
+    let currentRowCount = 0;
+    let limit = FIRST_PAGE_ROWS;
+
+    rows.forEach((row) => {
+        currentRowCount++;
+
+        // ถ้ารายการครบโควต้าของหน้าปัจจุบันแล้ว ให้แทรกแถวข้อความ
+        if (currentRowCount >= limit) {
+            const continueRow = document.createElement('tr');
+            continueRow.className = 'auto-continued-row';
+            continueRow.innerHTML = `
+                <td colspan="8" style="text-align: right; padding: 6px 12px; font-weight: bold; border-top: 1px dashed #cbd5e1; font-size: 13px;">
+                    (มีรายการต่อหน้าถัดไป...)
+                </td>
+            `;
+
+            // แทรกข้อความไว้ก่อนหน้าแถวที่จะล้นไปหน้าถัดไป
+            row.parentNode.insertBefore(continueRow, row);
+
+            // เปลี่ยนไปใช้โควต้าของหน้าถัดไป และรีเซ็ตตัวนับแถว
+            limit = NEXT_PAGE_ROWS;
+            currentRowCount = 0; 
+        }
+    });
+}
+
+// ผูกฟังก์ชันเข้ากับการสั่งพิมพ์ของเบราว์เซอร์
+window.onbeforeprint = preparePrint;
+	
+</script>
+
+
+<script>
+    // ตรวจสอบว่า Firebase ทำงานอยู่หรือไม่
+document.addEventListener("DOMContentLoaded", function () {
+    if (typeof firebase === "undefined") {
+        console.error("Firebase library not loaded.");
+        return;
+    }
+
+    const db = firebase.database();
+    const connectionsRef = db.ref("active_users/connections");
+    const countRef = db.ref("active_users/count");
+
+    // ป้องกันการนับเบิ้ลเมื่อเปลี่ยนหน้า โดยใช้ sessionStorage 
+    // เพื่อจำ Key ของ Connection เดิมในแท็บนี้ไว้ใช้งานต่อ
+    let connectionKey = sessionStorage.getItem("firebase_connection_key");
+    let myConnectionRef;
+
+    if (connectionKey) {
+        myConnectionRef = connectionsRef.child(connectionKey);
+    } else {
+        myConnectionRef = connectionsRef.push();
+        sessionStorage.setItem("firebase_connection_key", myConnectionRef.key);
+    }
+
+    // ตรวจสอบสถานะการเชื่อมต่อกับ Firebase
+    db.ref(".info/connected").on("value", function (snap) {
+        if (snap.val() === true) {
+            // เมื่อขาดการเชื่อมต่อ (ปิดเว็บ, ปิดแท็บ) ให้ลบข้อมูลเฉพาะ Key นี้ออก
+            myConnectionRef.onDisconnect().remove().then(function() {
+                myConnectionRef.set(true);
+            });
+        }
+    });
+
+    // ดึงจำนวนเครื่องที่ออนไลน์จริงมาแสดงผล
+    connectionsRef.on("value", function (snap) {
+        const activeCount = snap.numChildren();
+        
+        const countElement = document.getElementById("activeUsersCount");
+        if (countElement) {
+            countElement.innerText = activeCount > 0 ? activeCount : 1;
+        }
+        
+        countRef.set(activeCount > 0 ? activeCount : 1);
+    });
+});
+
+document.addEventListener("DOMContentLoaded", function() {
+    // การแสดง/ซ่อนถูกควบคุมด้วยปุ่ม toggleAddressTaxBtn เท่านั้น
+    updateAddressTaxButtonState();
+});
+
+(function() {
+    const oldBtn = document.getElementById('open-cust-mgr-btn');
+    if (oldBtn) oldBtn.remove();
+    const oldModal = document.getElementById('cust-manager-modal');
+    if (oldModal) oldModal.remove();
+    const oldToast = document.getElementById('cust-toast-msg');
+    if (oldToast) oldToast.remove();
+    const oldConfirm = document.getElementById('cust-confirm-modal');
+    if (oldConfirm) oldConfirm.remove();
+
+    // สร้าง Toast สำหรับแจ้งเตือนมุมจอ
+    const toast = document.createElement('div');
+    toast.id = 'cust-toast-msg';
+    toast.style.cssText = 'position: fixed; bottom: 70px; right: 20px; z-index: 10002; background: rgba(0, 0, 0, 0.85); color: #fff; padding: 8px 16px; border-radius: 6px; font-size: 13px; font-family: sans-serif; opacity: 0; transition: opacity 0.3s ease; pointer-events: none; box-shadow: 0 4px 12px rgba(0,0,0,0.15);';
+    document.body.appendChild(toast);
+
+    function showToast(message) {
+        toast.innerText = message;
+        toast.style.opacity = '1';
+        setTimeout(() => {
+            toast.style.opacity = '0';
+        }, 2000);
+    }
+
+    // สร้างฟังก์ชัน Custom Confirm Modal (แทนหน้าต่างเดิม)
+    function showCustomConfirm(message, onConfirm) {
+        let confirmModal = document.getElementById('cust-confirm-modal');
+        if (confirmModal) confirmModal.remove();
+
+        confirmModal = document.createElement('div');
+        confirmModal.id = 'cust-confirm-modal';
+        confirmModal.style.cssText = 'position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); display:flex; justify-content:center; align-items:center; z-index:10003; padding: 15px; box-sizing: border-box; font-family: sans-serif;';
+        
+        let dialogBox = document.createElement('div');
+        dialogBox.style.cssText = 'background:#fff; border-radius:10px; width:100%; max-width:320px; padding:20px; box-shadow:0 6px 20px rgba(0,0,0,0.25); text-align:center;';
+        
+        dialogBox.innerHTML = `
+            <div style="font-size: 32px; margin-bottom: 10px;">⚠️</div>
+            <div style="font-size:15px; color:#333; font-weight:600; margin-bottom:20px; line-height: 1.4;">${message}</div>
+            <div style="display:flex; gap:10px; justify-content:center;">
+                <button id="conf-cancel-btn" style="flex:1; padding:10px; background:#f1f2f6; color:#333; border:none; border-radius:6px; cursor:pointer; font-weight:bold; font-size:14px;">ยกเลิก</button>
+                <button id="conf-ok-btn" style="flex:1; padding:10px; background:#ff4d4f; color:#fff; border:none; border-radius:6px; cursor:pointer; font-weight:bold; font-size:14px;">ยืนยันลบ</button>
+            </div>
+        `;
+        
+        confirmModal.appendChild(dialogBox);
+        document.body.appendChild(confirmModal);
+
+        document.getElementById('conf-cancel-btn').onclick = function() {
+            confirmModal.remove();
+        };
+
+        document.getElementById('conf-ok-btn').onclick = function() {
+            confirmModal.remove();
+            onConfirm();
+        };
+    }
+
+    // สร้างปุ่มไอคอนมินิมอล
+    const btn = document.createElement('button');
+    btn.id = 'open-cust-mgr-btn';
+    btn.innerHTML = '⚙️ <span class="btn-text" style="display: none; white-space: nowrap; margin-left: 4px; vertical-align: middle;">จัดการลูกค้า</span>';
+    btn.style.cssText = 'position: fixed; bottom: 20px; right: 20px; z-index: 9999; background: rgba(255, 255, 255, 0.7); color: #555; border: 1px solid rgba(0,0,0,0.08); width: 38px; height: 38px; border-radius: 50%; cursor: pointer; font-size: 14px; box-shadow: 0 2px 5px rgba(0,0,0,0.08); backdrop-filter: blur(4px); display: flex; align-items: center; justify-content: center; transition: all 0.3s ease;';
+
+    const textSpan = btn.querySelector('.btn-text');
+    
+    btn.onmouseenter = function() {
+        btn.style.width = 'auto';
+        btn.style.padding = '0 12px';
+        btn.style.borderRadius = '20px';
+        btn.style.background = '#ffffff';
+        btn.style.color = '#000000';
+        textSpan.style.display = 'inline-block';
+    };
+    
+    btn.onmouseleave = function() {
+        btn.style.width = '38px';
+        btn.style.padding = '0';
+        btn.style.borderRadius = '50%';
+        btn.style.background = 'rgba(255, 255, 255, 0.7)';
+        btn.style.color = '#555';
+        textSpan.style.display = 'none';
+    };
+
+    btn.onclick = function() {
+        let modal = document.getElementById('cust-manager-modal');
+        if (!modal) {
+            modal = document.createElement('div');
+            modal.id = 'cust-manager-modal';
+            modal.style.cssText = 'position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); display:flex; justify-content:center; align-items:center; z-index:10000; padding: 10px; box-sizing: border-box;';
+            
+            let content = document.createElement('div');
+            content.style.cssText = 'background:#fff; border-radius:8px; width:100%; max-width:400px; height:80vh; max-height:550px; display:flex; flex-direction:column; box-shadow:0 4px 10px rgba(0,0,0,0.2); font-family:sans-serif; overflow:hidden;';
+            
+            content.innerHTML = `
+                <div style="padding:15px; border-bottom:1px solid #ddd; background:#f8f9fa; display:flex; justify-content:space-between; align-items:center;">
+                    <h3 style="margin:0; font-size:16px; color:#333;">จัดการรายชื่อลูกค้า</h3>
+                    <button id="close-refresh-btn" style="padding:6px 12px; background:#007bff; color:#fff; border:none; border-radius:4px; cursor:pointer; font-size:13px; font-weight:bold;">ปิดและรีเฟรช</button>
+                </div>
+                <div style="padding:10px 15px; border-bottom:1px solid #eee; background:#fff;">
+                    <input type="text" id="cust-search-input" placeholder="🔍 ค้นหาชื่อลูกค้า..." style="width:100%; padding:8px 12px; box-sizing:border-box; border:1px solid #ddd; border-radius:6px; font-size:14px; outline:none;">
+                </div>
+                <div id="cust-list-container" style="padding:15px; overflow-y:auto; flex-grow:1;"></div>
+            `;
+            
+            modal.appendChild(content);
+            document.body.appendChild(modal);
+
+            document.getElementById('close-refresh-btn').onclick = function() {
+                modal.style.display = 'none';
+                location.reload();
+            };
+
+            // ระบบกรองค้นหาแบบเรียลไทม์
+            document.getElementById('cust-search-input').oninput = function(e) {
+                let keyword = e.target.value.toLowerCase();
+                let rows = document.querySelectorAll('.cust-row');
+                rows.forEach(row => {
+                    let nameText = row.getAttribute('data-name').toLowerCase();
+                    if (nameText.includes(keyword)) {
+                        row.style.display = 'flex';
+                    } else {
+                        row.style.display = 'none';
+                    }
+                });
+            };
+        } else {
+            modal.style.display = 'flex';
+            document.getElementById('cust-search-input').value = '';
+        }
+
+        let listContainer = document.getElementById('cust-list-container');
+        listContainer.innerHTML = '';
+        
+        let customers = JSON.parse(localStorage.getItem('saved_quot_customers') || '[]');
+        if (customers.length === 0) {
+            listContainer.innerHTML = '<p style="color:#666; text-align:center; margin-top:20px;">ไม่มีรายชื่อลูกค้าในระบบ</p>';
+            return;
+        }
+
+        customers.forEach((cust, index) => {
+            let name = typeof cust === 'string' ? cust : (cust.name || cust.customerName || cust.companyName || '');
+            
+            let row = document.createElement('div');
+            row.className = 'cust-row';
+            row.setAttribute('data-name', name);
+            row.style.cssText = 'display:flex; justify-content:space-between; align-items:center; padding:10px 0; border-bottom:1px solid #eee;';
+            
+            let nameSpan = document.createElement('span');
+            nameSpan.innerText = name;
+            nameSpan.style.cssText = 'font-size:14px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:260px; color:#333;';
+            
+            let deleteBtn = document.createElement('button');
+            deleteBtn.innerText = ' [x] ';
+            deleteBtn.style.cssText = 'background:#ff4d4f; color:white; border:none; border-radius:4px; padding:5px 10px; cursor:pointer; font-weight:bold; flex-shrink:0;';
+            
+            deleteBtn.onclick = function() {
+                showCustomConfirm(`ต้องการลบ "${name}" ใช่หรือไม่?`, function() {
+                    customers.splice(index, 1);
+                    localStorage.setItem('saved_quot_customers', JSON.stringify(customers));
+                    
+                    if (typeof firebase !== 'undefined' && firebase.apps.length > 0) {
+                        firebase.firestore().collection("settings").doc("master_data").set({
+                            customers: customers
+                        }, { merge: true });
+                    }
+                    
+                    showToast(`🗑️ ลบ "${name}" เรียบร้อยแล้ว`);
+                    btn.click();
+                });
+            };
+            
+            row.appendChild(nameSpan);
+            row.appendChild(deleteBtn);
+            listContainer.appendChild(row);
+        });
+    };
+
+    document.body.appendChild(btn);
+    console.log("✅ เพิ่มช่องค้นหารายชื่อเรียบร้อยแล้ว!");
+})();
+
+
+</script>
+</body>
+</html>
