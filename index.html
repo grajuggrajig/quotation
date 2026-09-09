@@ -1982,18 +1982,15 @@ async function executeSave(isNewBill, showSuccessAlert = true, keepOriginalDate 
         });
     }
 
-    let customerDataObj = {
-        name: cName,
-        address: cAddr,
-        taxId: cTaxId,
-        updatedAt: new Date().toISOString()
-    };
-
+    // 3. ทำการอัปเดตทับตำแหน่งเดิม หรือเพิ่มใหม่ถ้าไม่พบเลย
     if (existingIndex >= 0) {
-        customers[existingIndex] = customerDataObj;
+        customers[existingIndex] = { name: cName, address: cAddr, taxId: cTaxId };
     } else {
-        customers.push(customerDataObj);
+        customers.push({ name: cName, address: cAddr, taxId: cTaxId });
     }
+
+    // หลังจากบันทึกเสร็จ อย่าลืมเคลียร์ค่า oldName ทิ้งด้วย
+    window.editingOldCustomerName = ""; 
 
     localStorage.setItem('saved_quot_customers', JSON.stringify(customers));
 
@@ -2003,73 +2000,101 @@ async function executeSave(isNewBill, showSuccessAlert = true, keepOriginalDate 
             products: products
         }, { merge: true });
     } catch (err) {
-        console.warn("⚠️ ไม่สามารถบันทึกข้อมูลลง Cloud ได้:", err);
+        console.warn("⚠️ ไม่สามารถอัปเดต Master Data ขึ้น Cloud ได้:", err);
     }
 
-    let billData = {
-        billNo: bNo,
-        bookNo: document.getElementById('bookNo').value.trim(),
-        date: dateField.value,
+    loadCustomerDropdown();
+
+    let grandTotalVal = calculate();
+    let finalBillNo;
+    if (isNewBill) {
+        finalBillNo = 'QT' + new Date().getTime();
+        bNoInput.value = finalBillNo;
+    } else {
+        if (!bNo) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'ไม่พบเลขที่บิลเดิม',
+                text: 'กรุณาเลือกบิลที่ต้องการแก้ไข หรือใช้ปุ่ม "บันทึกเป็นบิลใหม่" แทน',
+                confirmButtonText: 'ตกลง',
+                confirmButtonColor: '#0284c7'
+            });
+            return;
+        }
+        finalBillNo = bNo;
+    }
+
+    let rawBookNo = document.getElementById('bookNo').value.trim();
+    let currentBookNo = rawBookNo.replace(/^:/, '').trim();
+    let salesNameInput = document.getElementById('sigSalesName');
+    let currentSalesName = salesNameInput ? salesNameInput.value.trim() : '';
+
+    let existingTimestamp = null;
+    try {
+        const existingDoc = await db.collection("quotations").doc(finalBillNo).get();
+        if (existingDoc.exists && existingDoc.data().timestamp) {
+            existingTimestamp = existingDoc.data().timestamp;
+        }
+    } catch (e) {
+        console.warn("⚠️ ไม่สามารถตรวจสอบ timestamp เดิมได้:", e);
+    }
+
+    let billDataToSave = {
+        billNo: finalBillNo,
+        bookNo: currentBookNo,
+        billDate: dateField ? dateField.value.trim() : '',
         customerName: cName,
-        customerAddress: cAddr,
-        customerTaxId: cTaxId,
-        subject: document.getElementById('quotSubject').value.trim(),
-        enclosures: document.getElementById('quotEnclose').value.trim(),
+        address: cAddr,
+        taxNo: cTaxId,        
+        customerTaxId: cTaxId, 
+        subject: document.getElementById('quotSubject').value,
+        enclosure: document.getElementById('quotEnclose').value,
+        remark: document.getElementById('remarkText').value,
+        discountRate: parseFloat(document.getElementById('discountRate').value) || 0,
+        discountAmount: parseFloat(document.getElementById('discountAmount').value) || 0,
+        grandTotal: grandTotalVal,
         items: currentItems,
-        subTotal: document.getElementById('subTotal').innerText,
-        discountRate: document.getElementById('discountRate').value,
-        discountAmount: document.getElementById('discountAmount').innerText,
-        netTotal: document.getElementById('netTotal').innerText,
-        vatAmount: document.getElementById('vatAmount').innerText,
-        grandTotal: document.getElementById('grandTotal').innerText,
-        textAmount: document.getElementById('textAmount').innerText,
-        remark: document.getElementById('remarkText').value.trim(),
-        sigCustomerName: document.getElementById('sigCustomerName').value.trim(),
-        sigCustomerDate: document.getElementById('sigCustomerDate').value.trim(),
-        sigSalesName: document.getElementById('sigSalesName').value.trim(),
-        sigSalesDate: document.getElementById('sigSalesDate').value.trim(),
-        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+        customerSignName: document.getElementById('sigCustomerName').value,
+        customerSignDate: document.getElementById('sigCustomerDate').value,
+        salesSignName: currentSalesName,
+        salesSignDate: sigSalesDate ? sigSalesDate.value.trim() : '',
+        timestamp: (isNewBill || !existingTimestamp) ? new Date().getTime() : existingTimestamp
     };
 
     try {
-        if (!bNo) {
-            let counterRef = db.collection("settings").doc("bill_counter");
-            await db.runTransaction(async (transaction) => {
-                let counterDoc = await transaction.get(counterRef);
-                let nextSeq = 1;
-                let currentYear = new Date().getFullYear() + 543;
-                if (counterDoc.exists) {
-                    let data = counterDoc.data();
-                    if (data.year === currentYear) {
-                        nextSeq = (data.seq || 0) + 1;
-                    }
-                }
-                bNo = `QT${currentYear}-${String(nextSeq).padStart(4, '0')}`;
-                transaction.set(counterRef, { year: currentYear, seq: nextSeq }, { merge: true });
-            });
-            billData.billNo = bNo;
-            document.getElementById('billNo').value = bNo;
-        }
+        await db.collection("quotations").doc(finalBillNo).set(billDataToSave);
 
-        await db.collection("quotations").doc(bNo).set(billData, { merge: true });
+        let purchases = JSON.parse(localStorage.getItem('saved_quot_purchases') || '[]');
+        if (!isNewBill) {
+            purchases = purchases.filter(p => p.billNo !== finalBillNo);
+        }
+        purchases.push(billDataToSave);
+
+        if (purchases.length > 200) {
+            purchases.sort((a, b) => b.timestamp - a.timestamp);
+            purchases = purchases.slice(0, 200);
+        }
+        localStorage.setItem('saved_quot_purchases', JSON.stringify(purchases));
 
         if (showSuccessAlert) {
             Swal.fire({
                 icon: 'success',
-                title: 'บันทึกข้อมูลสำเร็จ!',
-                text: `เลขที่ใบเสนอราคา: ${bNo}`,
-                timer: 2000,
+                title: isNewBill ? 'บันทึกเป็นบิลใหม่สำเร็จ' : 'บันทึกข้อมูลสำเร็จ',
+                text: `เลขที่บิล: ${finalBillNo}`,
+                timer: 1500,
                 showConfirmButton: false
             });
         }
-        isDataChanged = false;
+
+        return;
     } catch (error) {
-        console.error("Error saving quotation: ", error);
+        console.error("❌ เกิดข้อผิดพลาดในการบันทึก Firebase: ", error);
         Swal.fire({
             icon: 'error',
-            title: 'เกิดข้อผิดพลาด',
-            text: 'ไม่สามารถบันทึกข้อมูลลงฐานข้อมูลได้: ' + error.message,
-            confirmButtonText: 'ตกลง'
+            title: 'บันทึกข้อมูลไม่สำเร็จ',
+            text: 'ไม่สามารถเชื่อมต่อกับ Cloud ได้ โปรดตรวจสอบอินเทอร์เน็ตแล้วลองใหม่อีกครั้ง',
+            confirmButtonText: 'ตกลง',
+            confirmButtonColor: '#ef4444'
         });
     }
 }
@@ -3368,44 +3393,46 @@ document.addEventListener("DOMContentLoaded", function() {
 	
 	
 	// ฟังก์ชันสำหรับตรวจสอบและเปิด/ปิดการแสดงผลที่อยู่และเลขผู้เสียภาษีอัตโนมัติ
-// ฟังก์ชันสำหรับกดปุ่มสลับซ่อน/แสดงที่อยู่และภาษี
+// ฟังก์ชันสำหรับปุ่มกดเปิด-ปิดกล่องที่อยู่/ภาษีด้วยมือ
 function toggleAddressTax() {
-    let details = document.getElementById('addressTaxDetails');
-    let btn = document.getElementById('toggleAddressTaxBtn');
-    if (!details || !btn) return;
-    
-    if (details.classList.contains('hidden-section')) {
-        details.classList.remove('hidden-section');
-        btn.innerHTML = '<i class="fa-solid fa-chevron-up"></i> ซ่อนที่อยู่/ภาษี';
-    } else {
-        details.classList.add('hidden-section');
-        btn.innerHTML = '<i class="fa-solid fa-chevron-down"></i> แสดงที่อยู่/ภาษี';
-    }
-}
-
-// ฟังก์ชันตรวจสอบ: ถ้ามีข้อมูลให้กางออกอัตโนมัติ, ถ้าไม่มีให้ซ่อน
-function autoShowAddressTaxIfDataExists() {
-    let addrInput = document.getElementById('custAddress');
-    let taxInput = document.getElementById('custTaxId');
     let detailsBox = document.getElementById('addressTaxDetails');
-    let btn = document.getElementById('toggleAddressTaxBtn');
-
+    let toggleBtn = document.getElementById('toggleAddressTaxBtn');
     if (!detailsBox) return;
 
-    let addr = addrInput ? addrInput.value.trim() : "";
-    let taxId = taxInput ? taxInput.value.trim() : "";
-
-    if (addr !== "" || taxId !== "") {
+    if (detailsBox.classList.contains('hidden-section')) {
         detailsBox.classList.remove('hidden-section');
-        if (btn) {
-            btn.innerHTML = '<i class="fa-solid fa-chevron-up"></i> ซ่อนที่อยู่/ภาษี';
+        if (toggleBtn) {
+            toggleBtn.innerHTML = `<i class="fa-solid fa-chevron-up" style="font-size: 10px; transition: transform 0.3s ease;"></i> ซ่อนที่อยู่/ภาษี`;
         }
     } else {
         detailsBox.classList.add('hidden-section');
-        if (btn) {
-            btn.innerHTML = '<i class="fa-solid fa-chevron-down"></i> แสดงที่อยู่/ภาษี';
+        if (toggleBtn) {
+            toggleBtn.innerHTML = `<i class="fa-solid fa-chevron-down" style="font-size: 10px; transition: transform 0.3s ease;"></i> แสดงที่อยู่/ภาษี`;
         }
     }
+}
+
+// ปรับปรุงฟังก์ชันตรวจสอบข้อมูลเพื่อไม่ให้รบกวนการพิมพ์ค้นหา
+function autoShowAddressTaxIfDataExists() {
+    let addrArea = document.getElementById('custAddress');
+    let taxInput = document.getElementById('custTaxId');
+    let detailsBox = document.getElementById('addressTaxDetails');
+    let toggleBtn = document.getElementById('toggleAddressTaxBtn');
+
+    if (!detailsBox) return;
+
+    let addressVal = addrArea ? addrArea.value.trim() : '';
+    let taxVal = taxInput ? taxInput.value.trim() : '';
+    let hasData = (addressVal !== '' || taxVal !== '');
+
+    // หากมีการดึงข้อมูลที่มีที่อยู่หรือเลขภาษี ให้เปิดกล่องอัตโนมัติ
+    if (hasData) {
+        detailsBox.classList.remove('hidden-section');
+        if (toggleBtn) {
+            toggleBtn.innerHTML = `<i class="fa-solid fa-chevron-up" style="font-size: 10px; transition: transform 0.3s ease;"></i> ซ่อนที่อยู่/ภาษี`;
+        }
+    }
+    // หมายเหตุ: เอาคำสั่งซ่อนอัตโนมัติ (else) ออก เพื่อป้องกันไม่ให้กล่องปิดเองเวลาพิมพ์หรือเลือกข้อมูลที่ไม่มีที่อยู่
 }
 
 // ผูก Event Listener และเรียกใช้งานตอนโหลดหน้าเว็บ
