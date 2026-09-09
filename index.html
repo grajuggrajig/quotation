@@ -1305,28 +1305,6 @@
         <input type="text" id="custName" class="inline-input cust-name-input" placeholder="ชื่อบริษัท/ลูกค้า...">
     </div>
 
-    <!-- ปุ่มกดดีไซน์ทันสมัย โดดเด่น ไม่เกะกะ -->
-    <div class="no-print" style="margin: 8px 0; display: flex; justify-content: flex-end;">
-        <button type="button" id="toggleAddressTaxBtn" onclick="toggleAddressTax()" 
-            style="background: linear-gradient(135deg, #ffffff, #f0f9ff); 
-                   border: 1px solid #bae6fd; 
-                   color: #0284c7; 
-                   border-radius: 9999px; 
-                   padding: 6px 14px; 
-                   font-size: 12px; 
-                   font-weight: 600; 
-                   cursor: pointer; 
-                   display: inline-flex; 
-                   align-items: center; 
-                   gap: 6px; 
-                   box-shadow: 0 2px 4px rgba(2, 132, 199, 0.08); 
-                   transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);"
-            onmouseover="this.style.background='linear-gradient(135deg, #f0f9ff, #e0f2fe)'; this.style.borderColor='#38bdf8'; this.style.boxShadow='0 4px 12px rgba(2, 132, 199, 0.15)'; this.style.transform='translateY(-1px)';" 
-            onmouseout="this.style.background='linear-gradient(135deg, #ffffff, #f0f9ff)'; this.style.borderColor='#bae6fd'; this.style.boxShadow='0 2px 4px rgba(2, 132, 199, 0.08)'; this.style.transform='translateY(0)';">
-            <i class="fa-solid fa-chevron-down" style="font-size: 10px; transition: transform 0.3s ease;"></i> แสดงที่อยู่/ภาษี
-        </button>
-    </div>
-
     <!-- ส่วนที่ถูกซ่อนไว้เป็นค่าเริ่มต้น (เพิ่ม class="hidden-section") -->
     <div id="addressTaxDetails" class="hidden-section">
         <div style="margin-bottom: 6px;">
