@@ -1982,15 +1982,18 @@ async function executeSave(isNewBill, showSuccessAlert = true, keepOriginalDate 
         });
     }
 
-    // 3. ทำการอัปเดตทับตำแหน่งเดิม หรือเพิ่มใหม่ถ้าไม่พบเลย
-    if (existingIndex >= 0) {
-        customers[existingIndex] = { name: cName, address: cAddr, taxId: cTaxId };
-    } else {
-        customers.push({ name: cName, address: cAddr, taxId: cTaxId });
-    }
+    let customerDataObj = {
+        name: cName,
+        address: cAddr,
+        taxId: cTaxId,
+        updatedAt: new Date().toISOString()
+    };
 
-    // หลังจากบันทึกเสร็จ อย่าลืมเคลียร์ค่า oldName ทิ้งด้วย
-    window.editingOldCustomerName = ""; 
+    if (existingIndex >= 0) {
+        customers[existingIndex] = customerDataObj;
+    } else {
+        customers.push(customerDataObj);
+    }
 
     localStorage.setItem('saved_quot_customers', JSON.stringify(customers));
 
@@ -2000,101 +2003,73 @@ async function executeSave(isNewBill, showSuccessAlert = true, keepOriginalDate 
             products: products
         }, { merge: true });
     } catch (err) {
-        console.warn("⚠️ ไม่สามารถอัปเดต Master Data ขึ้น Cloud ได้:", err);
+        console.warn("⚠️ ไม่สามารถบันทึกข้อมูลลง Cloud ได้:", err);
     }
 
-    loadCustomerDropdown();
-
-    let grandTotalVal = calculate();
-    let finalBillNo;
-    if (isNewBill) {
-        finalBillNo = 'QT' + new Date().getTime();
-        bNoInput.value = finalBillNo;
-    } else {
-        if (!bNo) {
-            Swal.fire({
-                icon: 'warning',
-                title: 'ไม่พบเลขที่บิลเดิม',
-                text: 'กรุณาเลือกบิลที่ต้องการแก้ไข หรือใช้ปุ่ม "บันทึกเป็นบิลใหม่" แทน',
-                confirmButtonText: 'ตกลง',
-                confirmButtonColor: '#0284c7'
-            });
-            return;
-        }
-        finalBillNo = bNo;
-    }
-
-    let rawBookNo = document.getElementById('bookNo').value.trim();
-    let currentBookNo = rawBookNo.replace(/^:/, '').trim();
-    let salesNameInput = document.getElementById('sigSalesName');
-    let currentSalesName = salesNameInput ? salesNameInput.value.trim() : '';
-
-    let existingTimestamp = null;
-    try {
-        const existingDoc = await db.collection("quotations").doc(finalBillNo).get();
-        if (existingDoc.exists && existingDoc.data().timestamp) {
-            existingTimestamp = existingDoc.data().timestamp;
-        }
-    } catch (e) {
-        console.warn("⚠️ ไม่สามารถตรวจสอบ timestamp เดิมได้:", e);
-    }
-
-    let billDataToSave = {
-        billNo: finalBillNo,
-        bookNo: currentBookNo,
-        billDate: dateField ? dateField.value.trim() : '',
+    let billData = {
+        billNo: bNo,
+        bookNo: document.getElementById('bookNo').value.trim(),
+        date: dateField.value,
         customerName: cName,
-        address: cAddr,
-        taxNo: cTaxId,        
-        customerTaxId: cTaxId, 
-        subject: document.getElementById('quotSubject').value,
-        enclosure: document.getElementById('quotEnclose').value,
-        remark: document.getElementById('remarkText').value,
-        discountRate: parseFloat(document.getElementById('discountRate').value) || 0,
-        discountAmount: parseFloat(document.getElementById('discountAmount').value) || 0,
-        grandTotal: grandTotalVal,
+        customerAddress: cAddr,
+        customerTaxId: cTaxId,
+        subject: document.getElementById('quotSubject').value.trim(),
+        enclosures: document.getElementById('quotEnclose').value.trim(),
         items: currentItems,
-        customerSignName: document.getElementById('sigCustomerName').value,
-        customerSignDate: document.getElementById('sigCustomerDate').value,
-        salesSignName: currentSalesName,
-        salesSignDate: sigSalesDate ? sigSalesDate.value.trim() : '',
-        timestamp: (isNewBill || !existingTimestamp) ? new Date().getTime() : existingTimestamp
+        subTotal: document.getElementById('subTotal').innerText,
+        discountRate: document.getElementById('discountRate').value,
+        discountAmount: document.getElementById('discountAmount').innerText,
+        netTotal: document.getElementById('netTotal').innerText,
+        vatAmount: document.getElementById('vatAmount').innerText,
+        grandTotal: document.getElementById('grandTotal').innerText,
+        textAmount: document.getElementById('textAmount').innerText,
+        remark: document.getElementById('remarkText').value.trim(),
+        sigCustomerName: document.getElementById('sigCustomerName').value.trim(),
+        sigCustomerDate: document.getElementById('sigCustomerDate').value.trim(),
+        sigSalesName: document.getElementById('sigSalesName').value.trim(),
+        sigSalesDate: document.getElementById('sigSalesDate').value.trim(),
+        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
     };
 
     try {
-        await db.collection("quotations").doc(finalBillNo).set(billDataToSave);
-
-        let purchases = JSON.parse(localStorage.getItem('saved_quot_purchases') || '[]');
-        if (!isNewBill) {
-            purchases = purchases.filter(p => p.billNo !== finalBillNo);
+        if (!bNo) {
+            let counterRef = db.collection("settings").doc("bill_counter");
+            await db.runTransaction(async (transaction) => {
+                let counterDoc = await transaction.get(counterRef);
+                let nextSeq = 1;
+                let currentYear = new Date().getFullYear() + 543;
+                if (counterDoc.exists) {
+                    let data = counterDoc.data();
+                    if (data.year === currentYear) {
+                        nextSeq = (data.seq || 0) + 1;
+                    }
+                }
+                bNo = `QT${currentYear}-${String(nextSeq).padStart(4, '0')}`;
+                transaction.set(counterRef, { year: currentYear, seq: nextSeq }, { merge: true });
+            });
+            billData.billNo = bNo;
+            document.getElementById('billNo').value = bNo;
         }
-        purchases.push(billDataToSave);
 
-        if (purchases.length > 200) {
-            purchases.sort((a, b) => b.timestamp - a.timestamp);
-            purchases = purchases.slice(0, 200);
-        }
-        localStorage.setItem('saved_quot_purchases', JSON.stringify(purchases));
+        await db.collection("quotations").doc(bNo).set(billData, { merge: true });
 
         if (showSuccessAlert) {
             Swal.fire({
                 icon: 'success',
-                title: isNewBill ? 'บันทึกเป็นบิลใหม่สำเร็จ' : 'บันทึกข้อมูลสำเร็จ',
-                text: `เลขที่บิล: ${finalBillNo}`,
-                timer: 1500,
+                title: 'บันทึกข้อมูลสำเร็จ!',
+                text: `เลขที่ใบเสนอราคา: ${bNo}`,
+                timer: 2000,
                 showConfirmButton: false
             });
         }
-
-        return;
+        isDataChanged = false;
     } catch (error) {
-        console.error("❌ เกิดข้อผิดพลาดในการบันทึก Firebase: ", error);
+        console.error("Error saving quotation: ", error);
         Swal.fire({
             icon: 'error',
-            title: 'บันทึกข้อมูลไม่สำเร็จ',
-            text: 'ไม่สามารถเชื่อมต่อกับ Cloud ได้ โปรดตรวจสอบอินเทอร์เน็ตแล้วลองใหม่อีกครั้ง',
-            confirmButtonText: 'ตกลง',
-            confirmButtonColor: '#ef4444'
+            title: 'เกิดข้อผิดพลาด',
+            text: 'ไม่สามารถบันทึกข้อมูลลงฐานข้อมูลได้: ' + error.message,
+            confirmButtonText: 'ตกลง'
         });
     }
 }
