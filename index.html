@@ -2549,30 +2549,70 @@ function autoShowAddressTaxIfDataExists() {
     updateAddressTaxButtonState();
 }
 
-function loadDataByBillNo() {
-        let searchNo = document.getElementById('searchOldBillNo').value.trim();
-        if(!searchNo) {
-            Swal.fire({ icon: 'warning', title: 'กรุณากรอกเลขที่บิลเดิม', text: 'โปรดระบุเลขที่บิลที่ต้องการค้นหา' });
+async function loadDataByBillNo() {
+        const searchNo = document.getElementById('searchOldBillNo').value.trim();
+
+        if (!searchNo) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'กรุณากรอกเลขที่บิลเดิม',
+                text: 'โปรดระบุเลขที่บิลที่ต้องการค้นหา'
+            });
             return;
         }
-        let purchases = JSON.parse(localStorage.getItem('saved_quot_purchases') || '[]');
-        let found = purchases.find(p => p.billNo === searchNo);
 
-        if(found) {
-            // 📌 ย้ายและเปลี่ยนจาก data มาเป็น found ตรงนี้
-            window.editingOldCustomerName = found.customerName; 
-            document.getElementById('custName').value = found.customerName || '';
-            document.getElementById('custAddress').value = found.address || '';
-            document.getElementById('custTaxId').value = found.taxNo || found.customerTaxId || found.taxId || found.custTaxId || '';
-            autoShowAddressTaxIfDataExists();
+        // ค้นหาจาก Cloud ก่อน เพื่อให้ได้ข้อมูลของบิลฉบับเต็ม
+        // ถ้า Cloud ไม่พบ/เชื่อมต่อไม่ได้ จึงค่อยใช้ข้อมูลใน LocalStorage
+        let found = null;
+        let cloudError = null;
 
-            // หากมีฟังก์ชันเติมรายการสินค้าอื่นๆ ก็ใส่ต่อตรงนี้ได้เลย
-            // fillPurchaseDataToDOM(found);
+        try {
+            if (typeof firebase !== 'undefined') {
+                if (!firebase.apps.length) {
+                    firebase.initializeApp(firebaseConfig);
+                }
+
+                const db = firebase.firestore();
+                const billDoc = await db.collection("quotations").doc(searchNo).get();
+
+                if (billDoc.exists) {
+                    found = billDoc.data();
+                }
+            }
+        } catch (error) {
+            cloudError = error;
+            console.warn("⚠️ ไม่สามารถดึงบิลจาก Cloud ได้ จะลองใช้ข้อมูลในเครื่องแทน:", error);
+        }
+
+        // Fallback: ใช้ข้อมูลที่บันทึกไว้ในเครื่อง
+        if (!found) {
+            try {
+                const purchases = JSON.parse(
+                    localStorage.getItem('saved_quot_purchases') || '[]'
+                );
+                found = purchases.find(p => p.billNo === searchNo) || null;
+            } catch (error) {
+                console.warn("⚠️ อ่านข้อมูลบิลจาก LocalStorage ไม่สำเร็จ:", error);
+            }
+        }
+
+        if (found) {
+            // จำชื่อเดิมไว้สำหรับกรณีแก้ไข/บันทึกทับบิลเดิม
+            window.editingOldCustomerName = found.customerName || '';
+
+            // ⭐ จุดสำคัญ:
+            // ใช้ฟังก์ชันเดียวกับระบบประวัติบิล เพื่อโหลด "ข้อมูลทั้งบิล"
+            // ได้แก่ เลขที่บิล, วันที่, ลูกค้า, ที่อยู่, Tax ID,
+            // Subject, Enclosure, Remark, ส่วนลด, ลายเซ็น และรายการสินค้าทั้งหมด
+            fillPurchaseDataToDOM(found);
+
+            // ให้เลขที่บิลที่ค้นหาค้างอยู่ตรงกับบิลที่ดึงมา
+            document.getElementById('searchOldBillNo').value = found.billNo || searchNo;
 
             Swal.fire({
                 icon: 'success',
                 title: 'ดึงข้อมูลสำเร็จ!',
-                text: `โหลดข้อมูลจากเลขที่บิล ${searchNo} เรียบร้อยแล้ว`,
+                html: `โหลดข้อมูล <b>ทั้งบิล</b> เลขที่ <b>${found.billNo || searchNo}</b> เรียบร้อยแล้ว`,
                 timer: 1500,
                 showConfirmButton: false
             });
@@ -2580,15 +2620,16 @@ function loadDataByBillNo() {
             Swal.fire({
                 icon: 'error',
                 title: 'ไม่พบข้อมูล',
-                text: `ไม่พบเลขที่บิล "${searchNo}" ในระบบประวัติการบันทึก`
+                text: cloudError
+                    ? `ไม่พบเลขที่บิล "${searchNo}" ในข้อมูลที่มีอยู่ในเครื่อง`
+                    : `ไม่พบเลขที่บิล "${searchNo}" ในระบบประวัติการบันทึก`
             });
         }
     }
-	
-	
-	
 
-    function openHistoryModal() {
+
+
+function openHistoryModal() {
         renderHistoryTable();
         document.getElementById('historyModal').style.display = 'flex';
 		
