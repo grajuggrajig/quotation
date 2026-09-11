@@ -237,7 +237,7 @@
         box-sizing: border-box;
         transition: all 0.2s ease;
         max-width: 100%;
-        line-height: 1.5; /* ป้องกันการซ้อนทับของบรรทัดและสระ */
+        line-height: 1.5;
     }
 
     input:focus, textarea:focus, select:focus {
@@ -256,10 +256,10 @@
         max-width: 300px;
     }
 
-	/* หรือกำหนดเฉพาะช่องนามลูกค้าให้เต็มพื้นที่บล็อก (100%) */
-#custName {
-    max-width: 100% !important;
-}
+    #custName {
+        max-width: 100% !important;
+    }
+
     .inline-textarea {
         border: 1px solid transparent;
         background-color: transparent;
@@ -690,12 +690,10 @@
 </head>
 <body>
 
-<!-- เพิ่ม Script ช่วยกรองและแปลงอักขระพิเศษ / การันต์ / สระที่มักติดปัญหาจากการคัดลอก PDF -->
 <script>
     document.addEventListener("input", function(e) {
         if (e.target && (e.target.tagName === "INPUT" || e.target.tagName === "TEXTAREA")) {
             let val = e.target.value;
-            // จัดการลบอักขระขยะที่มักติดมาจากการ copy PDF (เช่น Non-breaking spaces หรือตัวควบคุมพิเศษ)
             let cleanedVal = val.replace(/[\u200B-\u200D\uFEFF]/g, '');
             if (val !== cleanedVal) {
                 e.target.value = cleanedVal;
@@ -807,7 +805,7 @@
                             <button type="button" class="search-product-btn no-print" onclick="openProductSelector(this)" title="ค้นหาสินค้า"><i class="fa-solid fa-magnifying-glass"></i></button>
                         </div>
                     </td>
-                    <td style="text-align: center;"><input type="text" class="qty" value="0" inputmode="decimal" onfocus="if(this.value==='0')this.value='';" onblur="if(this.value==='')this.value='0';" oninput="formatNumberInput(this); calculate();"></td>
+                    <td style="text-align: center;"><input type="text" class="qty" value="1" inputmode="decimal" onfocus="if(this.value==='1')this.value='';" onblur="if(this.value==='')this.value='1';" oninput="formatNumberInput(this); calculate();"></td>
                     <td style="text-align: center;"><input type="text" class="unit-input" placeholder="ชิ้น/อัน"></td>
                     <td style="text-align: center;"><input type="text" class="price" value="0" inputmode="decimal" onfocus="if(this.value==='0')this.value='';" onblur="if(this.value==='')this.value='0';" oninput="formatNumberInput(this); calculate();"></td>
                     <td class="amount" style="text-align: right; padding-right: 12px;">0.00</td>
@@ -1493,20 +1491,21 @@
     }
 
     function selectProductToRow(product) {
-        if (activeRowForSelection) {
-            let descArea = activeRowForSelection.querySelector('.item-desc');
-            descArea.value = product.desc;
-            autoGrow(descArea);
-            if (product.unit) activeRowForSelection.querySelector('.unit-input').value = product.unit;
-            activeRowForSelection.querySelector('.price').value = product.price;
-            
-            let qtyInput = activeRowForSelection.querySelector('.qty');
-            if (qtyInput.value === '0' || qtyInput.value === '') qtyInput.value = '1';
-            
-            calculate();
-        }
-        closeModal('productSelectorModal');
+    if (activeRowForSelection) {
+        let descArea = activeRowForSelection.querySelector('.item-desc');
+        descArea.value = product.desc;
+        autoGrow(descArea);
+        if (product.unit) activeRowForSelection.querySelector('.unit-input').value = product.unit;
+        activeRowForSelection.querySelector('.price').value = product.price;
+        
+        // กำหนดค่าเริ่มต้นจำนวนเป็น 1 เสมอเมื่อเลือกสินค้าใหม่
+        let qtyInput = activeRowForSelection.querySelector('.qty');
+        qtyInput.value = '1';
+        
+        calculate();
     }
+    closeModal('productSelectorModal');
+}
 
     function saveCurrentData() { executeSave(false); }
     function saveAsNewData() { executeSave(true); }
@@ -1538,15 +1537,19 @@
 
         let grandTotalVal = calculate();
         let purchases = JSON.parse(localStorage.getItem('saved_cashbill_purchases') || '[]');
-        let finalBillNo = (isNewBill || !bNo) ? 'CS' + new Date().getTime() : bNo;
-        bNoInput.value = finalBillNo;
+        
+        let finalBillNo = bNo;
+        if (isNewBill || !bNo) {
+            finalBillNo = 'CS' + new Date().getTime();
+            bNoInput.value = finalBillNo;
+        }
 
-        let originalTimestamp = new Date().getTime();
         let existingBillIndex = purchases.findIndex(p => p.billNo === finalBillNo);
+        let timestampToUse = new Date().getTime(); // ค่าเริ่มต้นสำหรับบิลใหม่ (เวลาปัจจุบัน จะได้อยู่บนสุด)
 
         if (!isNewBill && existingBillIndex !== -1) {
-            // หากเป็นการบันทึกทับ ให้ดึง timestamp เดิมมาใช้ และลบรายการเก่าออก
-            originalTimestamp = purchases[existingBillIndex].timestamp;
+            // กรณีบันทึกทับบิลเดิม -> คง timestamp เดิมไว้ เพื่อให้อยู่ตำแหน่งเดิมในประวัติ
+            timestampToUse = purchases[existingBillIndex].timestamp;
             purchases.splice(existingBillIndex, 1);
         }
 
@@ -1564,9 +1567,9 @@
             items: currentItems,
             salesSignName: document.getElementById('sigSalesName').value,
             salesSignDate: document.getElementById('sigSalesDate').value,
-            timestamp: originalTimestamp, // คงเวลาเดิมไว้เพื่อให้ตำแหน่งไม่เปลี่ยน
-            updatedAt: new Date().getTime() // บันทึกเวลาที่แก้ไขล่าสุดเผื่อต้องการใช้งาน
+            timestamp: timestampToUse
         });
+
         localStorage.setItem('saved_cashbill_purchases', JSON.stringify(purchases));
         syncToFirebase();
         Swal.fire({ icon: 'success', title: 'บันทึกสำเร็จ!', text: `เลขที่บิล: ${finalBillNo}`, timer: 1500, showConfirmButton: false });
