@@ -750,6 +750,10 @@
                 <strong>ชื่อร้าน (Company Name): </strong><input type="text" id="shopName" class="inline-input" placeholder="กรอกชื่อร้าน..."><br>
                 <strong>ที่อยู่ (Address): </strong><textarea id="shopAddress" class="inline-textarea" placeholder="กรอกที่อยู่ร้าน..." oninput="autoGrow(this)"></textarea><br>
                 <strong>เลขประจำตัวผู้เสียภาษี(Tax ID): </strong><input type="text" id="shopTax" class="inline-input" placeholder="เลขผู้เสียภาษี...">
+                <div class="no-print" style="display:flex; gap:6px; margin-top:8px; flex-wrap:wrap;">
+                    <button type="button" onclick="fillCompanyInfo()" style="background:linear-gradient(135deg,#6366f1,#818cf8); color:#fff; border:none; border-radius:7px; padding:5px 10px; font-size:11px; cursor:pointer; font-weight:600;">🏢 ใส่ข้อมูลบริษัท</button>
+                    <button type="button" onclick="clearCompanyInfo()" style="background:linear-gradient(135deg,#fb7185,#fda4af); color:#fff; border:none; border-radius:7px; padding:5px 10px; font-size:11px; cursor:pointer; font-weight:600;">🧹 ล้างค่าบริษัท</button>
+                </div>
             </div>
         </div>
         <div class="title-box">บิลเงินสด<br><span style="font-size: 12px; font-weight: 400; opacity: 0.9;">CASH BILL / RECEIPT</span></div>
@@ -1109,6 +1113,22 @@
         element.style.height = (element.scrollHeight) + "px";
     }
 
+    function fillCompanyInfo() {
+        document.getElementById('shopName').value = 'บริษัท เค แอล สเตชั่นเนอรี่ จำกัด (สำนักงานใหญ่)';
+        const shopAddress = document.getElementById('shopAddress');
+        shopAddress.value = '873, 875 ถนนสุขุมวิท105 แขวงบางนาใต้ เขตบางนา กรุงเทพมหานคร 10260\nโทร. 0-2748-6788';
+        autoGrow(shopAddress);
+        document.getElementById('shopTax').value = '0105544005337';
+    }
+
+    function clearCompanyInfo() {
+        document.getElementById('shopName').value = '';
+        const shopAddress = document.getElementById('shopAddress');
+        shopAddress.value = '';
+        autoGrow(shopAddress);
+        document.getElementById('shopTax').value = '';
+    }
+
     function clearAllData() {
         Swal.fire({
             title: 'ต้องการล้างรายการทั้งหมด?',
@@ -1121,6 +1141,8 @@
             cancelButtonText: 'ยกเลิก'
         }).then((result) => {
             if (result.isConfirmed) {
+                // ล้างข้อมูลบริษัทด้วย เพื่อให้เริ่มบิลใหม่แบบว่างทั้งหมด
+                clearCompanyInfo();
                 document.getElementById('customerSelect').value = "";
                 document.getElementById('custName').value = "";
                 let addrArea = document.getElementById('custAddress');
