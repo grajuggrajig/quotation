@@ -1811,6 +1811,11 @@
         let batchContainer = document.getElementById('batchPrintContainer');
         batchContainer.innerHTML = '';
 
+        // ดึงค่าปัจจุบันจากฟอร์มหลัก (ชื่อร้าน ที่อยู่ และเลขผู้เสียภาษี)
+        let currentShopName = document.getElementById('shopName') ? document.getElementById('shopName').value : '';
+        let currentShopAddress = document.getElementById('shopAddress') ? document.getElementById('shopAddress').value : '';
+        let currentShopTax = document.getElementById('shopTax') ? document.getElementById('shopTax').value : '';
+
         selectedPurchases.forEach(p => {
             let itemsHtml = '';
             let totalAmount = 0;
@@ -1821,12 +1826,12 @@
                     totalAmount += amt;
                     itemsHtml += `
                         <tr>
-                            <td style="text-align: center; border: 1px solid #cbd5e1; padding: 5px 8px;">${idx + 1}</td>
-                            <td style="text-align: left; border: 1px solid #cbd5e1; padding: 5px 8px;">${item.desc || ''}</td>
-                            <td style="text-align: center; border: 1px solid #cbd5e1; padding: 5px 8px;">${item.qty || 0}</td>
-                            <td style="text-align: center; border: 1px solid #cbd5e1; padding: 5px 8px;">${item.unit || ''}</td>
-                            <td style="text-align: center; border: 1px solid #cbd5e1; padding: 5px 8px;">${(item.price || 0).toLocaleString('th-TH', {minimumFractionDigits: 2})}</td>
-                            <td style="text-align: right; border: 1px solid #cbd5e1; padding: 5px 8px; padding-right: 12px;">${amt.toLocaleString('th-TH', {minimumFractionDigits: 2})}</td>
+                            <td style="text-align: center;">${idx + 1}</td>
+                            <td class="desc-cell">${item.desc || ''}</td>
+                            <td style="text-align: center;">${item.qty || 0}</td>
+                            <td style="text-align: center;">${item.unit || ''}</td>
+                            <td style="text-align: center;">${(item.price || 0).toLocaleString('th-TH', {minimumFractionDigits: 2})}</td>
+                            <td style="text-align: right; padding-right: 12px;">${amt.toLocaleString('th-TH', {minimumFractionDigits: 2})}</td>
                         </tr>
                     `;
                 });
@@ -1835,18 +1840,18 @@
             let netTotalVal = p.grandTotal || totalAmount;
             let textAmt = convertNumberToThaiText(netTotalVal);
             
-            let sName = p.shopName !== undefined ? p.shopName : document.getElementById('shopName').value;
-            let sAddr = p.shopAddress !== undefined ? p.shopAddress : document.getElementById('shopAddress').value;
-            let sTax = p.shopTax !== undefined ? p.shopTax : document.getElementById('shopTax').value;
+            let sName = currentShopName || p.shopName || '';
+            let sAddr = currentShopAddress || p.shopAddress || '';
+            let sTax = currentShopTax || p.shopTax || '';
 
             let billHTML = `
                 <div class="bill-container" style="margin-bottom: 20px;">
                     <div class="header-section">
                         <div class="header-left">
                             <div class="shop-info-box">
-                                <strong>ชื่อร้าน (Company Name): </strong>${sName || '-'}<br>
-                                <strong>ที่อยู่ (Address): </strong>${sAddr || '-'}<br>
-                                <strong>เลขประจำตัวผู้เสียภาษี(Tax ID): </strong>${sTax || '-'}
+                                <strong>ชื่อร้าน (Company Name): </strong>${sName}<br>
+                                <strong>ที่อยู่ (Address): </strong><span style="white-space: pre-line;">${sAddr}</span><br>
+                                <strong>เลขประจำตัวผู้เสียภาษี(Tax ID): </strong>${sTax}
                             </div>
                         </div>
                         <div class="title-box">บิลเงินสด<br><span style="font-size: 12px; font-weight: 400; opacity: 0.9;">CASH BILL / RECEIPT</span></div>
@@ -1854,12 +1859,12 @@
                     
                     <table class="top-info">
                         <tr>
-                            <td class="customer-info" style="width: 55%; display: table-cell;">
+                            <td class="customer-info" style="width: 55%; vertical-align: top;">
                                 <strong>นามลูกค้า (Customer):</strong> ${p.customerName || '-'}<br>
-                                <strong>ที่อยู่ (Address):</strong> ${p.address || '-'}<br>
+                                <strong>ที่อยู่ (Address):</strong> <span style="white-space: pre-line;">${p.address || '-'}</span><br>
                                 <strong>เลขประจำตัวผู้เสียภาษี:</strong> ${p.tax || '-'}
                             </td>
-                            <td style="padding-left: 10px; width: 45%; display: table-cell;">
+                            <td style="padding-left: 10px; width: 45%; vertical-align: top;">
                                 <div class="no-date-box" style="width: 100%;">
                                     <strong>เล่มที่ (Book No.):</strong> ${p.bookNo || '-'}<br>
                                     <strong>เลขที่ (No.):</strong> ${p.billNo || '-'}<br>
@@ -1893,24 +1898,24 @@
                                 <div style="font-size: 12px; color: #64748b; margin-bottom: 6px;">(จำนวนเงินตัวอักษร)</div>
                                 <div style="font-size: 15px; color: #9333ea; font-weight: 600;">${textAmt}</div>
                             </td>
-                            <td class="footer-total-label" style="font-weight: 600; color: #475569; text-align: center; vertical-align: middle; padding: 10px;">
+                            <td class="footer-total-label" style="font-weight: 600; color: #475569; text-align: center; vertical-align: middle; padding: 10px; width: 25%;">
                                 รวมราคาสินค้า<br><span style="font-size: 11px; font-weight: 400; color: #64748b;">(Net Total)</span>
                             </td>
-                            <td style="width: 25%; font-weight: 600; text-align: center; vertical-align: middle; border: 1px solid #f3e8ff;">${netTotalVal.toLocaleString('th-TH', {minimumFractionDigits: 2})}</td>
+                            <td style="width: 25%; font-weight: 600; text-align: center; vertical-align: middle;">${netTotalVal.toLocaleString('th-TH', {minimumFractionDigits: 2})}</td>
                         </tr>
                         <tr>
-                            <td class="footer-total-label" style="background-color: #faf5ff; font-weight: 700; color: #475569; text-align: center; vertical-align: middle; padding: 10px;">
+                            <td class="footer-total-label" style="background-color: #faf5ff; font-weight: 700; color: #475569; text-align: center; vertical-align: middle; padding: 10px; width: 25%;">
                                 จำนวนเงินรวมทั้งสิ้น<br>
                                 <span style="font-size: 11px; font-weight: 600; color: #9333ea;">(Grand Total)</span>
                             </td>
-                            <td style="width: 25%; background-color: #faf5ff; color: #9333ea; font-size: 16px; text-align: center; vertical-align: middle; font-weight: 700; border: 1px solid #f3e8ff;">${netTotalVal.toLocaleString('th-TH', {minimumFractionDigits: 2})}</td>
+                            <td style="width: 25%; background-color: #faf5ff; color: #9333ea; font-size: 16px; text-align: center; vertical-align: middle; font-weight: 700;">${netTotalVal.toLocaleString('th-TH', {minimumFractionDigits: 2})}</td>
                         </tr>
                     </table>
 
                     <div class="signature-section">
                         <div class="sig-box">
                             <div class="sig-line"></div>
-                            <div class="sig-name-input" style="border:none;">${p.salesSignName || ''}</div>
+                            <div style="font-size: 14px; margin-bottom: 4px; text-align: center;">${p.salesSignName || ''}</div>
                             <div class="sig-text">ผู้รับเงิน / แคชเชียร์ (Cashier)</div>
                             <div class="sig-date">วันที่: ${p.salesSignDate || ''}</div>
                         </div>
