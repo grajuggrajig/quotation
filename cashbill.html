@@ -11,14 +11,26 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     
 <style>
-    /* แก้ไขปัญหาสระลอยและการจัดวางตัวอักษรภาษาไทย (Font Shaping & Rendering) */
+    :root {
+        --primary-gradient: linear-gradient(135deg, #7c3aed, #db2777);
+        --primary-color: #7c3aed;
+        --secondary-color: #db2777;
+        --bg-color: #f8fafc;
+        --card-bg: #ffffff;
+        --text-main: #1e293b;
+        --text-muted: #64748b;
+        --border-color: #e2e8f0;
+        --border-focus: #c084fc;
+        --accent-purple: #f3e8ff;
+    }
+
     body { 
         font-family: 'Prompt', 'Sarabun', 'Tahoma', sans-serif; 
         font-size: 14px; 
         margin: 0; 
-        padding: 10px;
-        background-color: #fdf4f8;
-        color: #334155;
+        padding: 20px 10px;
+        background-color: var(--bg-color);
+        color: var(--text-main);
         box-sizing: border-box;
         text-rendering: optimizeLegibility;
         -webkit-font-smoothing: antialiased;
@@ -35,13 +47,13 @@
 
     .bill-container { 
         width: 100%;
-        max-width: 800px; 
+        max-width: 820px; 
         margin: 0 auto; 
-        padding: 20px; 
-        background-color: #ffffff; 
-        border-radius: 20px;
-        box-shadow: 0 12px 25px -5px rgba(192, 132, 252, 0.12);
-        border: 1px solid #f3e8ff;
+        padding: 30px; 
+        background-color: var(--card-bg); 
+        border-radius: 28px;
+        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.05);
+        border: 1px solid var(--border-color);
         overflow-x: hidden;
     }
     
@@ -49,10 +61,10 @@
         display: flex; 
         justify-content: space-between; 
         align-items: flex-start; 
-        border-bottom: 2px dashed #f3e8ff;
-        padding-bottom: 15px; 
-        margin-bottom: 15px;
-        gap: 15px;
+        border-bottom: 2px solid #f1f5f9;
+        padding-bottom: 20px; 
+        margin-bottom: 20px;
+        gap: 20px;
         flex-wrap: wrap;
     }
 
@@ -61,50 +73,47 @@
         gap: 15px;
         align-items: flex-start;
         flex-grow: 1;
-        min-width: 250px;
+        min-width: 280px;
+    }
+
+    .shop-info-box {
+        width: 100%;
+        font-size: 13.5px;
+        color: var(--text-muted);
+        line-height: 1.6;
+    }
+
+    .shop-info-box strong {
+        color: var(--text-main);
+        font-weight: 600;
     }
 
     .shop-info-box .inline-input,
     .shop-info-box .inline-textarea {
         max-width: 100% !important;
         width: 100% !important;
-    }
-
-    .shop-info-row {
-        display: flex;
-        align-items: center;
-        margin-bottom: 6px;
-    }
-    .shop-info-row.align-top {
-        align-items: flex-start;
-    }
-    .shop-info-label {
-        min-width: 160px;
-        flex-shrink: 0;
-    }
-    .shop-info-input {
-        flex-grow: 1;
+        font-size: 13.5px;
+        color: var(--text-main);
     }
     
     .title-box { 
-        background: linear-gradient(135deg, #a855f7, #ec4899); 
+        background: var(--primary-gradient); 
         color: #ffffff;
-        padding: 12px 24px; 
-        border-radius: 14px; 
+        padding: 14px 28px; 
+        border-radius: 20px; 
         font-weight: 600; 
         font-size: 20px;
         letter-spacing: 0.5px;
-        box-shadow: 0 8px 16px -4px rgba(236, 72, 153, 0.25);
+        box-shadow: 0 10px 15px -3px rgba(124, 58, 237, 0.2);
         white-space: nowrap;
         text-align: center;
-        border: 1px solid rgba(255, 255, 255, 0.3);
     }
     
     .top-info { 
         width: 100%; 
-        margin-top: 2px; 
-        border-collapse: collapse; 
-        margin-bottom: 15px;
+        border-collapse: separate;
+        border-spacing: 0;
+        margin-bottom: 20px;
     }
 
     .top-info tr {
@@ -116,66 +125,68 @@
     @media(min-width: 768px) {
         .top-info tr {
             display: table-row;
+            gap: 0;
         }
     }
     
     .customer-info { 
-        border: 1px solid #fdf4f8;
-        padding: 12px 15px; 
+        border: 1px solid var(--border-color);
+        padding: 18px 22px; 
         width: 100%; 
         vertical-align: top; 
-        border-radius: 14px;
-        background-color: #fcf8fa;
-        line-height: 1.8;
-        font-size: 14px;
+        border-radius: 20px;
+        background-color: #f8fafc;
+        line-height: 2;
+        font-size: 13.5px;
     }
 
     @media(min-width: 768px) {
         .customer-info {
-            width: 55%;
+            width: 58%;
         }
     }
 
     .customer-info strong, .no-date-box strong {
-        color: #64748b;
+        color: var(--text-muted);
         font-weight: 600;
     }
     
     .no-date-box { 
-        border: 1px solid #fdf4f8; 
-        padding: 12px 15px; 
+        border: 1px solid var(--border-color); 
+        padding: 18px 22px; 
         text-align: left; 
-        border-radius: 14px;
-        background-color: #fcf8fa;
-        line-height: 1.9;
-        font-size: 14px;
+        border-radius: 20px;
+        background-color: #f8fafc;
+        line-height: 2;
+        font-size: 13.5px;
         width: 100%;
-    }
-
-    @media(min-width: 768px) {
-        .no-date-box {
-            width: 100%;
-        }
     }
     
     .table-responsive {
         width: 100%;
         overflow-x: auto;
         -webkit-overflow-scrolling: touch;
+        border-radius: 20px;
+        border: 1px solid var(--border-color);
+        background-color: #fff;
     }
 
     .data-table { 
         width: 100%; 
         border-collapse: collapse; 
-        margin-top: 10px; 
         min-width: 600px;
     }
     
     .data-table th, .data-table td { 
-        border: 1px solid #e9d5ff; 
-        padding: 10px 12px; 
-        vertical-align: top; 
-        font-size: 14px;
+        border-bottom: 1px solid var(--border-color);
+        border-right: 1px solid var(--border-color);
+        padding: 12px 14px; 
+        vertical-align: middle; 
+        font-size: 13.5px;
+    }
+
+    .data-table th:last-child, .data-table td:last-child {
+        border-right: none;
     }
 
     .data-table td.desc-cell {
@@ -184,55 +195,66 @@
     }
     
     .data-table th { 
-        background: linear-gradient(135deg, #9333ea, #c084fc); 
-        color: #ffffff;
-        font-weight: 500;
-        font-size: 14px;
-        letter-spacing: 0.5px;
-        border: none;
-        padding: 12px 10px;
-        vertical-align: middle;
+        background: #f1f5f9; 
+        color: var(--text-main);
+        font-weight: 600;
+        font-size: 13.5px;
+        letter-spacing: 0.3px;
+        border-top: none;
+        border-bottom: 2px solid var(--border-color);
+        text-align: center;
     }
 
-    .data-table th:first-child { border-top-left-radius: 8px; }
-    .data-table th:last-child { border-top-right-radius: 8px; }
-    .data-table tr:nth-child(even) td { background-color: #faf5ff; }
+    .data-table tr:first-child th:first-child {
+        border-top-left-radius: 20px;
+    }
+    .data-table tr:first-child th:last-child {
+        border-top-right-radius: 20px;
+    }
+
+    .data-table tr:last-child td {
+        border-bottom: none;
+    }
+
+    .data-table tr:nth-child(even) td { background-color: #fafbfc; }
     
     .footer-table { 
         width: 100%; 
-        border-collapse: collapse; 
-        margin-top: -1px;
+        border-collapse: separate;
+        border-spacing: 0;
+        margin-top: 15px;
+        border: 1px solid var(--border-color);
+        border-radius: 20px;
+        overflow: hidden;
     }
     
     .footer-table td { 
-        border: 1px solid #f3e8ff; 
-        padding: 10px 15px; 
-        font-size: 14px;
+        border: 1px solid var(--border-color); 
+        padding: 12px 16px; 
+        font-size: 13.5px;
     }
     
     .footer-total-label { 
-        background-color: #faf5ff; 
+        background-color: #f8fafc; 
         font-weight: 600; 
-        text-align: right; 
-        width: 25%; 
-        color: #475569;
+        color: var(--text-muted);
     }
 
     #grandTotal, #netTotal {
         font-weight: 700;
-        color: #9333ea;
+        color: var(--primary-color);
         text-align: right;
-        padding-right: 15px !important;
+        padding-right: 16px !important;
         font-size: 16px;
     }
 
     input, textarea, select { 
-        border: 1px solid #e9d5ff; 
-        border-radius: 8px;
+        border: 1px solid var(--border-color); 
+        border-radius: 12px;
         font-family: 'Prompt', 'Sarabun', sans-serif; 
-        font-size: 14px; 
-        padding: 6px 10px; 
-        color: #1e293b;
+        font-size: 13.5px; 
+        padding: 9px 14px; 
+        color: var(--text-main);
         background-color: #fff;
         box-sizing: border-box;
         transition: all 0.2s ease;
@@ -242,7 +264,7 @@
 
     input:focus, textarea:focus, select:focus {
         outline: none;
-        border-color: #c084fc;
+        border-color: var(--border-focus);
         box-shadow: 0 0 0 3px rgba(192, 132, 252, 0.15);
     }
     
@@ -251,9 +273,14 @@
         background-color: transparent;
         border-bottom: 1px dashed #cbd5e1; 
         border-radius: 0;
-        padding: 3px 6px;
+        padding: 4px 6px;
         width: 100%; 
         max-width: 300px;
+    }
+
+    .inline-input:focus {
+        border-bottom-color: var(--primary-color);
+        box-shadow: none;
     }
 
     #custName {
@@ -265,47 +292,48 @@
         background-color: transparent;
         border-bottom: 1px dashed #cbd5e1; 
         border-radius: 0;
-        padding: 3px 6px;
+        padding: 4px 6px;
         resize: none;
         vertical-align: top;
         font-family: 'Prompt', 'Sarabun', sans-serif;
         overflow: hidden;
-        height: 32px;
-        min-height: 32px;
+        height: 34px;
+        min-height: 34px;
         width: 100%;
-        max-width: 320px;
     }
     
     .qty, .unit-input, .price { 
         text-align: center; 
+        border-radius: 10px !important;
     }
-    .qty { width: 70px; }
-    .unit-input { width: 85px; }
-    .price { width: 110px; }
+    .qty { width: 75px; }
+    .unit-input { width: 90px; }
+    .price { width: 120px; }
 
     .item-desc-wrapper {
         display: flex;
         align-items: center;
-        gap: 6px;
+        gap: 8px;
     }
 
     .item-desc {
         width: 100%;
-        height: 32px;
-        min-height: 32px;
+        height: 38px;
+        min-height: 38px;
         resize: none;
         line-height: 1.5;
         overflow: hidden;
         flex-grow: 1;
+        border-radius: 10px !important;
     }
 
     .search-product-btn {
-        background: #a855f7;
-        color: white;
-        border: none;
-        border-radius: 6px;
-        width: 32px;
-        height: 32px;
+        background: #f1f5f9;
+        color: var(--text-muted);
+        border: 1px solid var(--border-color);
+        border-radius: 10px;
+        width: 38px;
+        height: 38px;
         cursor: pointer;
         display: flex;
         align-items: center;
@@ -314,22 +342,24 @@
         transition: 0.2s;
     }
     .search-product-btn:hover {
-        background: #9333ea;
+        background: var(--primary-color);
+        color: white;
+        border-color: var(--primary-color);
     }
     
     .control-panel { 
         width: 100%;
-        max-width: 800px;
-        margin: 0 auto 15px auto; 
+        max-width: 820px;
+        margin: 0 auto 20px auto; 
         display: flex;
         justify-content: space-between;
         align-items: center;
-        background: linear-gradient(135deg, #ffffff, #faf5ff);
-        padding: 12px 15px;
-        border-radius: 16px;
-        box-shadow: 0 8px 20px -4px rgba(168, 85, 247, 0.12);
-        border: 2px solid #e9d5ff;
-        gap: 12px;
+        background: #ffffff;
+        padding: 16px 22px;
+        border-radius: 24px;
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05);
+        border: 1px solid var(--border-color);
+        gap: 15px;
         flex-wrap: wrap;
         position: relative;
     }
@@ -337,7 +367,7 @@
     @media(min-width: 992px) {
         .control-panel {
             position: sticky;
-            top: 10px;
+            top: 15px;
             z-index: 2500;
         }
     }
@@ -345,20 +375,20 @@
     .panel-group {
         display: flex;
         flex-direction: column;
-        gap: 6px;
+        gap: 8px;
     }
 
     .panel-group-label {
         font-size: 11px;
         font-weight: 700;
-        color: #9333ea;
+        color: var(--text-muted);
         text-transform: uppercase;
         letter-spacing: 0.5px;
     }
 
     .panel-buttons {
         display: flex;
-        gap: 8px;
+        gap: 10px;
         align-items: center;
         flex-wrap: wrap;
     }
@@ -372,15 +402,15 @@
             display: block;
             width: 1px;
             height: 45px;
-            background-color: #e9d5ff;
+            background-color: var(--border-color);
             align-self: center;
         }
     }
 
     .icon-btn {
-        width: 40px;
-        height: 40px;
-        border-radius: 50%;
+        width: 42px;
+        height: 42px;
+        border-radius: 14px;
         border: none;
         cursor: pointer;
         display: flex;
@@ -389,42 +419,42 @@
         color: #fff;
         font-size: 15px;
         position: relative;
-        box-shadow: 0 4px 10px rgba(0,0,0,.1);
+        box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
         transition: .2s;
     }
     .icon-btn:hover {
-        transform: translateY(-2px) scale(1.05);
+        transform: translateY(-2px);
+        box-shadow: 0 6px 12px -2px rgba(0,0,0,0.15);
     }
 
     .btn-history-ui { background: linear-gradient(135deg, #8b5cf6, #a78bfa); }
     .btn-manage-cust { background: linear-gradient(135deg, #ec4899, #f472b6); }
     .btn-manage-prod { background: linear-gradient(135deg, #06b6d4, #22d3ee); }
-    .btn-save-ui { background: linear-gradient(135deg, #a855f7, #c084fc); }
+    .btn-save-ui { background: linear-gradient(135deg, #7c3aed, #a855f7); }
     .btn-savenew-ui { background: linear-gradient(135deg, #10b981, #34d399); }
     .btn-print-ui { background: linear-gradient(135deg, #6366f1, #818cf8); }
-    .btn-close-ui { background: linear-gradient(135deg, #f43f5e, #fb7185); }
-    .btn-clear-ui { background: linear-gradient(135deg, #fb7185, #fda4af); }
-    .btn-export-ui { background: linear-gradient(135deg, #06b6d4, #22d3ee); }
-    .btn-import-ui { background: linear-gradient(135deg, #8b5cf6, #a78bfa); }
+    .btn-close-ui { background: linear-gradient(135deg, #3b82f6, #60a5fa); }
+    .btn-clear-ui { background: linear-gradient(135deg, #f43f5e, #fb7185); }
+    .btn-export-ui { background: linear-gradient(135deg, #059669, #34d399); }
+    .btn-import-ui { background: linear-gradient(135deg, #d97706, #fbbf24); }
 
     .icon-btn[data-tip]::after {
         content: attr(data-tip);
         position: absolute;
-        bottom: -34px;
+        bottom: -38px;
         left: 50%;
         transform: translateX(-50%);
-        background: #333;
+        background: #1e293b;
         color: #fff;
-        padding: 4px 8px;
-        border-radius: 6px;
+        padding: 5px 10px;
+        border-radius: 10px;
         font-size: 11px;
         white-space: nowrap;
         opacity: 0;
         pointer-events: none;
         transition: 0.2s;
         z-index: 10;
-        box-shadow: 0 4px 6px rgba(0,0,0,0.15);
-        font-family: 'Prompt', sans-serif;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
         font-weight: 400;
     }
     .icon-btn[data-tip]:hover::after {
@@ -432,44 +462,47 @@
     }
     
     .btn-del { 
-        background: #fb7185; 
-        border: none;
-        color: white;
-        padding: 6px 12px;
+        background: #fee2e2; 
+        border: 1px solid #fecaca;
+        color: #ef4444;
+        padding: 6px 14px;
         font-size: 12px; 
-        border-radius: 6px;
+        border-radius: 10px;
         cursor: pointer;
         transition: all 0.2s;
+        font-weight: 600;
     }
-    .btn-del:hover { background: #f43f5e; }
+    .btn-del:hover { background: #ef4444; color: #fff; }
 
     .btn-edit {
-        background: #f59e0b;
-        border: none;
-        color: white;
-        padding: 6px 10px;
+        background: #fef3c7;
+        border: 1px solid #fde68a;
+        color: #d97706;
+        padding: 6px 14px;
         font-size: 12px;
-        border-radius: 6px;
+        border-radius: 10px;
         cursor: pointer;
+        font-weight: 600;
     }
-    .btn-edit:hover { background: #d97706; }
+    .btn-edit:hover { background: #d97706; color: #fff; }
 
     .btn-select-history, .btn-select-prod {
-        background: #a855f7;
-        color: white;
-        border: none;
-        padding: 6px 12px;
+        background: #f3e8ff;
+        border: 1px solid #e9d5ff;
+        color: #7c3aed;
+        padding: 6px 16px;
         font-size: 12px;
-        border-radius: 6px;
+        border-radius: 10px;
         cursor: pointer;
+        font-weight: 600;
     }
-    .btn-select-history:hover, .btn-select-prod:hover { background: #9333ea; }
+    .btn-select-history:hover, .btn-select-prod:hover { background: #7c3aed; color: #ffffff; }
     
-    .credit { font-size: 12px; color: #64748b; font-weight: 500; align-self: center; width: 100%; text-align: center; }
+    .credit { font-size: 13px; color: var(--text-muted); font-weight: 500; align-self: center; width: 100%; text-align: center; }
     @media(min-width: 768px) {
         .credit { width: auto; text-align: left; }
     }
-    .credit strong { color: #9333ea; }
+    .credit strong { color: var(--primary-color); }
 
     .modal {
         display: none;
@@ -479,84 +512,100 @@
         top: 0;
         width: 100%;
         height: 100%;
-        background-color: rgba(0,0,0,0.4);
+        background-color: rgba(15, 23, 42, 0.5);
+        backdrop-filter: blur(4px);
         justify-content: center;
         align-items: center;
-        padding: 10px;
+        padding: 15px;
     }
-    .modal-content {
+    .modal-content, .modal-content-wide {
         background: #fff;
-        padding: 20px;
-        border-radius: 16px;
-        width: 450px;
-        max-width: 100%;
-        box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1);
-        max-height: 80vh;
-        overflow-y: auto;
-    }
-    .modal-content-wide {
-        background: #fff;
-        padding: 20px;
-        border-radius: 16px;
-        width: 750px;
-        max-width: 100%;
-        box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1);
+        padding: 26px;
+        border-radius: 28px;
+        width: 100%;
+        box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25);
         max-height: 85vh;
         overflow-y: auto;
+        border: 1px solid var(--border-color);
     }
+    .modal-content { max-width: 480px; }
+    .modal-content-wide { max-width: 780px; }
+
     .modal-header {
-        font-size: 16px;
+        font-size: 18px;
         font-weight: 600;
         display: flex;
         justify-content: space-between;
         align-items: center;
         position: sticky;
-        top: -20px;
+        top: -26px;
         background-color: #ffffff;
-        padding: 15px 0 10px 0;
+        padding: 0 0 15px 0;
         z-index: 20;
-        margin-bottom: 0;
-        border-bottom: 1px solid #f3e8ff;
+        margin-bottom: 15px;
+        border-bottom: 1px solid var(--border-color);
+        color: var(--text-main);
     }
     .modal-sticky-top {
         position: sticky;
-        top: 35px;
+        top: 0;
         background-color: #ffffff;
         z-index: 15;
-        padding-bottom: 5px;
+        padding-bottom: 10px;
     }
 
     .close-btn {
-        background: none;
+        background: #f1f5f9;
         border: none;
-        font-size: 18px;
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        font-size: 16px;
         cursor: pointer;
-        color: #94a3b8;
+        color: var(--text-muted);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: 0.2s;
     }
+    .close-btn:hover { background: #fee2e2; color: #ef4444; }
+
     .history-table, .product-modal-table {
         width: 100%;
-        border-collapse: collapse;
-        margin-top: 10px;
-        font-size: 13px;
+        border-collapse: separate;
+        border-spacing: 0;
+        margin-top: 5px;
+        font-size: 13.5px;
+        border: 1px solid var(--border-color);
+        border-radius: 16px;
+        overflow: hidden;
     }
     .history-table th, .history-table td, .product-modal-table th, .product-modal-table td {
-        border: 1px solid #e9d5ff;
-        padding: 8px 10px;
+        border-bottom: 1px solid var(--border-color);
+        border-right: 1px solid var(--border-color);
+        padding: 12px 14px;
         text-align: left;
     }
+    .history-table th:last-child, .history-table td:last-child,
+    .product-modal-table th:last-child, .product-modal-table td:last-child {
+        border-right: none;
+    }
+    .history-table tr:last-child td, .product-modal-table tr:last-child td {
+        border-bottom: none;
+    }
     .history-table th, .product-modal-table th {
-        background-color: #9333ea;
-        color: #fff;
-        font-weight: 500;
+        background-color: #f8fafc;
+        color: var(--text-main);
+        font-weight: 600;
     }
     .history-table tr:nth-child(even) td, .product-modal-table tr:nth-child(even) td {
-        background-color: #faf5ff;
+        background-color: #fafbfc;
     }
 
     .signature-section {
         display: flex;
         justify-content: flex-end;
-        margin-top: 35px;
+        margin-top: 40px;
         padding-right: 0;
         width: 100%;
         page-break-inside: avoid;
@@ -564,55 +613,57 @@
 
     .sig-box {
         width: 100%;
-        max-width: 300px;
+        max-width: 280px;
         text-align: center;
         margin-left: auto;
         margin-right: 0;
     }
 
     .sig-line {
-        border-bottom: 1px dashed #999;
-        margin-bottom: 8px;
-        height: 40px;
+        border-bottom: 1px dashed #94a3b8;
+        margin-bottom: 10px;
+        height: 45px;
     }
 
     .sig-name-input, .sig-date-input {
         width: 100%;
         text-align: center;
-        padding: 5px;
-        border: 1px solid #ced4da;
-        border-radius: 6px;
-        margin-bottom: 6px;
-        font-size: 14px;
+        padding: 8px 12px;
+        border: 1px solid var(--border-color);
+        border-radius: 12px;
+        margin-bottom: 8px;
+        font-size: 13.5px;
         outline: none;
     }
 
     .sig-text, .sig-date {
-        font-size: 15px;
+        font-size: 13.5px;
         margin-bottom: 4px;
-        color: #333;
+        color: var(--text-muted);
     }
 
     #batchPrintContainer {
         display: none;
     }
 
+    /* ---------------- ปรับแต่งหน้าตาสำหรับพิมพ์ (Print Styles) ---------------- */
     @media print { 
+		.hide-on-print {
+            display: none !important;
+		}
         @page { 
             size: A4 portrait; 
-            margin: 5mm 8mm 5mm 8mm !important; 
+            margin: 10mm 12mm 10mm 12mm !important; 
         }
         body { 
             background-color: #ffffff !important; 
             padding: 0 !important; 
             margin: 0 !important;
-            color: #1e293b !important; 
+            color: #1e293b !important;
             -webkit-print-color-adjust: exact !important; 
             print-color-adjust: exact !important; 
-            font-size: 13px !important; 
+            font-size: 12.5px !important; 
             font-family: 'Sarabun', 'Prompt', sans-serif !important;
-            text-rendering: optimizeLegibility;
-            -webkit-font-smoothing: antialiased;
         } 
         .control-panel, .no-print, .search-product-btn, select#customerSelect, .modal { 
             display: none !important; 
@@ -647,22 +698,57 @@
             box-shadow: none !important; 
             padding: 0 !important; 
             margin: 0 !important;
+            background-color: #ffffff !important;
         } 
+
+        .header-section {
+            border-bottom: 2px solid #e2e8f0 !important;
+            padding-bottom: 12px !important;
+            margin-bottom: 15px !important;
+        }
+
+        .shop-label-print {
+            display: none !important;
+        }
+
+        .shop-info-box {
+            line-height: 1.5 !important;
+        }
+
+        .title-box {
+            background: #7c3aed !important; 
+            color: #ffffff !important;
+            box-shadow: none !important;
+            border-radius: 12px !important;
+            padding: 10px 20px !important;
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
+        }
 
         .top-info tr {
             display: table-row !important;
         }
         .customer-info {
-            width: 55% !important;
+            width: 58% !important;
             display: table-cell !important;
+            border: 1px solid #cbd5e1 !important;
+            background-color: #ffffff !important;
+            border-radius: 12px !important;
+            padding: 12px !important;
+            line-height: 1.8 !important;
         }
         .top-info td:last-child {
-            width: 45% !important;
+            width: 42% !important;
             display: table-cell !important;
-            padding-left: 10px !important;
+            padding-left: 12px !important;
         }
         .no-date-box {
             width: 100% !important;
+            border: 1px solid #cbd5e1 !important;
+            background-color: #ffffff !important;
+            border-radius: 12px !important;
+            padding: 12px !important;
+            line-height: 1.8 !important;
         }
 
         input, textarea, select, .inline-textarea, .sig-name-input, .sig-date-input { 
@@ -672,20 +758,172 @@
             padding: 1px 2px !important; 
             color: #1e293b !important; 
             font-family: 'Sarabun', 'Prompt', sans-serif !important;
+            font-size: 12.5px !important;
         }
         input::placeholder, textarea::placeholder {
             color: transparent !important;
         }
+
+        .table-responsive {
+            border: none !important;
+            overflow: visible !important;
+        }
+
+        .data-table {
+            border: 1px solid #cbd5e1 !important;
+            border-radius: 8px !important;
+        }
+
         .data-table th, .data-table td { 
             border: 1px solid #cbd5e1 !important; 
-            padding: 5px 8px !important; 
-            font-size: 13px !important;
+            padding: 6px 8px !important; 
+            font-size: 12px !important;
         }
         .data-table th { 
-            background: linear-gradient(135deg, #9333ea, #c084fc) !important; 
-            color: #ffffff !important; 
+            background: #f1f5f9 !important; 
+            color: #1e293b !important; 
+            font-weight: 700 !important;
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
+        }
+
+        .footer-table {
+            border: 1px solid #cbd5e1 !important;
+            border-radius: 8px !important;
+        }
+        .footer-table td {
+            border: 1px solid #cbd5e1 !important;
+            background-color: #ffffff !important;
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
+            padding: 8px 10px !important;
+            font-size: 12px !important;
+        }
+        .footer-total-label {
+            background-color: #f8fafc !important;
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
+        }
+        #grandTotal {
+            color: #7c3aed !important;
+            font-size: 14px !important;
+        }
+        #textAmount {
+            color: #7c3aed !important;
+            font-size: 13.5px !important;
         }
     }
+
+/* ===== Responsive Layout Fixes ===== */
+.header-section{
+    display:grid !important;
+    grid-template-columns:minmax(0,1fr) auto;
+    align-items:start;
+    gap:24px;
+}
+.header-left{min-width:0;width:100%;}
+.title-box{
+    justify-self:end;
+    align-self:start;
+    min-width:190px;
+    margin-left:auto;
+}
+.shop-info-box{min-width:0;overflow-wrap:anywhere;}
+.shop-info-box .inline-input,
+.shop-info-box .inline-textarea{width:100% !important;max-width:100% !important;}
+
+.data-table{
+    table-layout:fixed;
+    min-width:0;
+    width:100%;
+}
+.data-table th,
+.data-table td{overflow:hidden;}
+.data-table th:nth-child(1), .data-table td:nth-child(1){width:6% !important;}
+.data-table th:nth-child(2), .data-table td:nth-child(2){width:43% !important;}
+.data-table th:nth-child(3), .data-table td:nth-child(3){width:8% !important;}
+.data-table th:nth-child(4), .data-table td:nth-child(4){width:11% !important;}
+.data-table th:nth-child(5), .data-table td:nth-child(5){width:16% !important;}
+.data-table th:nth-child(6), .data-table td:nth-child(6){width:16% !important;}
+.data-table th:nth-child(7), .data-table td:nth-child(7){width:4% !important;}
+
+.item-desc-wrapper{min-width:0;width:100%;}
+.item-desc{
+    display:block;
+    width:100% !important;
+    min-width:0;
+    min-height:38px;
+    height:38px;
+    resize:none;
+    overflow:hidden;
+    white-space:pre-wrap;
+    overflow-wrap:anywhere;
+    word-break:break-word;
+    line-height:1.55;
+}
+.desc-cell{
+    min-width:0;
+    overflow:hidden;
+}
+.qty{width:62px !important;max-width:100%;padding-left:5px !important;padding-right:5px !important;}
+.unit-input{width:82px !important;max-width:100%;padding-left:5px !important;padding-right:5px !important;}
+.price{width:105px !important;max-width:100%;padding-left:5px !important;padding-right:5px !important;}
+.search-product-btn{flex:0 0 38px;}
+
+@media(max-width:767px){
+    .bill-container{padding:18px 12px;border-radius:20px;}
+    .header-section{grid-template-columns:1fr;gap:14px;}
+    .title-box{justify-self:end;min-width:0;width:auto;}
+    .data-table{min-width:620px;}
+    .table-responsive{overflow-x:auto;}
+}
+
+@media print{
+    .header-section{
+        display:grid !important;
+        grid-template-columns:minmax(0,1fr) auto !important;
+        align-items:start !important;
+        gap:18px !important;
+    }
+    .header-left{min-width:0 !important;}
+    .title-box{
+        justify-self:end !important;
+        align-self:start !important;
+        min-width:175px !important;
+        margin-left:auto !important;
+    }
+    .data-table{table-layout:fixed !important;min-width:0 !important;width:100% !important;}
+    .data-table th:nth-child(1), .data-table td:nth-child(1){width:6% !important;}
+    .data-table th:nth-child(2), .data-table td:nth-child(2){width:43% !important;}
+    .data-table th:nth-child(3), .data-table td:nth-child(3){width:8% !important;}
+    .data-table th:nth-child(4), .data-table td:nth-child(4){width:11% !important;}
+    .data-table th:nth-child(5), .data-table td:nth-child(5){width:16% !important;}
+    .data-table th:nth-child(6), .data-table td:nth-child(6){width:16% !important;}
+    .data-table th:nth-child(7), .data-table td:nth-child(7){display:none !important;}
+    .data-table th:nth-child(2), .data-table td:nth-child(2){
+        white-space:normal !important;
+        overflow:visible !important;
+        overflow-wrap:anywhere !important;
+        word-break:break-word !important;
+    }
+    .item-desc{
+        height:auto !important;
+        min-height:0 !important;
+        overflow:visible !important;
+        white-space:pre-wrap !important;
+        overflow-wrap:anywhere !important;
+        word-break:break-word !important;
+    }
+    .desc-cell{overflow:visible !important;}
+    .item-desc-wrapper{overflow:visible !important;}
+    .table-responsive{overflow:visible !important;}
+    .data-table th,.data-table td{overflow:visible !important;}
+    .data-table tbody tr{break-inside:avoid;page-break-inside:avoid;}
+    .data-table thead{display:table-header-group;}
+    .footer-table{break-inside:avoid;page-break-inside:avoid;}
+    .signature-section{break-inside:avoid;page-break-inside:avoid;}
+}
+
 </style>
 </head>
 <body>
@@ -703,7 +941,7 @@
 </script>
 
 <div class="control-panel no-print">
-    <div class="credit"><i class="fa-solid fa-user" style="margin-right: 4px; color: #9333ea;"></i> ผู้จัดทำ: <strong>Thanong Chooduang</strong></div>
+    <div class="credit"><i class="fa-solid fa-user" style="margin-right: 4px; color: var(--primary-color);"></i> ผู้จัดทำ: <strong>Thanong Chooduang</strong></div>
     
     <div class="panel-group">
         <div class="panel-group-label">📁 ข้อมูล & ฐานข้อมูล</div>
@@ -733,10 +971,10 @@
     <div class="panel-group">
         <div class="panel-group-label">⚙️ พิมพ์ & ออก</div>
         <div class="panel-buttons">
-            <button class="icon-btn btn-print-ui" data-tip="พิมพ์ / บันทึก PDF" onclick="window.print()">
+            <button class="icon-btn btn-print-ui" data-tip="พิมพ์ / บันทึก PDF" onclick="printCurrentBill()">
                 <i class="fa-solid fa-print"></i>
             </button>
-            <a href="index.html" class="icon-btn btn-close-ui" data-tip="หน้าหลัก" style="background-color: #3b82f6; color: white; display: inline-flex; align-items: center; justify-content: center; text-decoration: none;">
+            <a href="index.html" class="icon-btn btn-close-ui" data-tip="หน้าหลัก" style="text-decoration: none;">
                 <i class="fa-solid fa-house"></i> 
             </a>
         </div>
@@ -745,15 +983,14 @@
 
 <div class="bill-container">
     <div class="header-section">
-        <div class="header-left">
-            <div class="shop-info-box">
-                <strong>ชื่อร้าน (Company Name): </strong><input type="text" id="shopName" class="inline-input" placeholder="กรอกชื่อร้าน..."><br>
-                <strong>ที่อยู่ (Address): </strong><textarea id="shopAddress" class="inline-textarea" placeholder="กรอกที่อยู่ร้าน..." oninput="autoGrow(this)"></textarea><br>
-                <strong>เลขประจำตัวผู้เสียภาษี(Tax ID): </strong><input type="text" id="shopTax" class="inline-input" placeholder="เลขผู้เสียภาษี...">
-                <div class="no-print" style="display:flex; gap:6px; margin-top:8px; flex-wrap:wrap;">
-                    <button type="button" onclick="fillCompanyInfo()" style="background:linear-gradient(135deg,#6366f1,#818cf8); color:#fff; border:none; border-radius:7px; padding:5px 10px; font-size:11px; cursor:pointer; font-weight:600;">🏢 ใส่ข้อมูลบริษัท</button>
-                    <button type="button" onclick="clearCompanyInfo()" style="background:linear-gradient(135deg,#fb7185,#fda4af); color:#fff; border:none; border-radius:7px; padding:5px 10px; font-size:11px; cursor:pointer; font-weight:600;">🧹 ล้างค่าบริษัท</button>
-                </div>
+        <div class="shop-info-box">
+            <span class="hide-on-print"><strong>ชื่อร้าน: </strong></span><input type="text" id="shopName" class="inline-input" placeholder="กรอกชื่อร้าน..."><br>
+            <span class="hide-on-print"><strong>ที่อยู่: </strong></span><textarea id="shopAddress" class="inline-textarea" placeholder="กรอกที่อยู่ร้าน..." oninput="autoGrow(this)"></textarea><br>
+            <span><strong>เลขประจำตัวผู้เสียภาษี: </strong></span><input type="text" id="shopTax" class="inline-input" value="0105544005337" placeholder="เลขผู้เสียภาษี...">
+            
+            <div class="no-print" style="display:flex; gap:8px; margin-top:10px; flex-wrap:wrap;">
+                <button type="button" onclick="fillCompanyInfo()" style="background:#f1f5f9; color:var(--text-main); border:1px solid var(--border-color); border-radius:10px; padding:6px 14px; font-size:12px; cursor:pointer; font-weight:600;">🏢 ใส่ข้อมูลบริษัท</button>
+                <button type="button" onclick="clearCompanyInfo()" style="background:#fee2e2; color:#ef4444; border:1px solid #fecaca; border-radius:10px; padding:6px 14px; font-size:12px; cursor:pointer; font-weight:600;">🧹 ล้างค่าบริษัท</button>
             </div>
         </div>
         <div class="title-box">บิลเงินสด<br><span style="font-size: 12px; font-weight: 400; opacity: 0.9;">CASH BILL / RECEIPT</span></div>
@@ -762,26 +999,28 @@
     <table class="top-info">
         <tr>
             <td class="customer-info">
-                <strong class="no-print" style="color: #9333ea; font-weight: 700;">🔍 เลือกลูกค้า/บริษัท:</strong> 
-                <select id="customerSelect" class="inline-input no-print" style="width: 160px; font-weight: 600; color: #9333ea; border-bottom-color: #c084fc;" onchange="selectCustomer(this)">
-                    <option value="">-- เลือกลูกค้า --</option>
-                </select><span class="no-print"><br></span>
+                <div class="no-print" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                    <strong style="color: var(--primary-color); font-weight: 700;">🔍 เลือกลูกค้า/บริษัท:</strong>
+                    <select id="customerSelect" class="inline-input no-print" style="width: 180px; font-weight: 600; color: var(--primary-color);" onchange="selectCustomer(this)">
+                        <option value="">-- เลือกลูกค้า --</option>
+                    </select>
+                </div>
                 <strong>นามลูกค้า (Customer):</strong> <input type="text" id="custName" class="inline-input" placeholder="ชื่อบริษัท/ลูกค้า..."><br>
                 <strong>ที่อยู่ (Address):</strong> <textarea id="custAddress" class="inline-textarea" placeholder="ที่อยู่ลูกค้า..." oninput="autoGrow(this)"></textarea><br>
                 <strong>เลขประจำตัวผู้เสียภาษี:</strong> <input type="text" id="custTax" class="inline-input" placeholder="เลขผู้เสียภาษีลูกค้า">
             </td>
             <td style="padding-left: 0; width: 100%;">
                 <div class="no-date-box">
-                    <div class="no-print" style="margin-bottom: 6px;">
-                        <strong style="color: #9333ea;">🔍 ค้นหาบิลเดิม:</strong> 
-                        <div style="display: flex; gap: 5px; margin-top: 4px; flex-wrap: wrap;">
-                            <input type="text" id="searchOldBillNo" class="inline-input" style="width: 110px;" placeholder="เลขที่บิลเก่า">
-                            <button style="background: linear-gradient(135deg, #06b6d4, #22d3ee); color: white; border: none; border-radius: 6px; padding: 4px 10px; font-size: 11px; cursor: pointer;" onclick="loadDataByBillNo()">ดึงข้อมูล</button>
+                    <div class="no-print" style="margin-bottom: 8px;">
+                        <strong style="color: var(--primary-color);">🔍 ค้นหาบิลเดิม:</strong> 
+                        <div style="display: flex; gap: 6px; margin-top: 6px; flex-wrap: wrap;">
+                            <input type="text" id="searchOldBillNo" class="inline-input" style="width: 130px;" placeholder="เลขที่บิลเก่า">
+                            <button style="background: #f1f5f9; color: var(--text-main); border: 1px solid var(--border-color); border-radius: 10px; padding: 6px 12px; font-size: 12px; cursor: pointer; font-weight: 600;" onclick="loadDataByBillNo()">ดึงข้อมูล</button>
                         </div>
                     </div>
-                    <strong>เล่มที่ (Book No.):</strong> <input type="text" id="bookNo" class="inline-input" style="width: 110px;" placeholder="-"><br>
-                    <strong>เลขที่ (No.):</strong> <input type="text" id="billNo" class="inline-input" style="width: 120px;" placeholder="CS2026xxxx"><br>
-                    <strong>วันที่ (Date):</strong> <input type="text" id="billDate" class="inline-input" style="width: 120px;" placeholder="วว/ดด/ปปปป">
+                    <strong>เล่มที่ (Book No.):</strong> <input type="text" id="bookNo" class="inline-input" style="width: 120px;" placeholder="-"><br>
+                    <strong>เลขที่ (No.):</strong> <input type="text" id="billNo" class="inline-input" style="width: 130px;" placeholder="CS2026xxxx"><br>
+                    <strong>วันที่ (Date):</strong> <input type="text" id="billDate" class="inline-input" style="width: 130px;" placeholder="วว/ดด/ปปปป">
                 </div>
             </td>
         </tr>
@@ -791,13 +1030,13 @@
         <table class="data-table" id="billTable">
             <thead>
                 <tr>
-                    <th style="width: 5%;">ลำดับ<br><span style="font-size: 10px; font-weight: 300;">Item</span></th>
-                    <th style="width: 47%;">รายการสินค้า / รายละเอียด<br><span style="font-size: 10px; font-weight: 300;">Description</span></th>
-                    <th style="width: 8%;">จำนวน<br><span style="font-size: 10px; font-weight: 300;">Qty</span></th>
-                    <th style="width: 10%;">หน่วย<br><span style="font-size: 10px; font-weight: 300;">Unit</span></th>
-                    <th style="width: 13%;">ราคาต่อหน่วย<br><span style="font-size: 10px; font-weight: 300;">Unit Price</span></th>
-                    <th style="width: 13%;">จำนวนเงิน<br><span style="font-size: 10px; font-weight: 300;">Amount</span></th>
-                    <th class="no-print" style="width: 4%;">ลบ</th>
+                    <th style="width: 6%;">ลำดับ<br><span style="font-size: 10px; font-weight: 400; color: var(--text-muted);">Item</span></th>
+                    <th style="width: 45%;">รายการสินค้า / รายละเอียด<br><span style="font-size: 10px; font-weight: 400; color: var(--text-muted);">Description</span></th>
+                    <th style="width: 9%;">จำนวน<br><span style="font-size: 10px; font-weight: 400; color: var(--text-muted);">Qty</span></th>
+                    <th style="width: 11%;">หน่วย<br><span style="font-size: 10px; font-weight: 400; color: var(--text-muted);">Unit</span></th>
+                    <th style="width: 13%;">ราคาต่อหน่วย<br><span style="font-size: 10px; font-weight: 400; color: var(--text-muted);">Unit Price</span></th>
+                    <th style="width: 13%;">จำนวนเงิน<br><span style="font-size: 10px; font-weight: 400; color: var(--text-muted);">Amount</span></th>
+                    <th class="no-print" style="width: 3%;">ลบ</th>
                 </tr>
             </thead>
             <tbody>
@@ -812,37 +1051,37 @@
                     <td style="text-align: center;"><input type="text" class="qty" value="1" inputmode="decimal" onfocus="if(this.value==='1')this.value='';" onblur="if(this.value==='')this.value='1';" oninput="formatNumberInput(this); calculate();"></td>
                     <td style="text-align: center;"><input type="text" class="unit-input" placeholder="ชิ้น/อัน"></td>
                     <td style="text-align: center;"><input type="text" class="price" value="0" inputmode="decimal" onfocus="if(this.value==='0')this.value='';" onblur="if(this.value==='')this.value='0';" oninput="formatNumberInput(this); calculate();"></td>
-                    <td class="amount" style="text-align: right; padding-right: 12px;">0.00</td>
+                    <td class="amount" style="text-align: right; padding-right: 14px;">0.00</td>
                     <td class="no-print" style="text-align: center;"><button class="btn-del" onclick="removeRow(this)">ลบ</button></td>
                 </tr>
             </tbody>
             <tfoot class="no-print">
                 <tr>
-                    <td colspan="7" style="text-align: center; padding: 12px; border: 1px solid #e9d5ff; background: #ffffff;">
-                        <button style="background: linear-gradient(135deg, #10b981, #34d399); color: white; border: none; border-radius: 8px; padding: 8px 16px; font-weight: 600; cursor: pointer;" onclick="addRow()">+ เพิ่มรายการสินค้า</button>
+                    <td colspan="7" style="text-align: center; padding: 14px; background: #f8fafc; border-top: 1px solid var(--border-color); border-bottom-left-radius: 20px; border-bottom-right-radius: 20px;">
+                        <button style="background: linear-gradient(135deg, #10b981, #34d399); color: white; border: none; border-radius: 12px; padding: 10px 20px; font-weight: 600; cursor: pointer; box-shadow: 0 4px 6px -1px rgba(16, 185, 129, 0.2);" onclick="addRow()">+ เพิ่มรายการสินค้า</button>
                     </td>
                 </tr>
             </tfoot>
         </table>
     </div>
     
-    <table class="footer-table" style="width: 100%; border-collapse: collapse;">
+    <table class="footer-table" style="width: 100%;">
         <tr>
-            <td rowspan="2" style="width: 50%; vertical-align: middle; text-align: center; background-color: #faf5ff; border-right: 1px solid #f3e8ff; padding: 10px;">
-                <div style="font-size: 12px; color: #64748b; margin-bottom: 6px;">(จำนวนเงินตัวอักษร)</div>
-                <div id="textAmount" style="font-size: 15px; color: #9333ea; font-weight: 600;">ศูนย์บาทถ้วน</div>
+            <td rowspan="2" style="width: 50%; vertical-align: middle; text-align: center; background-color: #f8fafc; border-right: 1px solid var(--border-color); padding: 14px;">
+                <div style="font-size: 12.5px; color: var(--text-muted); margin-bottom: 6px;">(จำนวนเงินตัวอักษร)</div>
+                <div id="textAmount" style="font-size: 15px; color: var(--primary-color); font-weight: 600;">ศูนย์บาทถ้วน</div>
             </td>
-            <td class="footer-total-label" style="font-weight: 600; color: #475569; text-align: center; vertical-align: middle; padding: 10px;">
-                รวมราคาสินค้า<br><span style="font-size: 11px; font-weight: 400; color: #64748b;">(Net Total)</span>
+            <td class="footer-total-label" style="font-weight: 600; text-align: center; vertical-align: middle; padding: 14px; width: 25%;">
+                รวมราคาสินค้า<br><span style="font-size: 11px; font-weight: 400; color: var(--text-muted);">(Net Total)</span>
             </td>
             <td id="netTotal" style="width: 25%; font-weight: 600; text-align: center; vertical-align: middle;">0.00</td>
         </tr>
         <tr>
-            <td class="footer-total-label" style="background-color: #faf5ff; font-weight: 700; color: #475569; text-align: center; vertical-align: middle; padding: 10px;">
+            <td class="footer-total-label" style="background-color: #f8fafc; font-weight: 700; text-align: center; vertical-align: middle; padding: 14px; width: 25%;">
                 จำนวนเงินรวมทั้งสิ้น<br>
-                <span style="font-size: 11px; font-weight: 600; color: #9333ea;">(Grand Total)</span>
+                <span style="font-size: 11px; font-weight: 600; color: var(--primary-color);">(Grand Total)</span>
             </td>
-            <td id="grandTotal" style="width: 25%; background-color: #faf5ff; color: #9333ea; font-size: 16px; text-align: center; vertical-align: middle; font-weight: 700;">0.00</td>
+            <td id="grandTotal" style="width: 25%; background-color: #f8fafc; color: var(--primary-color); font-size: 16px; text-align: center; vertical-align: middle; font-weight: 700;">0.00</td>
         </tr>
     </table>
 
@@ -865,9 +1104,9 @@
             <span id="historyModalTitle">📋 ประวัติการขายและใบเสร็จทั้งหมด (History Log)</span>
             <button class="close-btn" onclick="closeModal('historyModal')">&times;</button>
         </div>
-        <div style="margin-bottom: 12px; display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
-            <input type="text" id="historySearchInput" style="flex-grow: 1; padding: 8px 12px;" placeholder="🔍 ค้นหาจากชื่อลูกค้า, เลขที่บิล, วันที่ หรือยอดเงิน..." oninput="filterHistoryTable()">
-            <button type="button" onclick="printSelectedBills()" style="background: linear-gradient(135deg, #6366f1, #818cf8); color: white; border: none; padding: 8px 16px; border-radius: 8px; cursor: pointer; font-weight: 600; white-space: nowrap;"><i class="fa-solid fa-print"></i> พิมพ์บิลที่เลือก (<span id="selectedCount">0</span>)</button>
+        <div style="margin-bottom: 15px; display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+            <input type="text" id="historySearchInput" style="flex-grow: 1; padding: 10px 14px; border-radius: 12px;" placeholder="🔍 ค้นหาจากชื่อลูกค้า, เลขที่บิล, วันที่ หรือยอดเงิน..." oninput="filterHistoryTable()">
+            <button type="button" onclick="printSelectedBills()" style="background: linear-gradient(135deg, #6366f1, #818cf8); color: white; border: none; padding: 10px 18px; border-radius: 12px; cursor: pointer; font-weight: 600; white-space: nowrap; box-shadow: 0 4px 6px -1px rgba(99,102,241,0.2);"><i class="fa-solid fa-print"></i> พิมพ์บิลที่เลือก (<span id="selectedCount">0</span>)</button>
         </div>
         <div id="historyTableContainer" style="max-height: 50vh; overflow-y: auto;"></div>
     </div>
@@ -880,13 +1119,13 @@
             <span>👥 จัดการข้อมูลลูกค้า / เพิ่มลูกค้าใหม่</span>
             <button class="close-btn" onclick="closeModal('customerModal')">&times;</button>
         </div>
-        <div style="background: #faf5ff; padding: 15px; border-radius: 10px; margin: 15px 0; border: 1px solid #e9d5ff;">
+        <div style="background: #f8fafc; padding: 18px; border-radius: 20px; margin: 15px 0; border: 1px solid var(--border-color);">
             <strong>➕ เพิ่มลูกค้าใหม่เข้าฐานข้อมูล:</strong>
-            <div style="display: flex; gap: 8px; margin-top: 8px; flex-wrap: wrap;">
-                <input type="text" id="newCustName" placeholder="ชื่อลูกค้า/บริษัท" style="flex-grow: 2; min-width: 180px;">
-                <input type="text" id="newCustAddress" placeholder="ที่อยู่" style="flex-grow: 2; min-width: 180px;">
-                <input type="text" id="newCustTax" placeholder="เลขผู้เสียภาษี" style="width: 120px;">
-                <button type="button" onclick="addNewCustomer()" style="background: #10b981; color: white; border: none; padding: 8px 16px; border-radius: 8px; cursor: pointer; font-weight: 600;">บันทึกลูกค้า</button>
+            <div style="display: flex; gap: 10px; margin-top: 10px; flex-wrap: wrap;">
+                <input type="text" id="newCustName" placeholder="ชื่อลูกค้า/บริษัท" style="flex-grow: 2; min-width: 180px; border-radius: 12px;">
+                <input type="text" id="newCustAddress" placeholder="ที่อยู่" style="flex-grow: 2; min-width: 180px; border-radius: 12px;">
+                <input type="text" id="newCustTax" placeholder="เลขผู้เสียภาษี" style="width: 130px; border-radius: 12px;">
+                <button type="button" onclick="addNewCustomer()" style="background: #10b981; color: white; border: none; padding: 10px 18px; border-radius: 12px; cursor: pointer; font-weight: 600;">บันทึกลูกค้า</button>
             </div>
         </div>
         <div id="customerListContainer" style="margin-top: 5px; max-height: 40vh; overflow-y: auto;"></div>
@@ -901,21 +1140,21 @@
             <button class="close-btn" onclick="closeModal('productModal')">&times;</button>
         </div>
         
-        <div style="background: #faf5ff; padding: 15px; border-radius: 10px; margin: 15px 0; border: 1px solid #e9d5ff;">
+        <div style="background: #f8fafc; padding: 18px; border-radius: 20px; margin: 15px 0; border: 1px solid var(--border-color);">
             <strong>➕ เพิ่มสินค้าใหม่เข้าฐานข้อมูล:</strong>
-            <div style="display: flex; gap: 8px; margin-top: 8px; flex-wrap: wrap;">
-                <input type="text" id="newProdDesc" placeholder="รายละเอียดสินค้า" style="flex-grow: 2; min-width: 200px;">
-                <input type="text" id="newProdUnit" placeholder="หน่วย (ชิ้น)" style="width: 100px;">
-                <input type="text" id="newProdPrice" placeholder="ราคาต่อหน่วย" style="width: 110px;" inputmode="decimal">
-                <button type="button" onclick="addNewProduct()" style="background: #10b981; color: white; border: none; padding: 8px 16px; border-radius: 8px; cursor: pointer; font-weight: 600;">บันทึกสินค้า</button>
+            <div style="display: flex; gap: 10px; margin-top: 10px; flex-wrap: wrap;">
+                <input type="text" id="newProdDesc" placeholder="รายละเอียดสินค้า" style="flex-grow: 2; min-width: 200px; border-radius: 12px;">
+                <input type="text" id="newProdUnit" placeholder="หน่วย (ชิ้น)" style="width: 110px; border-radius: 12px;">
+                <input type="text" id="newProdPrice" placeholder="ราคาต่อหน่วย" style="width: 120px; border-radius: 12px;" inputmode="decimal">
+                <button type="button" onclick="addNewProduct()" style="background: #10b981; color: white; border: none; padding: 10px 18px; border-radius: 12px; cursor: pointer; font-weight: 600;">บันทึกสินค้า</button>
             </div>
         </div>
 
         <div class="modal-sticky-top">
             <div style="margin: 10px 0 8px 0;">
-                <input type="text" id="productSearchInput" style="width: 100%; padding: 8px 12px; box-sizing: border-box;" placeholder="🔍 ค้นหาจากรายละเอียดสินค้า..." oninput="renderProductList()">
+                <input type="text" id="productSearchInput" style="width: 100%; padding: 10px 14px; box-sizing: border-box; border-radius: 12px;" placeholder="🔍 ค้นหาจากรายละเอียดสินค้า..." oninput="renderProductList()">
             </div>
-            <div id="productCountText" style="font-weight: 600; color: #9333ea; font-size: 13px;"></div>
+            <div id="productCountText" style="font-weight: 600; color: var(--primary-color); font-size: 13px;"></div>
         </div>
 
         <div id="productListContainer" style="margin-top: 5px; max-height: 40vh; overflow-y: auto;"></div>
@@ -930,11 +1169,11 @@
             <button class="close-btn" onclick="closeModal('productSelectorModal')">&times;</button>
         </div>
         
-        <div style="margin: 12px 0; display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
-            <input type="text" id="selectorSearchInput" style="flex-grow: 1; padding: 8px 12px;" placeholder="🔍 พิมพ์ค้นหาสินค้า..." oninput="renderProductSelectorList()">
-            <button type="button" onclick="openQuickAddProductModal()" style="background: linear-gradient(135deg, #10b981, #34d399); color: white; border: none; padding: 8px 14px; border-radius: 8px; cursor: pointer; font-weight: 600; white-space: nowrap;"><i class="fa-solid fa-plus"></i> เพิ่มสินค้าใหม่</button>
+        <div style="margin: 15px 0; display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+            <input type="text" id="selectorSearchInput" style="flex-grow: 1; padding: 10px 14px; border-radius: 12px;" placeholder="🔍 พิมพ์ค้นหาสินค้า..." oninput="renderProductSelectorList()">
+            <button type="button" onclick="openQuickAddProductModal()" style="background: linear-gradient(135deg, #10b981, #34d399); color: white; border: none; padding: 10px 16px; border-radius: 12px; cursor: pointer; font-weight: 600; white-space: nowrap;"><i class="fa-solid fa-plus"></i> เพิ่มสินค้าใหม่</button>
         </div>
-        <div id="productSelectorCountText" style="font-weight: 600; color: #9333ea; font-size: 13px; margin-bottom: 8px;"></div>
+        <div id="productSelectorCountText" style="font-weight: 600; color: var(--primary-color); font-size: 13px; margin-bottom: 8px;"></div>
 
         <div id="productSelectorContainer" style="max-height: 50vh; overflow-y: auto;"></div>
     </div>
@@ -947,20 +1186,20 @@
             <span>➕ เพิ่มสินค้าใหม่ (ด่วน)</span>
             <button class="close-btn" onclick="closeModal('quickAddProductModal')">&times;</button>
         </div>
-        <div style="margin-top: 15px; display: flex; flex-direction: column; gap: 10px;">
+        <div style="margin-top: 15px; display: flex; flex-direction: column; gap: 12px;">
             <div>
-                <label style="font-weight: 600; color: #64748b;">รายละเอียดสินค้า:</label>
-                <input type="text" id="quickProdDesc" placeholder="ชื่อ/รายละเอียดสินค้า" style="width: 100%; margin-top: 4px;">
+                <label style="font-weight: 600; color: var(--text-muted); font-size: 13px;">รายละเอียดสินค้า:</label>
+                <input type="text" id="quickProdDesc" placeholder="ชื่อ/รายละเอียดสินค้า" style="width: 100%; margin-top: 6px; border-radius: 12px;">
             </div>
             <div>
-                <label style="font-weight: 600; color: #64748b;">หน่วย:</label>
-                <input type="text" id="quickProdUnit" placeholder="เช่น ชิ้น, กล่อง, ตัว" style="width: 100%; margin-top: 4px;">
+                <label style="font-weight: 600; color: var(--text-muted); font-size: 13px;">หน่วย:</label>
+                <input type="text" id="quickProdUnit" placeholder="เช่น ชิ้น, กล่อง, ตัว" style="width: 100%; margin-top: 6px; border-radius: 12px;">
             </div>
             <div>
-                <label style="font-weight: 600; color: #64748b;">ราคาต่อหน่วย:</label>
-                <input type="text" id="quickProdPrice" placeholder="0.00" inputmode="decimal" style="width: 100%; margin-top: 4px;">
+                <label style="font-weight: 600; color: var(--text-muted); font-size: 13px;">ราคาต่อหน่วย:</label>
+                <input type="text" id="quickProdPrice" placeholder="0.00" inputmode="decimal" style="width: 100%; margin-top: 6px; border-radius: 12px;">
             </div>
-            <button type="button" onclick="saveQuickProduct()" style="background: #10b981; color: white; border: none; padding: 10px; border-radius: 8px; cursor: pointer; font-weight: 600; margin-top: 10px;">บันทึกและเลือกใช้งาน</button>
+            <button type="button" onclick="saveQuickProduct()" style="background: #10b981; color: white; border: none; padding: 12px; border-radius: 12px; cursor: pointer; font-weight: 600; margin-top: 10px;">บันทึกและเลือกใช้งาน</button>
         </div>
     </div>
 </div>
@@ -972,21 +1211,21 @@
             <span>✏️ แก้ไขข้อมูลสินค้า</span>
             <button class="close-btn" onclick="closeModal('editProductModal')">&times;</button>
         </div>
-        <div style="margin-top: 15px; display: flex; flex-direction: column; gap: 10px;">
+        <div style="margin-top: 15px; display: flex; flex-direction: column; gap: 12px;">
             <input type="hidden" id="editProdIndex">
             <div>
-                <label style="font-weight: 600; color: #64748b;">รายละเอียดสินค้า:</label>
-                <input type="text" id="editProdDesc" placeholder="ชื่อ/รายละเอียดสินค้า" style="width: 100%; margin-top: 4px;">
+                <label style="font-weight: 600; color: var(--text-muted); font-size: 13px;">รายละเอียดสินค้า:</label>
+                <input type="text" id="editProdDesc" placeholder="ชื่อ/รายละเอียดสินค้า" style="width: 100%; margin-top: 6px; border-radius: 12px;">
             </div>
             <div>
-                <label style="font-weight: 600; color: #64748b;">หน่วย:</label>
-                <input type="text" id="editProdUnit" placeholder="เช่น ชิ้น, กล่อง, ตัว" style="width: 100%; margin-top: 4px;">
+                <label style="font-weight: 600; color: var(--text-muted); font-size: 13px;">หน่วย:</label>
+                <input type="text" id="editProdUnit" placeholder="เช่น ชิ้น, กล่อง, ตัว" style="width: 100%; margin-top: 6px; border-radius: 12px;">
             </div>
             <div>
-                <label style="font-weight: 600; color: #64748b;">ราคาต่อหน่วย:</label>
-                <input type="text" id="editProdPrice" placeholder="0.00" inputmode="decimal" style="width: 100%; margin-top: 4px;">
+                <label style="font-weight: 600; color: var(--text-muted); font-size: 13px;">ราคาต่อหน่วย:</label>
+                <input type="text" id="editProdPrice" placeholder="0.00" inputmode="decimal" style="width: 100%; margin-top: 6px; border-radius: 12px;">
             </div>
-            <button type="button" onclick="updateProductData()" style="background: #f59e0b; color: white; border: none; padding: 10px; border-radius: 8px; cursor: pointer; font-weight: 600; margin-top: 10px;">บันทึกการแก้ไข</button>
+            <button type="button" onclick="updateProductData()" style="background: #d97706; color: white; border: none; padding: 12px; border-radius: 12px; cursor: pointer; font-weight: 600; margin-top: 10px;">บันทึกการแก้ไข</button>
         </div>
     </div>
 </div>
@@ -1091,27 +1330,49 @@
         }
     }
 
-    function closeAppWindow() {
-        Swal.fire({
-            title: 'ออกจากระบบบิลเงินสด',
-            text: 'คุณต้องการปิดโปรแกรมใช่หรือไม่',
-            icon: 'question',
-            showCancelButton: true,
-            confirmButtonColor: '#f43f5e',
-            cancelButtonColor: '#94a3b8',
-            confirmButtonText: 'ปิดโปรแกรม',
-            cancelButtonText: 'ยกเลิก'
-        }).then((result) => {
-            if (result.isConfirmed) {
-                window.close();
-            }
+    function autoGrow(element) {
+        if (!element) return;
+        element.style.height = "auto";
+        element.style.height = Math.max(34, element.scrollHeight) + "px";
+    }
+
+    function escapeHtml(value) {
+        return String(value ?? '')
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#039;');
+    }
+
+    function money(value) {
+        const n = Number(value);
+        return (Number.isFinite(n) ? n : 0).toLocaleString('th-TH', {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
         });
     }
 
-    function autoGrow(element) {
-        element.style.height = "32px";
-        element.style.height = (element.scrollHeight) + "px";
+    function preparePrintLayout(root = document) {
+        root.querySelectorAll('.item-desc').forEach(el => autoGrow(el));
+        root.querySelectorAll('.inline-textarea').forEach(el => autoGrow(el));
     }
+
+    function cleanupPrintMode() {
+        document.body.classList.remove('batch-printing');
+        const batch = document.getElementById('batchPrintContainer');
+        if (batch) batch.innerHTML = '';
+    }
+
+    function printCurrentBill() {
+        cleanupPrintMode();
+        preparePrintLayout(document);
+        requestAnimationFrame(() => {
+            setTimeout(() => window.print(), 80);
+        });
+    }
+
+    window.addEventListener('afterprint', cleanupPrintMode);
 
     function fillCompanyInfo() {
         document.getElementById('shopName').value = 'บริษัท เค แอล สเตชั่นเนอรี่ จำกัด (สำนักงานใหญ่)';
@@ -1135,13 +1396,12 @@
             text: 'ข้อมูลลูกค้า ตารางสินค้า และรายละเอียดทั้งหมดจะถูกรีเซ็ตเพื่อเริ่มรายการใหม่',
             icon: 'warning',
             showCancelButton: true,
-            confirmButtonColor: '#fb7185',
+            confirmButtonColor: '#ef4444',
             cancelButtonColor: '#94a3b8',
             confirmButtonText: 'ล้างรายการ',
             cancelButtonText: 'ยกเลิก'
         }).then((result) => {
             if (result.isConfirmed) {
-                // ล้างข้อมูลบริษัทด้วย เพื่อให้เริ่มบิลใหม่แบบว่างทั้งหมด
                 clearCompanyInfo();
                 document.getElementById('customerSelect').value = "";
                 document.getElementById('custName').value = "";
@@ -1175,7 +1435,7 @@
                         <td style="text-align: center;"><input type="text" class="qty" value="0" inputmode="decimal" onfocus="if(this.value==='0')this.value='';" onblur="if(this.value==='')this.value='0';" oninput="formatNumberInput(this); calculate();"></td>
                         <td style="text-align: center;"><input type="text" class="unit-input" placeholder="ชิ้น/อัน"></td>
                         <td style="text-align: center;"><input type="text" class="price" value="0" inputmode="decimal" onfocus="if(this.value==='0')this.value='';" onblur="if(this.value==='')this.value='0';" oninput="formatNumberInput(this); calculate();"></td>
-                        <td class="amount" style="text-align: right; padding-right: 12px;">0.00</td>
+                        <td class="amount" style="text-align: right; padding-right: 14px;">0.00</td>
                         <td class="no-print" style="text-align: center;"><button class="btn-del" onclick="removeRow(this)">ลบ</button></td>
                     </tr>
                 `;
@@ -1202,7 +1462,7 @@
             <td style="text-align: center;"><input type="text" class="qty" value="0" inputmode="decimal" onfocus="if(this.value==='0')this.value='';" onblur="if(this.value==='')this.value='0';" oninput="formatNumberInput(this); calculate();"></td>
             <td style="text-align: center;"><input type="text" class="unit-input" placeholder="ชิ้น/อัน"></td>
             <td style="text-align: center;"><input type="text" class="price" value="0" inputmode="decimal" onfocus="if(this.value==='0')this.value='';" onblur="if(this.value==='')this.value='0';" oninput="formatNumberInput(this); calculate();"></td>
-            <td class="amount" style="text-align: right; padding-right: 12px;">0.00</td>
+            <td class="amount" style="text-align: right; padding-right: 14px;">0.00</td>
             <td class="no-print" style="text-align: center;"><button class="btn-del" onclick="removeRow(this)">ลบ</button></td>
         `;
         calculate();
@@ -1216,7 +1476,7 @@
                 title: 'ไม่สามารถลบได้',
                 text: 'ต้องมีรายการสินค้าอย่างน้อย 1 รายการครับ',
                 confirmButtonText: 'ตกลง',
-                confirmButtonColor: '#9333ea'
+                confirmButtonColor: '#7c3aed'
             });
             return;
         }
@@ -1289,11 +1549,11 @@
         let customers = JSON.parse(localStorage.getItem('saved_cashbill_customers') || '[]');
 
         if (customers.length === 0) {
-            container.innerHTML = '<p style="text-align:center; color:#64748b; padding: 15px;">ไม่พบข้อมูลลูกค้า</p>';
+            container.innerHTML = '<p style="text-align:center; color:var(--text-muted); padding: 20px;">ไม่พบข้อมูลลูกค้า</p>';
             return;
         }
 
-        let html = `<table class="product-modal-table"><thead><tr><th>ชื่อลูกค้า/บริษัท</th><th>ที่อยู่</th><th style="width: 20%;">เลขผู้เสียภาษี</th><th style="width: 15%; text-align:center;">จัดการ</th></tr></thead><tbody>`;
+        let html = `<table class="product-modal-table"><thead><tr><th>ชื่อลูกค้า/บริษัท</th><th>ที่อยู่</th><th style="width: 22%;">เลขผู้เสียภาษี</th><th style="width: 15%; text-align:center;">จัดการ</th></tr></thead><tbody>`;
         customers.forEach((c, idx) => {
             html += `<tr>
                 <td>${c.name}</td>
@@ -1311,7 +1571,7 @@
             title: 'ยืนยันการลบข้อมูลลูกค้า?',
             icon: 'warning',
             showCancelButton: true,
-            confirmButtonColor: '#f43f5e',
+            confirmButtonColor: '#ef4444',
             cancelButtonColor: '#94a3b8',
             confirmButtonText: 'ลบ',
             cancelButtonText: 'ยกเลิก'
@@ -1360,17 +1620,17 @@
 
         if (countContainer) countContainer.innerText = `พบสินค้า = ${filtered.length} รายการ`;
         if (filtered.length === 0) {
-            container.innerHTML = '<p style="text-align:center; color:#64748b; padding: 15px;">ไม่พบข้อมูลสินค้า</p>';
+            container.innerHTML = '<p style="text-align:center; color:var(--text-muted); padding: 20px;">ไม่พบข้อมูลสินค้า</p>';
             return;
         }
 
-        let html = `<table class="product-modal-table"><thead><tr><th>รายละเอียดสินค้า</th><th style="width: 15%;">หน่วย</th><th style="width: 20%; text-align:right;">ราคา</th><th style="width: 15%; text-align:center;">จัดการ</th></tr></thead><tbody>`;
+        let html = `<table class="product-modal-table"><thead><tr><th>รายละเอียดสินค้า</th><th style="width: 15%;">หน่วย</th><th style="width: 20%; text-align:right;">ราคา</th><th style="width: 20%; text-align:center;">จัดการ</th></tr></thead><tbody>`;
         filtered.forEach(p => {
             html += `<tr>
                 <td>${p.desc}</td>
                 <td>${p.unit || '-'}</td>
                 <td style="text-align:right;">${p.price.toLocaleString('th-TH', {minimumFractionDigits: 2})}</td>
-                <td style="text-align:center; display: flex; gap: 4px; justify-content: center;">
+                <td style="text-align:center; display: flex; gap: 6px; justify-content: center;">
                     <button class="btn-edit" onclick="openEditProductModal(${p.idx})">แก้ไข</button>
                     <button class="btn-del" onclick="deleteProduct(${p.idx})">ลบ</button>
                 </td>
@@ -1385,7 +1645,7 @@
             title: 'ยืนยันการลบสินค้า?',
             icon: 'warning',
             showCancelButton: true,
-            confirmButtonColor: '#f43f5e',
+            confirmButtonColor: '#ef4444',
             cancelButtonColor: '#94a3b8',
             confirmButtonText: 'ลบ',
             cancelButtonText: 'ยกเลิก'
@@ -1459,9 +1719,9 @@
 
         if (filtered.length === 0) {
             container.innerHTML = `
-                <div style="text-align:center; color:#64748b; padding: 25px;">
-                    <p style="margin-bottom: 10px;">ไม่พบสินค้าที่คุณค้นหา</p>
-                    <button type="button" onclick="openQuickAddProductModal()" style="background: #10b981; color: white; border: none; padding: 6px 14px; border-radius: 6px; cursor: pointer; font-weight: 600;">+ เพิ่มสินค้านี้เข้าระบบ</button>
+                <div style="text-align:center; color:var(--text-muted); padding: 30px;">
+                    <p style="margin-bottom: 12px;">ไม่พบสินค้าที่คุณค้นหา</p>
+                    <button type="button" onclick="openQuickAddProductModal()" style="background: #10b981; color: white; border: none; padding: 8px 16px; border-radius: 12px; cursor: pointer; font-weight: 600;">+ เพิ่มสินค้านี้เข้าระบบ</button>
                 </div>`;
             return;
         }
@@ -1472,7 +1732,7 @@
                 <td>${p.desc}</td>
                 <td>${p.unit || '-'}</td>
                 <td style="text-align:right;">${p.price.toLocaleString('th-TH', {minimumFractionDigits: 2})}</td>
-                <td style="text-align:center; display: flex; gap: 4px; justify-content: center;">
+                <td style="text-align:center; display: flex; gap: 6px; justify-content: center;">
                     <button class="btn-select-prod" onclick='selectProductToRow(${JSON.stringify(p)})'>เลือก</button>
                     <button class="btn-edit" onclick="openEditProductModal(${p.idx})">แก้ไข</button>
                     <button class="btn-del" onclick="deleteProduct(${p.idx})">ลบ</button>
@@ -1513,21 +1773,20 @@
     }
 
     function selectProductToRow(product) {
-    if (activeRowForSelection) {
-        let descArea = activeRowForSelection.querySelector('.item-desc');
-        descArea.value = product.desc;
-        autoGrow(descArea);
-        if (product.unit) activeRowForSelection.querySelector('.unit-input').value = product.unit;
-        activeRowForSelection.querySelector('.price').value = product.price;
-        
-        // กำหนดค่าเริ่มต้นจำนวนเป็น 1 เสมอเมื่อเลือกสินค้าใหม่
-        let qtyInput = activeRowForSelection.querySelector('.qty');
-        qtyInput.value = '1';
-        
-        calculate();
+        if (activeRowForSelection) {
+            let descArea = activeRowForSelection.querySelector('.item-desc');
+            descArea.value = product.desc;
+            autoGrow(descArea);
+            if (product.unit) activeRowForSelection.querySelector('.unit-input').value = product.unit;
+            activeRowForSelection.querySelector('.price').value = product.price;
+            
+            let qtyInput = activeRowForSelection.querySelector('.qty');
+            qtyInput.value = '1';
+            
+            calculate();
+        }
+        closeModal('productSelectorModal');
     }
-    closeModal('productSelectorModal');
-}
 
     function saveCurrentData() { executeSave(false); }
     function saveAsNewData() { executeSave(true); }
@@ -1567,10 +1826,9 @@
         }
 
         let existingBillIndex = purchases.findIndex(p => p.billNo === finalBillNo);
-        let timestampToUse = new Date().getTime(); // ค่าเริ่มต้นสำหรับบิลใหม่ (เวลาปัจจุบัน จะได้อยู่บนสุด)
+        let timestampToUse = new Date().getTime();
 
         if (!isNewBill && existingBillIndex !== -1) {
-            // กรณีบันทึกทับบิลเดิม -> คง timestamp เดิมไว้ เพื่อให้อยู่ตำแหน่งเดิมในประวัติ
             timestampToUse = purchases[existingBillIndex].timestamp;
             purchases.splice(existingBillIndex, 1);
         }
@@ -1687,7 +1945,7 @@
                     <td style="text-align: center;"><input type="text" class="qty" value="${item.qty || 0}" inputmode="decimal" onfocus="if(this.value==='0')this.value='';" onblur="if(this.value==='')this.value='0';" oninput="formatNumberInput(this); calculate();"></td>
                     <td style="text-align: center;"><input type="text" class="unit-input" value="${item.unit || ''}" placeholder="ชิ้น/อัน"></td>
                     <td style="text-align: center;"><input type="text" class="price" value="${item.price || 0}" inputmode="decimal" onfocus="if(this.value==='0')this.value='';" onblur="if(this.value==='')this.value='0';" oninput="formatNumberInput(this); calculate();"></td>
-                    <td class="amount" style="text-align: right; padding-right: 12px;">0.00</td>
+                    <td class="amount" style="text-align: right; padding-right: 14px;">0.00</td>
                     <td class="no-print" style="text-align: center;"><button class="btn-del" onclick="removeRow(this)">ลบ</button></td>
                 `;
                 autoGrow(newRow.querySelector('.item-desc'));
@@ -1707,7 +1965,7 @@
         let container = document.getElementById('historyTableContainer');
         let purchases = JSON.parse(localStorage.getItem('saved_cashbill_purchases') || '[]');
         if (purchases.length === 0) {
-            container.innerHTML = '<p style="text-align:center; color:#64748b; padding: 20px;">ยังไม่มีประวัติการบันทึกบิล</p>';
+            container.innerHTML = '<p style="text-align:center; color:var(--text-muted); padding: 25px;">ยังไม่มีประวัติการบันทึกบิล</p>';
             return;
         }
         purchases.sort((a, b) => b.timestamp - a.timestamp);
@@ -1716,7 +1974,7 @@
             purchases = purchases.filter(p => p.billNo.toLowerCase().includes(lower) || p.customerName.toLowerCase().includes(lower));
         }
         
-        let html = `<table class="history-table"><thead><tr><th style="width: 40px; text-align:center;"><input type="checkbox" id="selectAllCheckbox" onchange="toggleSelectAll(this)"></th><th>วันที่</th><th>เลขที่บิล</th><th>ชื่อลูกค้า</th><th style="text-align:right;">ยอดรวม</th><th style="text-align:center; width: 120px;">จัดการ</th></tr></thead><tbody>`;
+        let html = `<table class="history-table"><thead><tr><th style="width: 45px; text-align:center;"><input type="checkbox" id="selectAllCheckbox" onchange="toggleSelectAll(this)"></th><th>วันที่</th><th>เลขที่บิล</th><th>ชื่อลูกค้า</th><th style="text-align:right;">ยอดรวม</th><th style="text-align:center; width: 130px;">จัดการ</th></tr></thead><tbody>`;
         purchases.forEach(p => {
             let isChecked = selectedBillNos.has(p.billNo) ? 'checked' : '';
             html += `<tr>
@@ -1724,8 +1982,8 @@
                 <td>${p.billDate}</td>
                 <td><strong>${p.billNo}</strong></td>
                 <td>${p.customerName}</td>
-                <td style="text-align:right; color:#9333ea; font-weight:600;">${p.grandTotal.toLocaleString('th-TH', {minimumFractionDigits: 2})}</td>
-                <td style="text-align:center; display: flex; gap: 5px; justify-content: center;">
+                <td style="text-align:right; color:var(--primary-color); font-weight:600;">${p.grandTotal.toLocaleString('th-TH', {minimumFractionDigits: 2})}</td>
+                <td style="text-align:center; display: flex; gap: 6px; justify-content: center;">
                     <button class="btn-select-history" onclick="selectHistoryBill('${p.billNo}')">เลือก</button>
                     <button class="btn-del" onclick="deleteHistoryBill('${p.billNo}')">ลบ</button>
                 </td>
@@ -1782,7 +2040,7 @@
             text: 'ข้อมูลบิลนี้จะถูกลบออกจากประวัติอย่างถาวร',
             icon: 'warning',
             showCancelButton: true,
-            confirmButtonColor: '#f43f5e',
+            confirmButtonColor: '#ef4444',
             cancelButtonColor: '#94a3b8',
             confirmButtonText: 'ลบบิล',
             cancelButtonText: 'ยกเลิก'
@@ -1805,70 +2063,92 @@
             return;
         }
 
-        let purchases = JSON.parse(localStorage.getItem('saved_cashbill_purchases') || '[]');
-        let selectedPurchases = purchases.filter(p => selectedBillNos.has(p.billNo));
+        let purchases = [];
+        try {
+            purchases = JSON.parse(localStorage.getItem('saved_cashbill_purchases') || '[]');
+        } catch (e) {
+            console.error('อ่านประวัติบิลไม่สำเร็จ:', e);
+            Swal.fire('เกิดข้อผิดพลาด', 'ไม่สามารถอ่านข้อมูลประวัติบิลได้', 'error');
+            return;
+        }
 
-        let batchContainer = document.getElementById('batchPrintContainer');
+        const selectedPurchases = purchases.filter(p => selectedBillNos.has(String(p.billNo)));
+        if (!selectedPurchases.length) {
+            Swal.fire('ไม่พบข้อมูลบิล', 'ไม่พบข้อมูลของบิลที่เลือก กรุณาเปิดประวัติใหม่แล้วลองอีกครั้ง', 'warning');
+            return;
+        }
+
+        const batchContainer = document.getElementById('batchPrintContainer');
+        if (!batchContainer) {
+            Swal.fire('เกิดข้อผิดพลาด', 'ไม่พบพื้นที่สำหรับเตรียมเอกสารพิมพ์', 'error');
+            return;
+        }
+
         batchContainer.innerHTML = '';
 
-        // ดึงค่าปัจจุบันจากฟอร์มหลัก (ชื่อร้าน ที่อยู่ และเลขผู้เสียภาษี)
-        let currentShopName = document.getElementById('shopName') ? document.getElementById('shopName').value : '';
-        let currentShopAddress = document.getElementById('shopAddress') ? document.getElementById('shopAddress').value : '';
-        let currentShopTax = document.getElementById('shopTax') ? document.getElementById('shopTax').value : '';
+        const currentShopName = document.getElementById('shopName')?.value.trim() || '';
+        const currentShopAddress = document.getElementById('shopAddress')?.value.trim() || '';
+        const currentShopTax = document.getElementById('shopTax')?.value.trim() || '';
 
         selectedPurchases.forEach(p => {
-            let itemsHtml = '';
+            const items = Array.isArray(p.items) ? p.items : [];
             let totalAmount = 0;
 
-            if (p.items && p.items.length > 0) {
-                p.items.forEach((item, idx) => {
-                    let amt = (item.qty || 0) * (item.price || 0);
-                    totalAmount += amt;
-                    itemsHtml += `
-                        <tr>
-                            <td style="text-align: center;">${idx + 1}</td>
-                            <td class="desc-cell">${item.desc || ''}</td>
-                            <td style="text-align: center;">${item.qty || 0}</td>
-                            <td style="text-align: center;">${item.unit || ''}</td>
-                            <td style="text-align: center;">${(item.price || 0).toLocaleString('th-TH', {minimumFractionDigits: 2})}</td>
-                            <td style="text-align: right; padding-right: 12px;">${amt.toLocaleString('th-TH', {minimumFractionDigits: 2})}</td>
-                        </tr>
-                    `;
-                });
-            }
+            const itemsHtml = items.map((item, idx) => {
+                const qty = Number(item.qty) || 0;
+                const price = Number(item.price) || 0;
+                const amount = qty * price;
+                totalAmount += amount;
 
-            let netTotalVal = p.grandTotal || totalAmount;
-            let textAmt = convertNumberToThaiText(netTotalVal);
-            
-            let sName = currentShopName || p.shopName || '';
-            let sAddr = currentShopAddress || p.shopAddress || '';
-            let sTax = currentShopTax || p.shopTax || '';
+                return `
+                    <tr>
+                        <td style="text-align:center;">${idx + 1}</td>
+                        <td class="desc-cell">${escapeHtml(item.desc || '')}</td>
+                        <td style="text-align:center;">${escapeHtml(item.qty ?? 0)}</td>
+                        <td style="text-align:center;">${escapeHtml(item.unit || '')}</td>
+                        <td style="text-align:right;padding-right:8px;">${money(price)}</td>
+                        <td style="text-align:right;padding-right:8px;">${money(amount)}</td>
+                    </tr>`;
+            }).join('');
 
-            let billHTML = `
-                <div class="bill-container" style="margin-bottom: 20px;">
+            const netTotalVal = Number.isFinite(Number(p.grandTotal))
+                ? Number(p.grandTotal)
+                : totalAmount;
+            const textAmt = convertNumberToThaiText(netTotalVal);
+
+            const sName = currentShopName || p.shopName || '';
+            const sAddr = currentShopAddress || p.shopAddress || '';
+            const sTax = currentShopTax || p.shopTax || '';
+
+            const billHTML = `
+                <div class="bill-container batch-bill">
                     <div class="header-section">
                         <div class="header-left">
                             <div class="shop-info-box">
-                                <strong>ชื่อร้าน (Company Name): </strong>${sName}<br>
-                                <strong>ที่อยู่ (Address): </strong><span style="white-space: pre-line;">${sAddr}</span><br>
-                                <strong>เลขประจำตัวผู้เสียภาษี(Tax ID): </strong>${sTax}
+                                ${escapeHtml(sName)}<br>
+                                <span style="white-space:pre-line;">${escapeHtml(sAddr)}</span><br>
+                                <span><strong>เลขประจำตัวผู้เสียภาษี:</strong> ${escapeHtml(sTax)}</span>
                             </div>
                         </div>
-                        <div class="title-box">บิลเงินสด<br><span style="font-size: 12px; font-weight: 400; opacity: 0.9;">CASH BILL / RECEIPT</span></div>
+                        <div class="title-box">
+                            บิลเงินสด<br>
+                            <span style="font-size:12px;font-weight:400;opacity:.9;">CASH BILL / RECEIPT</span>
+                        </div>
                     </div>
-                    
+
                     <table class="top-info">
                         <tr>
-                            <td class="customer-info" style="width: 55%; vertical-align: top;">
-                                <strong>นามลูกค้า (Customer):</strong> ${p.customerName || '-'}<br>
-                                <strong>ที่อยู่ (Address):</strong> <span style="white-space: pre-line;">${p.address || '-'}</span><br>
-                                <strong>เลขประจำตัวผู้เสียภาษี:</strong> ${p.tax || '-'}
+                            <td class="customer-info" style="width:58%;vertical-align:top;">
+                                <strong>นามลูกค้า (Customer):</strong> ${escapeHtml(p.customerName || '-')}<br>
+                                <strong>ที่อยู่ (Address):</strong>
+                                <span style="white-space:pre-line;">${escapeHtml(p.address || '-')}</span><br>
+                                <strong>เลขประจำตัวผู้เสียภาษี:</strong> ${escapeHtml(p.tax || '-')}
                             </td>
-                            <td style="padding-left: 10px; width: 45%; vertical-align: top;">
-                                <div class="no-date-box" style="width: 100%;">
-                                    <strong>เล่มที่ (Book No.):</strong> ${p.bookNo || '-'}<br>
-                                    <strong>เลขที่ (No.):</strong> ${p.billNo || '-'}<br>
-                                    <strong>วันที่ (Date):</strong> ${p.billDate || '-'}
+                            <td style="padding-left:12px;width:42%;vertical-align:top;">
+                                <div class="no-date-box" style="width:100%;">
+                                    <strong>เล่มที่ (Book No.):</strong> ${escapeHtml(p.bookNo || '-')}<br>
+                                    <strong>เลขที่ (No.):</strong> ${escapeHtml(p.billNo || '-')}<br>
+                                    <strong>วันที่ (Date):</strong> ${escapeHtml(p.billDate || '-')}
                                 </div>
                             </td>
                         </tr>
@@ -1878,57 +2158,56 @@
                         <table class="data-table">
                             <thead>
                                 <tr>
-                                    <th style="width: 5%;">ลำดับ<br><span style="font-size: 10px; font-weight: 300;">Item</span></th>
-                                    <th style="width: 47%;">รายการสินค้า / รายละเอียด<br><span style="font-size: 10px; font-weight: 300;">Description</span></th>
-                                    <th style="width: 8%;">จำนวน<br><span style="font-size: 10px; font-weight: 300;">Qty</span></th>
-                                    <th style="width: 10%;">หน่วย<br><span style="font-size: 10px; font-weight: 300;">Unit</span></th>
-                                    <th style="width: 13%;">ราคาต่อหน่วย<br><span style="font-size: 10px; font-weight: 300;">Unit Price</span></th>
-                                    <th style="width: 13%;">จำนวนเงิน<br><span style="font-size: 10px; font-weight: 300;">Amount</span></th>
+                                    <th>ลำดับ<br><span style="font-size:10px;font-weight:400;">Item</span></th>
+                                    <th>รายการสินค้า / รายละเอียด<br><span style="font-size:10px;font-weight:400;">Description</span></th>
+                                    <th>จำนวน<br><span style="font-size:10px;font-weight:400;">Qty</span></th>
+                                    <th>หน่วย<br><span style="font-size:10px;font-weight:400;">Unit</span></th>
+                                    <th>ราคาต่อหน่วย<br><span style="font-size:10px;font-weight:400;">Unit Price</span></th>
+                                    <th>จำนวนเงิน<br><span style="font-size:10px;font-weight:400;">Amount</span></th>
                                 </tr>
                             </thead>
-                            <tbody>
-                                ${itemsHtml}
-                            </tbody>
+                            <tbody>${itemsHtml}</tbody>
                         </table>
                     </div>
-                    
-                    <table class="footer-table" style="width: 100%; border-collapse: collapse;">
+
+                    <table class="footer-table" style="width:100%;">
                         <tr>
-                            <td rowspan="2" style="width: 50%; vertical-align: middle; text-align: center; background-color: #faf5ff; border-right: 1px solid #f3e8ff; padding: 10px;">
-                                <div style="font-size: 12px; color: #64748b; margin-bottom: 6px;">(จำนวนเงินตัวอักษร)</div>
-                                <div style="font-size: 15px; color: #9333ea; font-weight: 600;">${textAmt}</div>
+                            <td rowspan="2" style="width:50%;vertical-align:middle;text-align:center;background:#f8fafc;padding:12px;">
+                                <div style="font-size:12px;color:#64748b;margin-bottom:6px;">(จำนวนเงินตัวอักษร)</div>
+                                <div id="textAmount" style="font-size:15px;font-weight:600;">${escapeHtml(textAmt)}</div>
                             </td>
-                            <td class="footer-total-label" style="font-weight: 600; color: #475569; text-align: center; vertical-align: middle; padding: 10px; width: 25%;">
-                                รวมราคาสินค้า<br><span style="font-size: 11px; font-weight: 400; color: #64748b;">(Net Total)</span>
+                            <td class="footer-total-label" style="width:25%;font-weight:600;text-align:center;vertical-align:middle;padding:12px;">
+                                รวมราคาสินค้า<br><span style="font-size:11px;font-weight:400;color:#64748b;">(Net Total)</span>
                             </td>
-                            <td style="width: 25%; font-weight: 600; text-align: center; vertical-align: middle;">${netTotalVal.toLocaleString('th-TH', {minimumFractionDigits: 2})}</td>
+                            <td style="width:25%;font-weight:600;text-align:center;vertical-align:middle;">${money(netTotalVal)}</td>
                         </tr>
                         <tr>
-                            <td class="footer-total-label" style="background-color: #faf5ff; font-weight: 700; color: #475569; text-align: center; vertical-align: middle; padding: 10px; width: 25%;">
-                                จำนวนเงินรวมทั้งสิ้น<br>
-                                <span style="font-size: 11px; font-weight: 600; color: #9333ea;">(Grand Total)</span>
+                            <td class="footer-total-label" style="width:25%;background:#f8fafc;font-weight:700;text-align:center;vertical-align:middle;padding:12px;">
+                                จำนวนเงินรวมทั้งสิ้น<br><span style="font-size:11px;font-weight:600;">(Grand Total)</span>
                             </td>
-                            <td style="width: 25%; background-color: #faf5ff; color: #9333ea; font-size: 16px; text-align: center; vertical-align: middle; font-weight: 700;">${netTotalVal.toLocaleString('th-TH', {minimumFractionDigits: 2})}</td>
+                            <td style="width:25%;background:#f8fafc;font-size:16px;text-align:center;vertical-align:middle;font-weight:700;">${money(netTotalVal)}</td>
                         </tr>
                     </table>
 
                     <div class="signature-section">
                         <div class="sig-box">
                             <div class="sig-line"></div>
-                            <div style="font-size: 14px; margin-bottom: 4px; text-align: center;">${p.salesSignName || ''}</div>
+                            <div style="font-size:13.5px;margin-bottom:4px;text-align:center;">${escapeHtml(p.salesSignName || '')}</div>
                             <div class="sig-text">ผู้รับเงิน / แคชเชียร์ (Cashier)</div>
-                            <div class="sig-date">วันที่: ${p.salesSignDate || ''}</div>
+                            <div class="sig-date">วันที่: ${escapeHtml(p.salesSignDate || '')}</div>
                         </div>
                     </div>
-                </div>
-            `;
-            batchContainer.innerHTML += billHTML;
+                </div>`;
+            batchContainer.insertAdjacentHTML('beforeend', billHTML);
         });
 
         closeModal('historyModal');
         document.body.classList.add('batch-printing');
-        window.print();
-        document.body.classList.remove('batch-printing');
+
+        requestAnimationFrame(() => {
+            preparePrintLayout(batchContainer);
+            setTimeout(() => window.print(), 100);
+        });
     }
 
     async function exportAllData() {
