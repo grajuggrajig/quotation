@@ -461,17 +461,31 @@
         opacity: 1;
     }
     
-    .btn-del { 
-        background: #fee2e2; 
-        border: 1px solid #fecaca;
-        color: #ef4444;
-        padding: 6px 14px;
-        font-size: 12px; 
-        border-radius: 10px;
-        cursor: pointer;
-        transition: all 0.2s;
-        font-weight: 600;
-    }
+    /* ปรับแต่งปุ่มลบให้แสดงผลเต็มบรรทัด ไม่บิดเบี้ยว */
+.btn-del { 
+    background: #fee2e2; 
+    border: 1px solid #fecaca;
+    color: #ef4444;
+    padding: 6px 10px;
+    font-size: 12px; 
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-weight: 600;
+    white-space: nowrap; /* ป้องกันข้อความขึ้นบรรทัดใหม่ */
+}
+.btn-del:hover { 
+    background: #ef4444; 
+    color: #fff; 
+}
+
+/* ปรับความกว้างของคอลัมน์ปุ่มลบในตารางให้กว้างพอดี */
+.data-table th:nth-child(7), 
+.data-table td:nth-child(7) {
+    width: 6% !important;
+    text-align: center;
+    white-space: nowrap;
+}
     .btn-del:hover { background: #ef4444; color: #fff; }
 
     .btn-edit {
@@ -838,15 +852,14 @@
     width:100%;
 }
 .data-table th,
-.data-table td{overflow:hidden;}
-.data-table th:nth-child(1), .data-table td:nth-child(1){width:6% !important;}
-.data-table th:nth-child(2), .data-table td:nth-child(2){width:43% !important;}
-.data-table th:nth-child(3), .data-table td:nth-child(3){width:8% !important;}
-.data-table th:nth-child(4), .data-table td:nth-child(4){width:11% !important;}
-.data-table th:nth-child(5), .data-table td:nth-child(5){width:16% !important;}
-.data-table th:nth-child(6), .data-table td:nth-child(6){width:16% !important;}
-.data-table th:nth-child(7), .data-table td:nth-child(7){width:4% !important;}
-
+/* ค้นหาและแก้ไขเปอร์เซ็นต์คอลัมน์ใน .data-table */
+.data-table th:nth-child(1), .data-table td:nth-child(1){ width: 6% !important; }   /* ลำดับ */
+.data-table th:nth-child(2), .data-table td:nth-child(2){ width: 38% !important; }  /* รายการสินค้า */
+.data-table th:nth-child(3), .data-table td:nth-child(3){ width: 10% !important; }  /* จำนวน */
+.data-table th:nth-child(4), .data-table td:nth-child(4){ width: 12% !important; }  /* หน่วย */
+.data-table th:nth-child(5), .data-table td:nth-child(5){ width: 14% !important; }  /* ราคาต่อหน่วย */
+.data-table th:nth-child(6), .data-table td:nth-child(6){ width: 12% !important; }  /* จำนวนเงิน */
+.data-table th:nth-child(7), .data-table td:nth-child(7){ width: 8% !important; }   /* ปุ่มลบ (ขยายเป็น 8%) */
 .item-desc-wrapper{min-width:0;width:100%;}
 .item-desc{
     display:block;
