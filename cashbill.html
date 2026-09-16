@@ -81,6 +81,10 @@
         font-size: 13.5px;
         color: var(--text-muted);
         line-height: 1.6;
+		padding: 18px 22px; 
+		border: 1px solid var(--border-color); 
+		border-radius: 20px;
+		background-color: #f8fafc;
     }
 
     .shop-info-box strong {
@@ -826,6 +830,26 @@
             color: #7c3aed !important;
             font-size: 13.5px !important;
         }
+		/* กำหนดสีข้อความอินพุต */
+    @media print {
+    /* บังคับสีตัวอักษรข้อมูลบริษัททั้งหมดตอนพิมพ์ */
+    .shop-info-box,
+    .shop-info-box strong,
+    .shop-info-box input,
+    .shop-info-box textarea,
+    #shopName,
+    #shopAddress,
+    #shopTax {
+        color: #7c3aed !important; /* หรือใส่ #1e293b หากต้องการสีดำ/เทาเข้มคมชัด */
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+    }
+}
+
+    /* หากต้องการให้เห็นเส้นขอบ/เส้นใต้ช่องกรอกตอนพิมพ์ด้วย */
+    #shopTax, #custTax {
+        border-bottom: 1px dashed #cbd5e1 !important; /* เพิ่มเส้นใต้ประตอนพิมพ์ */
+    }
     }
 
 /* ===== Responsive Layout Fixes ===== */
