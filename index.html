@@ -54,8 +54,8 @@
     }
 
     .bill-container { 
-        width: min(1400px, calc(100vw - 40px)); 
-        max-width: 1400px;
+        width: min(1400px, calc(100vw - 40px));
+        max-width: 1400px; 
         margin: 0 auto; 
         padding: 25px 30px; 
         background-color: #ffffff; 
@@ -370,7 +370,7 @@
         max-width: 1400px;
         margin: 0 auto 15px auto; 
         display: flex;
-        justify-content: space-between;
+        justify-content: flex-start;
         align-items: center;
         background: linear-gradient(135deg, #f8fafc, #e2e8f0);
         padding: 12px 20px;
@@ -527,7 +527,7 @@
         background: #fff;
         padding: 20px;
         border-radius: 14px;
-        width: min(1200px, calc(100vw - 40px));
+        width: 750px;
         max-width: 100%;
         box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1);
         max-height: 85vh;
@@ -839,7 +839,7 @@
 
 <div class="control-panel no-print">
    <!-- HTML -->
-		<div class="version-badge" style="margin-left: auto;">
+		<div class="version-badge">
             <i class="fa-solid fa-circle-dot" style="font-size: 8px; color: #10b981; animation: pulse 1.5s infinite;"></i>
             <span>กำลังใช้งาน:</span>
             <strong class="version-num" id="activeUsersCount">1</strong>
