@@ -54,7 +54,8 @@
     }
 
     .bill-container { 
-        width: 800px; 
+        width: min(1400px, calc(100vw - 40px)); 
+        max-width: 1400px;
         margin: 0 auto; 
         padding: 25px 30px; 
         background-color: #ffffff; 
@@ -365,7 +366,8 @@
     }
     
     .control-panel { 
-        max-width: 800px;
+        width: min(1400px, calc(100vw - 40px));
+        max-width: 1400px;
         margin: 0 auto 15px auto; 
         display: flex;
         justify-content: space-between;
@@ -525,7 +527,7 @@
         background: #fff;
         padding: 20px;
         border-radius: 14px;
-        width: 750px;
+        width: min(1200px, calc(100vw - 40px));
         max-width: 100%;
         box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1);
         max-height: 85vh;
@@ -1403,7 +1405,7 @@
             <tbody>
                 <tr class="item-row">
                     <td class="row-num" style="text-align: center;">1</td>
-                    <td class="desc-cell"><textarea class="item-desc" placeholder="ระบุรายละเอียดสินค้า" oninput="autoGrow(this)" onblur="fetchProductByDesc(this)"></textarea></td>
+                    <td class="desc-cell"><textarea class="item-desc" placeholder="ระบุรายละเอียดสินค้า" oninput="autoGrow(this)"></textarea></td>
                     <td style="text-align: center;">
                         <input type="text" class="sku-input" placeholder="รหัส/รุ่น " 
                                onkeydown="if(event.key === 'Enter'){ fetchProductBySKU(this); this.blur(); }">
@@ -1681,7 +1683,7 @@ window.onload = function() {
                 tbody.innerHTML = `
                     <tr class="item-row">
                         <td class="row-num" style="text-align: center;">1</td>
-                        <td class="desc-cell"><textarea class="item-desc" placeholder="ระบุรายละเอียดสินค้า" oninput="autoGrow(this)" onblur="fetchProductByDesc(this)"></textarea></td>
+                        <td class="desc-cell"><textarea class="item-desc" placeholder="ระบุรายละเอียดสินค้า" oninput="autoGrow(this)"></textarea></td>
                         <td style="text-align: center;">
                             <input type="text" class="sku-input" placeholder="รหัส/รุ่น (กด Enter)" 
                                    onkeydown="if(event.key === 'Enter'){ fetchProductBySKU(this); this.blur(); }">
@@ -1723,7 +1725,7 @@ function addRow() {
     newRow.className = "item-row";
     newRow.innerHTML = `
         <td class="row-num" style="text-align: center;">${rowCount + 1}</td>
-        <td class="desc-cell"><textarea class="item-desc" placeholder="ระบุรายละเอียดสินค้า" oninput="autoGrow(this)" onblur="fetchProductByDesc(this)"></textarea></td>
+        <td class="desc-cell"><textarea class="item-desc" placeholder="ระบุรายละเอียดสินค้า" oninput="autoGrow(this)"></textarea></td>
         <td style="text-align: center;">
             <input type="text" class="sku-input" placeholder="รหัส/รุ่น (กด Enter)" 
                    onkeydown="if(event.key === 'Enter'){ fetchProductBySKU(this); this.blur(); }">
@@ -2793,7 +2795,7 @@ function insertRowAbove(btn) {
     newRow.className = "item-row";
     newRow.innerHTML = `
         <td class="row-num" style="text-align: center;"></td>
-        <td class="desc-cell"><textarea class="item-desc" placeholder="ระบุรายละเอียดสินค้า" oninput="autoGrow(this)" onblur="fetchProductByDesc(this)"></textarea></td>
+        <td class="desc-cell"><textarea class="item-desc" placeholder="ระบุรายละเอียดสินค้า" oninput="autoGrow(this)"></textarea></td>
         <td style="text-align: center;">
             <input type="text" class="sku-input" placeholder="รหัส/รุ่น (กด Enter)" 
                    onkeydown="if(event.key === 'Enter'){ fetchProductBySKU(this); this.blur(); }">
@@ -2895,7 +2897,7 @@ async function deleteHistoryBill(billNo) {
             newRow.className = "item-row";
             newRow.innerHTML = `
                 <td class="row-num" style="text-align: center;">${index + 1}</td>
-                <td class="desc-cell"><textarea class="item-desc" placeholder="ระบุรายละเอียดสินค้า" oninput="autoGrow(this)" onblur="fetchProductByDesc(this)">${item.desc || ''}</textarea></td>
+                <td class="desc-cell"><textarea class="item-desc" placeholder="ระบุรายละเอียดสินค้า" oninput="autoGrow(this)">${item.desc || ''}</textarea></td>
                 <td style="text-align: center;">
                     <input type="text" class="sku-input" value="${item.sku || item.model || ''}" placeholder="รุ่น" 
                            onkeydown="if(event.key === 'Enter'){ fetchProductBySKU(this); this.blur(); }">
