@@ -335,6 +335,17 @@
     }
 }
 
+/* 📌 เฉพาะช่องที่อยู่ลูกค้า: ให้ใช้ความสูงที่ JS คำนวณไว้ตอนพิมพ์ */
+@media print {
+    .inline-textarea[data-field="custAddress"] {
+        min-height: 22px !important;
+        overflow: visible !important;
+        white-space: pre-wrap !important;
+        word-break: break-word !important;
+        overflow-wrap: anywhere !important;
+    }
+}
+
         /* Table Styling */
         .table-responsive-wrapper {
             margin-bottom: 15px;
@@ -1587,10 +1598,20 @@ window.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    // 📌 เฉพาะช่อง Address: ขยายตามความยาวจริงของที่อยู่ลูกค้า
+    function adjustCustomerAddressHeight() {
+        document.querySelectorAll('textarea[data-field="custAddress"]').forEach(function(ta) {
+            ta.style.height = 'auto';
+            const contentHeight = Math.max(22, ta.scrollHeight);
+            ta.style.height = contentHeight + 'px';
+        });
+    }
+
     window.addEventListener('load', function() {
         document.querySelectorAll('textarea.item-desc').forEach(function(ta) {
             adjustTextareaHeight(ta);
         });
+        adjustCustomerAddressHeight();
     });
 
     document.addEventListener('input', function(e) {
@@ -1598,6 +1619,8 @@ window.addEventListener('DOMContentLoaded', () => {
 
         if (e.target.matches('textarea.item-desc')) {
             adjustTextareaHeight(e.target);
+        } else if (e.target.matches('textarea[data-field="custAddress"]')) {
+            adjustCustomerAddressHeight();
         } else if (e.target.matches('textarea.inline-textarea, textarea.meta-field')) {
             e.target.style.height = 'auto';
             e.target.style.height = Math.max(22, e.target.scrollHeight) + 'px';
@@ -1612,10 +1635,22 @@ window.addEventListener('DOMContentLoaded', () => {
     // คำนวณอีกครั้งก่อนพิมพ์ เพื่อให้หน้าจอและ PDF ใช้ความสูงเดียวกัน
     window.addEventListener('beforeprint', function() {
         adjustAllItemDescriptions();
+        adjustCustomerAddressHeight();
+        // บังคับใช้ความสูงที่คำนวณแล้วเฉพาะ Address เพื่อไม่ให้ CSS print ย่อกลับ
+        document.querySelectorAll('textarea[data-field="custAddress"]').forEach(function(ta) {
+            const contentHeight = Math.max(22, ta.scrollHeight);
+            ta.style.setProperty('height', contentHeight + 'px', 'important');
+        });
     });
 
     window.addEventListener('afterprint', function() {
-        requestAnimationFrame(adjustAllItemDescriptions);
+        document.querySelectorAll('textarea[data-field="custAddress"]').forEach(function(ta) {
+            ta.style.removeProperty('height');
+        });
+        requestAnimationFrame(function() {
+            adjustAllItemDescriptions();
+            adjustCustomerAddressHeight();
+        });
     });
 
     // หลัง render รายการใหม่ ให้รอ layout เสร็จก่อนคำนวณความสูง
@@ -1624,7 +1659,11 @@ window.addEventListener('DOMContentLoaded', () => {
         originalRenderDocument();
         requestAnimationFrame(function() {
             adjustAllItemDescriptions();
-            requestAnimationFrame(adjustAllItemDescriptions);
+            adjustCustomerAddressHeight();
+            requestAnimationFrame(function() {
+                adjustAllItemDescriptions();
+                adjustCustomerAddressHeight();
+            });
         });
     };
 
