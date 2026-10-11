@@ -961,21 +961,24 @@
     .signature-section{break-inside:avoid;page-break-inside:avoid;}
 }
 
+
+/* Thai text / PDF copied content: use a Thai-focused font with safe line height */
+.item-desc, .inline-input, .inline-textarea, input, textarea, select {
+    font-family: 'Sarabun', 'Prompt', Tahoma, sans-serif;
+    font-variant-ligatures: none;
+    font-kerning: normal;
+}
+.item-desc, .inline-textarea {
+    line-height: 1.65;
+    padding-top: 6px;
+    padding-bottom: 6px;
+}
+
 </style>
 </head>
 <body>
 
-<script>
-    document.addEventListener("input", function(e) {
-        if (e.target && (e.target.tagName === "INPUT" || e.target.tagName === "TEXTAREA")) {
-            let val = e.target.value;
-            let cleanedVal = val.replace(/[\u200B-\u200D\uFEFF]/g, '');
-            if (val !== cleanedVal) {
-                e.target.value = cleanedVal;
-            }
-        }
-    });
-</script>
+
 
 <div class="control-panel no-print">
     <div class="credit"><i class="fa-solid fa-user" style="margin-right: 4px; color: var(--primary-color);"></i> ผู้จัดทำ: <strong>Thanong Chooduang</strong></div>
@@ -2316,5 +2319,64 @@
         return (isNegative ? "ลบ" : "") + bahtText + satangText;
     }
 </script>
+
+<script>
+/* Thai/PDF paste cleanup: preserve text while normalizing Unicode combining marks. */
+(function () {
+    'use strict';
+    function cleanPastedText(value) {
+        return String(value == null ? '' : value)
+            .normalize('NFC')
+            .replace(/\r\n?/g, '\n')
+            .replace(/[\u200B-\u200F\u202A-\u202E\u2060\uFEFF]/g, '')
+            .replace(/\uFFFD/g, '')
+            .replace(/[\uE000-\uF8FF]/g, '')
+            .replace(/\u00A0/g, ' ');
+    }
+    function isTextField(el) {
+        if (!el || !el.tagName) return false;
+        if (el.tagName === 'TEXTAREA') return true;
+        if (el.tagName !== 'INPUT') return false;
+        return !['button','submit','reset','checkbox','radio','file','color','range'].includes((el.type || 'text').toLowerCase());
+    }
+    document.addEventListener('paste', function (event) {
+        const el = event.target;
+        if (!isTextField(el)) return;
+        const clipboard = event.clipboardData || window.clipboardData;
+        if (!clipboard) return;
+        const raw = clipboard.getData('text/plain');
+        if (typeof raw !== 'string') return;
+        event.preventDefault();
+        const text = cleanPastedText(raw);
+        if (typeof el.setRangeText === 'function') {
+            const start = typeof el.selectionStart === 'number' ? el.selectionStart : el.value.length;
+            const end = typeof el.selectionEnd === 'number' ? el.selectionEnd : start;
+            el.setRangeText(text, start, end, 'end');
+        } else {
+            el.value = (el.value || '') + text;
+        }
+        el.dispatchEvent(new Event('input', { bubbles: true }));
+        el.dispatchEvent(new Event('change', { bubbles: true }));
+    }, true);
+    document.addEventListener('input', function (event) {
+        const el = event.target;
+        if (!isTextField(el)) return;
+        const original = el.value;
+        const cleaned = cleanPastedText(original);
+        if (original !== cleaned) {
+            const start = el.selectionStart;
+            const end = el.selectionEnd;
+            el.value = cleaned;
+            try {
+                if (typeof start === 'number' && typeof end === 'number') {
+                    const delta = original.length - cleaned.length;
+                    el.setSelectionRange(Math.max(0, start - delta), Math.max(0, end - delta));
+                }
+            } catch (_) {}
+        }
+    }, true);
+})();
+</script>
+
 </body>
 </html>
