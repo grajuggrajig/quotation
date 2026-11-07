@@ -1780,10 +1780,30 @@
             return;
         }
         const tbody = document.querySelector('#billTable tbody');
-        const rowIsBlank = row => row && !row.querySelector('.item-desc').value.trim() && (Number(row.querySelector('.price').value.replace(/,/g,'')) || 0) === 0;
+        const rowIsBlank = row => {
+            if (!row) return false;
+            const descInput = row.querySelector('.item-desc');
+            const priceInput = row.querySelector('.price');
+            return !!descInput && !!priceInput &&
+                !descInput.value.trim() &&
+                (Number(String(priceInput.value || '0').replace(/,/g, '')) || 0) === 0;
+        };
+
+        // ถ้ามีแถวที่ผู้ใช้กดปุ่มค้นหาไว้ ให้ใช้แถวนั้นเสมอ
+        // แม้แถวนั้นจะมีสินค้าเดิมอยู่แล้ว เพราะการเลือกสินค้าใหม่คือการแทนที่แถวเดิม
         let targetRow = activeRowForSelection;
-        if (!targetRow || !tbody.contains(targetRow) || !rowIsBlank(targetRow)) targetRow = Array.from(tbody.querySelectorAll('.item-row')).find(rowIsBlank);
-        if (!targetRow) { addRow(); targetRow = tbody.querySelector('.item-row:last-child'); }
+        if (!targetRow || !tbody.contains(targetRow)) {
+            activeRowForSelection = null;
+            // กรณีเปิดตัวเลือกสินค้าโดยไม่ได้เลือกแถว ให้ใช้แถวว่างก่อน
+            targetRow = Array.from(tbody.querySelectorAll('.item-row')).find(rowIsBlank);
+            // หากไม่มีแถวว่าง จึงค่อยเพิ่มแถวใหม่
+            if (!targetRow) {
+                addRow();
+                targetRow = tbody.querySelector('.item-row:last-child');
+            }
+        }
+        if (!targetRow) return;
+
         const desc = targetRow.querySelector('.item-desc');
         desc.value = product.desc || '';
         autoGrow(desc);
@@ -1823,7 +1843,7 @@
         closeModal('quickAddProductModal');
         renderProductSelectorList();
         const latestProducts = JSON.parse(localStorage.getItem('saved_cashbill_products') || '[]');
-        const latestIndex = latestProducts.findIndex(p => p.desc === newProd.desc && p.unit === newProd.unit && Number(p.price) === Number(newProd.price));
+        const latestIndex = latestProducts.length - 1;
         if (latestIndex >= 0) addSelectedProductToBill(latestIndex);
     }
 
